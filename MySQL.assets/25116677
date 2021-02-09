@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <link rel="canonical" href="https://blog.csdn.net/jason_teach/article/details/25116677"/>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="renderer" content="webkit"/>
+    <meta name="force-rendering" content="webkit"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="report" content='{"pid": "blog", "spm":"1001.2101"}'>
+
+            <meta name="applicable-device" content="pc">
+        <meta http-equiv="Cache-Control" content="no-siteapp" />
+    
+    <meta name="referrer" content="always">
+    <link rel="alternate" media="handheld" href="#" />
+    <meta name="shenma-site-verification" content="5a59773ab8077d4a62bf469ab966a63b_1497598848">
+            <meta name="csdn-baidu-search"  content='{"autorun":true,"install":true,"keyword":"MySQL之锁-1 降低锁竞争，减少MySQL用户等待时间"}'>
+    
+    <link href="https://csdnimg.cn/public/favicon.ico" rel="SHORTCUT ICON">
+    <title>MySQL之锁-1 降低锁竞争，减少MySQL用户等待时间_会飞的蚂蚁-CSDN博客</title>
+        <meta name="keywords" content="MySQL之锁-1 降低锁竞争，减少MySQL用户等待时间">
+        <meta name="description" content="通过锁机制，可以实现多线程同时对某个表进行操作。如下图所示，在某个时刻，用户甲、用户乙、用户丙可能会同时或者先后(前面一个作业还没有完成)对数据表A进行查询或者更新的操作。当某个线程涉及到更新操作时，就需要获得独占的访问权。在更新的过程中，所有其它想要访问这个表的线程必须要等到其更新完成为止。此时就会导致锁竞争的问题。从而导致用户等待时间的延长。在这篇文章中，笔者将跟大家讨论，采取哪些措施可以有效">
+    <script src='//g.csdnimg.cn/tingyun/1.8.3/blog.js' type='text/javascript'></script>
+        
+                    <link rel="stylesheet" href="https://csdnimg.cn/release/phoenix/template/new_css/detail_enter-aa41db3c8c.min.css">
+                            <script type="application/ld+json">{"@context":"https:\/\/ziyuan.baidu.com\/contexts\/cambrian.jsonld","@id":"https:\/\/blog.csdn.net\/flying_ants\/java\/article\/details\/25116677","appid":1638831770136827,"title":"MySQL\u4e4b\u9501-1 \u964d\u4f4e\u9501\u7ade\u4e89\uff0c\u51cf\u5c11MySQL\u7528\u6237\u7b49\u5f85\u65f6\u95f4_\u4f1a\u98de\u7684\u8682\u8681-CSDN\u535a\u5ba2","pubDate":"2014-05-06T12:46:13","upDate":"2014-05-06T12:46:13"}</script>
+    
+            <link rel="stylesheet" href="https://csdnimg.cn/release/phoenix/template/themes_skin/skin3-template/skin3-template-3faf0f2897.min.css">
+    
+<!--    自定义皮肤样式-->
+    
+    <script type="text/javascript">
+        var username = "jason_teach";
+        var blog_address = "https://blog.csdn.net/flying_ants";
+        var static_host = "https://csdnimg.cn/release/phoenix/";
+        var currentUserName = "";
+        var isOwner = false;
+        var loginUrl = "http://passport.csdn.net/account/login?from=https://blog.csdn.net/flying_ants/java/article/details/25116677"
+        var blogUrl = "https://blog.csdn.net/";
+
+        var curSkin = "skin3-template";
+        // 收藏所需数据
+        var articleTitle = "MySQL之锁-1 降低锁竞争，减少MySQL用户等待时间";
+        var articleDesc = "通过锁机制，可以实现多线程同时对某个表进行操作。如下图所示，在某个时刻，用户甲、用户乙、用户丙可能会同时或者先后(前面一个作业还没有完成)对数据表A进行查询或者更新的操作。当某个线程涉及到更新操作时，就需要获得独占的访问权。在更新的过程中，所有其它想要访问这个表的线程必须要等到其更新完成为止。此时就会导致锁竞争的问题。从而导致用户等待时间的延长。在这篇文章中，笔者将跟大家讨论，采取哪些措施可以有效";
+
+        var articleTitles = "MySQL之锁-1 降低锁竞争，减少MySQL用户等待时间_会飞的蚂蚁-CSDN博客";
+        
+        var nickName = "jason_teach";
+        var isCorporate = false;
+        var subDomainBlogUrl = "https://blog.csdn.net/"
+        var digg_base_url = "https://blog.csdn.net/flying_ants";
+        var articleDetailUrl = "https://blog.csdn.net/jason_teach/article/details/25116677";
+        var isShowThird = "0"
+        var skinStatus = "White"
+        var canRead = true;
+        
+        var sideToolbarVersion = 2.5;
+        // 百度搜索类型
+        var baiduSearchType = "title";
+    </script>
+    <script src="https://csdnimg.cn/public/common/libs/jquery/jquery-1.9.1.min.js" type="text/javascript"></script>
+    <!--js引用-->
+            <script src="//g.csdnimg.cn/??fixed-sidebar/1.1.6/fixed-sidebar.js,report/1.5.6/report.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="https://csdnimg.cn/public/sandalstrap/1.4/css/sandalstrap.min.css">
+    <style>
+        .MathJax, .MathJax_Message, .MathJax_Preview{
+            display: none
+        }
+    </style>
+</head>
+<body class="nodata " > 
+    <link rel="stylesheet" href="https://csdnimg.cn/public/common/toolbar/content_toolbar_css/content_toolbar.css">
+    <script id="toolbar-tpl-scriptId" src="https://csdnimg.cn/public/common/toolbar/js/content_toolbar.js" type="text/javascript" domain="https://blog.csdn.net/"></script>
+    <script>
+    (function(){
+        var bp = document.createElement('script');
+        var curProtocol = window.location.protocol.split(':')[0];
+        if (curProtocol === 'https') {
+            bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+        }
+        else {
+            bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+        }
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+    })();
+</script>
+<link rel="stylesheet" href="https://csdnimg.cn/release/phoenix/template/new_css/blog_code-c3a0c33d5c.css">
+<link rel="stylesheet" href="https://csdnimg.cn/release/phoenix/vendor/pagination/paging-e040f0c7c8.css">
+
+<script type="text/javascript">
+	var NEWS_FEED = function(){}
+</script>
+
+<link rel="stylesheet" href="https://csdnimg.cn/release/phoenix/template/new_css/chart-3456820cac.css" />
+<div class="main_father clearfix d-flex justify-content-center" style="height:100%;"> 
+    <div class="container clearfix" id="mainBox">
+        <aside class="blog_container_aside">
+	<!--主页引入-->
+    
+    <div id="asideProfile" class="aside-box">
+    <div class="profile-intro d-flex">
+        <div class="avatar-box d-flex justify-content-center flex-column">
+            <a href="https://blog.csdn.net/jason_teach"  data-report-click='{"mod":"popu_379","spm":"1001.2101.3001.4121","dest":"https://blog.csdn.net/jason_teach","ab":"new"}'>
+                <img src="https://profile.csdnimg.cn/E/B/5/3_jason_teach" class="avatar_pic" username='jason_teach'>
+            </a>
+        </div>
+        <div class="user-info d-flex flex-column profile-intro-name-box">
+            <div>
+                                <a href="https://blog.csdn.net/jason_teach" class="" id="uid" title='jason_teach' data-report-click='{"mod":"popu_379","spm":"1001.2101.3001.4122","dest":"https://blog.csdn.net/jason_teach","ab":"new"}' >
+                    <span class="name " username='jason_teach'>
+                        jason_teach                    </span>
+                </a>
+                <span></span>
+                <span class="flag expert-blog"><span class="bubble">CSDN认证博客专家</span></span>
+                <span class="flag company-blog"><span class="bubble">CSDN认证企业博客</span></span>
+            </div>
+
+            <div class="profile-intro-name-boxFooter">
+                                    <span class="personal-home-page">码龄8年</span>
+                                            <span class="personal-home-page"><a class="personal-home-certification" href="https://me.csdn.net/jason_teach?utm_source=14998968" target="_blank"><img src="https://csdnimg.cn/identity/nocErtification.png" alt="">暂无认证</a></span>
+                                                </div>
+        </div>
+    </div>
+    <div class="data-info d-flex item-tiling">
+                <dl class="text-center" title="18">
+                            <dt><a href="https://blog.csdn.net/flying_ants" data-report-query="t=1"><span class="count">18</span></a></dt>
+                <dd><a href="https://blog.csdn.net/flying_ants" data-report-query="t=1">原创</a></dd>
+                    </dl>
+        <dl class="text-center" id="fanBox" title="5">
+            <dt><span class="count" id="fan">5</span></dt>
+            <dd>粉丝</dd>
+        </dl>
+        <dl class="text-center" title="2">
+            <dt><span class="count">2</span></dt>
+            <dd>获赞</dd>
+        </dl>
+        <dl class="text-center" title="0">
+            <dt><span class="count">0</span></dt>
+            <dd>评论</dd>
+        </dl>
+        <dl class="text-center" style="min-width:58px" title="29162">  
+            <dt><span class="count">2万+</span></dt>
+            <dd>访问</dd>
+        </dl>
+    </div>
+    <div class="item-rank"></div>
+    <div class="data-info d-flex item-tiling">
+        <dl class="text-center" title="498">
+            <dt><span class="count">498</span></dt>
+            <dd>积分</dd>
+        </dl>
+        <dl class="text-center" title="4">
+            <dt><span class="count">4</span></dt>
+            <dd>收藏</dd>
+        </dl>
+        <dl class="text-center" title="374926">
+            <dt><span class="count">37万+</span></dt>
+            <dd><a href="https://blog.csdn.net/rank/writing_rank" target="_blank">周排名</a></dd>
+        </dl>
+        <dl class="text-center" title="184066">
+            <dt><span class="count">18万+</span></dt>
+            <dd><a href="https://blog.csdn.net/rank/writing_rank_total" target="_blank">总排名</a></dd>
+        </dl>
+        <dl class="text-center" title="3级,点击查看等级说明">
+            <dt><a href="https://blog.csdn.net/blogdevteam/article/details/103478461#博客等级"  target="_blank">
+                                    <img class="level" src="https://csdnimg.cn/identity/blog3.png"/>
+                                </a>
+            </dt>
+            <dd>等级</dd>
+        </dl>
+    </div>
+    <div class="aside-box-footer">
+                
+    </div>
+        <div class="profile-intro-name-boxOpration">
+        <div class='opt-letter-watch-box'>
+            <a class="bt-button personal-letter" href="https://me.csdn.net/jason_teach" target="_blank" rel="noopener">TA的主页</a>
+        </div>
+        <div class='opt-letter-watch-box'>
+            <a class="bt-button personal-letter" href=https://im.csdn.net/im/main.html?userName=jason_teach target="_blank" rel="noopener">私信</a>
+        </div>
+        <div class="opt-letter-watch-box">
+                            <a class="personal-watch bt-button" id="btnAttent" >关注</a>
+                    </div>
+    </div>
+    </div>
+<div id="asideSearchArticle" class="aside-box">
+	<div class="aside-content search-comter">
+    <div class="aside-search aside-search-blog">         
+        <input type="text" class="input-serch-blog" name="" autocomplete="off" value="" id="search-blog-words" placeholder="搜博主文章">
+        <a class="btn-search-blog">
+                    <img src="//csdnimg.cn/cdn/content-toolbar/csdn-sou.png?v=1587021042">
+                </a>
+    </div>
+    </div>
+</div><script>
+    function watchBtnChange(flag, username) {
+        $('span.blog-expert-button-follow').each(function(index) {
+            if (flag) {
+                if ($(this).attr("data-name") == username) {
+                    $(this).html('<span class="hover-hide">已关注</span><span class="hover-show">取消</span>').removeClass('btn-red-follow').addClass('btn-gray-follow attented');
+                }
+            } else {
+                if ($(this).attr("data-name") == username) {
+                    $(this).html("关注").addClass('btn-red-follow').removeClass('btn-gray-follow attented');
+                }
+            }
+        })
+        if (username == $('p.csdn-tracking-statistics').attr("username")) {
+            if (flag) {
+                $('#btnAttent').addClass("attented").text("已关注").removeClass('btn-red-hollow').addClass('btn-gray-hollow');
+                changeFans(1)
+            } else {
+                $('#btnAttent').text("关注").addClass('btn-red-hollow').removeClass('btn-gray-hollow attented');
+                changeFans(-1)
+            }
+        }
+
+    }
+
+    function changeFans(num) {
+        if ($('#fan').text().indexOf('+') < 0) {
+            $('#fan').text(parseInt($('#fan').text()) + num);
+        } else {
+            $('#fanBox').attr('title', parseInt($('#fanBox').attr('title')) + num);
+        }
+    }
+    window.csdn = window.csdn ? window.csdn : {};
+    window.csdn.watchBtnChange = watchBtnChange;
+</script><div id="asideNewArticle" class="aside-box">
+    <h3 class="aside-title">最新文章</h3>
+    <div class="aside-content">
+        <ul class="inf_list clearfix">
+                        <li class="clearfix">
+                <a data-report-click='{"mod":"popu_382","spm":"1001.2101.3001.4136","dest":"https://blog.csdn.net/jason_teach/article/details/39288951","ab":"new"}' href="https://blog.csdn.net/jason_teach/article/details/39288951" target="_blank" >
+                                        MongoDB之基础-1 MongoDB2.6.4版本之安装介绍                </a>
+            </li>
+                        <li class="clearfix">
+                <a data-report-click='{"mod":"popu_382","spm":"1001.2101.3001.4136","dest":"https://blog.csdn.net/jason_teach/article/details/37873679","ab":"new"}' href="https://blog.csdn.net/jason_teach/article/details/37873679" target="_blank" >
+                                        MariaDB 10 mysqldump备份sql文件导入报错一则                </a>
+            </li>
+                        <li class="clearfix">
+                <a data-report-click='{"mod":"popu_382","spm":"1001.2101.3001.4136","dest":"https://blog.csdn.net/jason_teach/article/details/34819671","ab":"new"}' href="https://blog.csdn.net/jason_teach/article/details/34819671" target="_blank" >
+                                        MySQL之系统变量1 - Show Global Status                </a>
+            </li>
+                        <li class="clearfix">
+                <a data-report-click='{"mod":"popu_382","spm":"1001.2101.3001.4136","dest":"https://blog.csdn.net/jason_teach/article/details/34054197","ab":"new"}' href="https://blog.csdn.net/jason_teach/article/details/34054197" target="_blank" >
+                                        Linux主机和MySQL实时监控工具-orzdba                </a>
+            </li>
+                        <li class="clearfix">
+                <a data-report-click='{"mod":"popu_382","spm":"1001.2101.3001.4136","dest":"https://blog.csdn.net/jason_teach/article/details/30977693","ab":"new"}' href="https://blog.csdn.net/jason_teach/article/details/30977693" target="_blank" >
+                                        MySQL之索引1 --- MyISAM和InnoDB索引实现的不同                </a>
+            </li>
+                    </ul>
+    </div>
+</div>
+    <div id="asideCategory" class="aside-box flexible-box"
+         style="display:block!important;">
+    <h3 class="aside-title">分类专栏</h3>
+    <div class="aside-content">
+        <ul>
+                            <li class="">
+                                        <a class="clearfix" 
+                                                    data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"","dest":"https://blog.csdn.net/jason_teach/category_2160913.html","ab":"new"}'
+                                               href="https://blog.csdn.net/jason_teach/category_2160913.html">
+                                                    <img src="https://img-blog.csdnimg.cn/20190927151026427.png?x-oss-process=image/resize,m_fixed,h_224,w_224" alt="">
+                                                <!--####是否付费-->
+                        <span class="title oneline"><span class="text">Linux系统管理</span>
+                                                    </span>
+                        <!--####是否付费-->
+                                                    <span class="count float-right">3篇</span>
+                                            </a>
+                </li>
+                            <li class="">
+                                        <a class="clearfix" 
+                                                    data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"","dest":"https://blog.csdn.net/jason_teach/category_2160921.html","ab":"new"}'
+                                               href="https://blog.csdn.net/jason_teach/category_2160921.html">
+                                                    <img src="https://img-blog.csdnimg.cn/20190918135101160.png?x-oss-process=image/resize,m_fixed,h_224,w_224" alt="">
+                                                <!--####是否付费-->
+                        <span class="title oneline"><span class="text">MySQL Database</span>
+                                                    </span>
+                        <!--####是否付费-->
+                                                    <span class="count float-right">14篇</span>
+                                            </a>
+                </li>
+                            <li class="">
+                                        <a class="clearfix" 
+                                                    data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"","dest":"https://blog.csdn.net/jason_teach/category_2161045.html","ab":"new"}'
+                                               href="https://blog.csdn.net/jason_teach/category_2161045.html">
+                                                    <img src="https://img-blog.csdnimg.cn/20190918140129601.png?x-oss-process=image/resize,m_fixed,h_224,w_224" alt="">
+                                                <!--####是否付费-->
+                        <span class="title oneline"><span class="text">Linux Service</span>
+                                                    </span>
+                        <!--####是否付费-->
+                                            </a>
+                </li>
+                            <li class="">
+                                        <a class="clearfix" 
+                                                    data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"","dest":"https://blog.csdn.net/jason_teach/category_2161051.html","ab":"new"}'
+                                               href="https://blog.csdn.net/jason_teach/category_2161051.html">
+                                                    <img src="https://img-blog.csdnimg.cn/20190927151053287.png?x-oss-process=image/resize,m_fixed,h_224,w_224" alt="">
+                                                <!--####是否付费-->
+                        <span class="title oneline"><span class="text">Python</span>
+                                                    </span>
+                        <!--####是否付费-->
+                                            </a>
+                </li>
+                            <li class="">
+                                        <a class="clearfix" 
+                                                    data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"","dest":"https://blog.csdn.net/jason_teach/category_2161055.html","ab":"new"}'
+                                               href="https://blog.csdn.net/jason_teach/category_2161055.html">
+                                                    <img src="https://img-blog.csdnimg.cn/20190927151124774.png?x-oss-process=image/resize,m_fixed,h_224,w_224" alt="">
+                                                <!--####是否付费-->
+                        <span class="title oneline"><span class="text">Shell</span>
+                                                    </span>
+                        <!--####是否付费-->
+                                            </a>
+                </li>
+                            <li class="">
+                                        <a class="clearfix" 
+                                                    data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"","dest":"https://blog.csdn.net/jason_teach/category_2161057.html","ab":"new"}'
+                                               href="https://blog.csdn.net/jason_teach/category_2161057.html">
+                                                    <img src="https://img-blog.csdnimg.cn/20190918135101160.png?x-oss-process=image/resize,m_fixed,h_224,w_224" alt="">
+                                                <!--####是否付费-->
+                        <span class="title oneline"><span class="text">Puppet</span>
+                                                    </span>
+                        <!--####是否付费-->
+                                            </a>
+                </li>
+                            <li class="">
+                                        <a class="clearfix" 
+                                                    data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"","dest":"https://blog.csdn.net/jason_teach/category_2161065.html","ab":"new"}'
+                                               href="https://blog.csdn.net/jason_teach/category_2161065.html">
+                                                    <img src="https://img-blog.csdnimg.cn/20190918140213434.png?x-oss-process=image/resize,m_fixed,h_224,w_224" alt="">
+                                                <!--####是否付费-->
+                        <span class="title oneline"><span class="text">NoSQL之Redis</span>
+                                                    </span>
+                        <!--####是否付费-->
+                                                    <span class="count float-right">4篇</span>
+                                            </a>
+                </li>
+                            <li class="">
+                                        <a class="clearfix" 
+                                                    data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"","dest":"https://blog.csdn.net/jason_teach/category_2161067.html","ab":"new"}'
+                                               href="https://blog.csdn.net/jason_teach/category_2161067.html">
+                                                    <img src="https://img-blog.csdnimg.cn/20190927151043371.png?x-oss-process=image/resize,m_fixed,h_224,w_224" alt="">
+                                                <!--####是否付费-->
+                        <span class="title oneline"><span class="text">NoSQL之MongoDB</span>
+                                                    </span>
+                        <!--####是否付费-->
+                                                    <span class="count float-right">1篇</span>
+                                            </a>
+                </li>
+                            <li class="">
+                                        <a class="clearfix" 
+                                                    data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"","dest":"https://blog.csdn.net/jason_teach/category_2167479.html","ab":"new"}'
+                                               href="https://blog.csdn.net/jason_teach/category_2167479.html">
+                                                    <img src="https://img-blog.csdnimg.cn/2019092715111047.png?x-oss-process=image/resize,m_fixed,h_224,w_224" alt="">
+                                                <!--####是否付费-->
+                        <span class="title oneline"><span class="text">Iptables</span>
+                                                    </span>
+                        <!--####是否付费-->
+                                                    <span class="count float-right">1篇</span>
+                                            </a>
+                </li>
+                            <li class="">
+                                        <a class="clearfix" 
+                                                    data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"","dest":"https://blog.csdn.net/jason_teach/category_2354191.html","ab":"new"}'
+                                               href="https://blog.csdn.net/jason_teach/category_2354191.html">
+                                                    <img src="https://img-blog.csdnimg.cn/20190927151117521.png?x-oss-process=image/resize,m_fixed,h_224,w_224" alt="">
+                                                <!--####是否付费-->
+                        <span class="title oneline"><span class="text">Toolkit</span>
+                                                    </span>
+                        <!--####是否付费-->
+                                                    <span class="count float-right">1篇</span>
+                                            </a>
+                </li>
+                            <li class="">
+                                        <a class="clearfix" 
+                                                    data-report-click='{"mod":"popu_537","spm":"1001.2101.3001.4137","strategy":"","dest":"https://blog.csdn.net/jason_teach/category_2399111.html","ab":"new"}'
+                                               href="https://blog.csdn.net/jason_teach/category_2399111.html">
+                                                    <img src="https://img-blog.csdnimg.cn/20190918140037908.png?x-oss-process=image/resize,m_fixed,h_224,w_224" alt="">
+                                                <!--####是否付费-->
+                        <span class="title oneline"><span class="text">MySQL 排错</span>
+                                                    </span>
+                        <!--####是否付费-->
+                                                    <span class="count float-right">1篇</span>
+                                            </a>
+                </li>
+                    </ul>
+    </div>
+        <p class="text-center">
+        <a class="flexible-btn" data-fbox="aside-archive"><img class="look-more" src="https://csdnimg.cn/release/phoenix/template/new_img/arrowDownWhite.png" alt=""></a>
+    </p>
+    </div>
+<div id="asideArchive" class="aside-box">
+    <h3 class="aside-title">归档</h3>
+    <div class="aside-content">
+        <div class="archive-box">
+                        <div class="archive-title">2014</div>
+            <div class="archive-content">
+                                    <div class="archive-item">
+                        <a href="https://blog.csdn.net/jason_teach/article/month/2014/09" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":"https://blog.csdn.net/jason_teach/article/month/2014/09"}'>
+                        <span class="time">9月</span>
+                        <span class="count">1篇</span>
+                        </a>
+                    </div>
+                                    <div class="archive-item">
+                        <a href="https://blog.csdn.net/jason_teach/article/month/2014/07" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":"https://blog.csdn.net/jason_teach/article/month/2014/07"}'>
+                        <span class="time">7月</span>
+                        <span class="count">1篇</span>
+                        </a>
+                    </div>
+                                    <div class="archive-item">
+                        <a href="https://blog.csdn.net/jason_teach/article/month/2014/06" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":"https://blog.csdn.net/jason_teach/article/month/2014/06"}'>
+                        <span class="time">6月</span>
+                        <span class="count">5篇</span>
+                        </a>
+                    </div>
+                                    <div class="archive-item">
+                        <a href="https://blog.csdn.net/jason_teach/article/month/2014/05" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":"https://blog.csdn.net/jason_teach/article/month/2014/05"}'>
+                        <span class="time">5月</span>
+                        <span class="count">6篇</span>
+                        </a>
+                    </div>
+                                    <div class="archive-item">
+                        <a href="https://blog.csdn.net/jason_teach/article/month/2014/04" target="_blank" data-report-click='{"mod":"popu_538","spm":"1001.2101.3001.4138","ab":"new","dest":"https://blog.csdn.net/jason_teach/article/month/2014/04"}'>
+                        <span class="time">4月</span>
+                        <span class="count">13篇</span>
+                        </a>
+                    </div>
+                            </div>
+                    </div>
+    </div>
+</div>
+<div id="asideHotArticle" class="aside-box">
+	<h3 class="aside-title">热门文章</h3>
+	<div class="aside-content">
+		<ul class="hotArticle-list">
+							<li>
+
+                    <a
+                    data-report-click='{"mod":"popu_541","spm":"1001.2101.3001.4139","dest":"https://blog.csdn.net/jason_teach/article/details/22793123","ab":"new"}' 
+                     href="https://blog.csdn.net/jason_teach/article/details/22793123" >
+                                                MySQL之基础-2 MySQL安装介绍之5.6版本Cmake安装                        <img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt=""><span class="read">3756</span>
+                    </a>
+				</li>
+							<li>
+
+                    <a
+                    data-report-click='{"mod":"popu_541","spm":"1001.2101.3001.4139","dest":"https://blog.csdn.net/jason_teach/article/details/23350031","ab":"new"}' 
+                     href="https://blog.csdn.net/jason_teach/article/details/23350031" >
+                                                MySQL之数据库模型设计-1 第一范式、第二范式、第三范式理解                        <img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt=""><span class="read">3186</span>
+                    </a>
+				</li>
+							<li>
+
+                    <a
+                    data-report-click='{"mod":"popu_541","spm":"1001.2101.3001.4139","dest":"https://blog.csdn.net/jason_teach/article/details/25541325","ab":"new"}' 
+                     href="https://blog.csdn.net/jason_teach/article/details/25541325" >
+                                                SecureCRT 属性设置                        <img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt=""><span class="read">1827</span>
+                    </a>
+				</li>
+							<li>
+
+                    <a
+                    data-report-click='{"mod":"popu_541","spm":"1001.2101.3001.4139","dest":"https://blog.csdn.net/jason_teach/article/details/28898317","ab":"new"}' 
+                     href="https://blog.csdn.net/jason_teach/article/details/28898317" >
+                                                MySQL之功能1  --- Percona-Server5.6首发提供日志审计功能                        <img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt=""><span class="read">1425</span>
+                    </a>
+				</li>
+							<li>
+
+                    <a
+                    data-report-click='{"mod":"popu_541","spm":"1001.2101.3001.4139","dest":"https://blog.csdn.net/jason_teach/article/details/25116677","ab":"new"}' 
+                     href="https://blog.csdn.net/jason_teach/article/details/25116677" >
+                                                MySQL之锁-1 降低锁竞争，减少MySQL用户等待时间                        <img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt=""><span class="read">1391</span>
+                    </a>
+				</li>
+					</ul>
+	</div>
+</div>
+<div id="asideNewComments" class="aside-box">
+    <h3 class="aside-title">最新评论</h3>
+    <div class="aside-content">
+        <ul class="newcomment-list">
+                        <li>
+                <a class="title text-truncate" data-report-click='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/jason_teach/article/details/8095994#comments_5975456","ab":"new"}'  target="_blank" href="https://blog.csdn.net/jason_teach/article/details/8095994#comments_5975456">nginx的五种负载算法模式</a>
+                <p class="comment ellipsis">
+                    <a href="https://my.csdn.net/jason_teach" class="user-name" target="_blank">jason_teach</a>
+                                        <span class="reply">回复</span>
+                                        shenzuochun：                </p>
+            </li>
+                        <li>
+                <a class="title text-truncate" data-report-click='{"mod":"popu_542","spm":"1001.2101.3001.4231","dest":"https://blog.csdn.net/jason_teach/article/details/8095994#comments_5975455","ab":"new"}'  target="_blank" href="https://blog.csdn.net/jason_teach/article/details/8095994#comments_5975455">nginx的五种负载算法模式</a>
+                <p class="comment ellipsis">
+                    <a href="https://my.csdn.net/jason_teach" class="user-name" target="_blank">jason_teach</a>
+                                        <span class="reply">回复</span>
+                                        shenzuochun：
+用url_hash 均衡                </p>
+            </li>
+                    </ul>
+    </div>
+</div>
+            <div id="footerRightAds">
+        <div class="aside-box">
+            <div id="kp_box_57" data-pid="57"><script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
+<div id="gpt-passback-1">
+  <script>
+    window.googletag = window.googletag || {cmd: []};
+    googletag.cmd.push(function() {
+    googletag.defineSlot('/162717810/CN-csdn.net/300x600-3', [300, 600], 'gpt-passback-1').addService(googletag.pubads());
+    googletag.enableServices();
+    googletag.display('gpt-passback-1');
+    });
+  </script>
+</div><img class="pre-img-lasy" data-src="https://kunyu.csdn.net/1.png?p=57&a=2234&c=0&k=&d=1&t=3&u=1b13f6a2af52475eb4d65d970e6d1f7b"></div>        </div>
+        </div>
+        <!-- 详情页显示目录 -->
+        <!--文章目录-->
+<div id="asidedirectory" class="aside-box">
+    <div class='groupfile' id="directory">
+        <h3 class="aside-title">目录</h3>
+        <div class="align-items-stretch group_item">
+            <div class="pos-box">
+            <div class="scroll-box">
+                <div class="toc-box"></div>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+    	<!-- <div id="asideFooter">
+		<div class="aside-box">
+			<div class="persion_article">
+			</div>
+		</div>
+    </div> -->
+</aside>
+<script>
+	$("a.flexible-btn").click(function(){
+		$(this).parents('div.aside-box').removeClass('flexible-box');
+		$(this).parents("p.text-center").remove();
+	})
+</script>
+<script type="text/javascript"  src="https://g.csdnimg.cn/user-tooltip/2.1/user-tooltip.js"></script>
+        <main>
+            <script type="text/javascript">
+    var blogSensitiveWords = "";
+</script>
+<div class="blog-content-box">
+    <div class="article-header-box">
+        <div class="article-header">
+            <div class="article-title-box">
+                <h1 class="title-article" id="articleContentId">MySQL之锁-1 降低锁竞争，减少MySQL用户等待时间</h1>
+            </div>
+            <div class="article-info-box">
+                <div class="article-bar-top">
+                    <!--文章类型-->
+                                        <!--原创-->
+                                        <!--翻译-->
+                                        <!--转载-->
+                                        <img class="article-type-img" src="https://csdnimg.cn/release/phoenix/template/new_img/reprint.png" alt="">
+                                        <div class="bar-content">
+                                                                                                                                            <a class="follow-nickName" href="https://me.csdn.net/jason_teach" target="_blank" rel="noopener">jason_teach</a>
+                    <span class="time">2014-05-06 12:46:13</span>
+                    <img class="article-read-img article-heard-img" src="https://csdnimg.cn/release/phoenix/template/new_img/articleReadEyes.png" alt="">
+                    <span class="read-count">1398</span>
+                    <a id='blog_detail_zk_collection' class="un-collection" data-report-click='{"mod":"popu_823","spm":"1001.2101.3001.4232","ab":"new"}'>
+                        <img class="article-collect-img article-heard-img un-collect-status" style="display:inline-block" src="https://csdnimg.cn/release/phoenix/template/new_img/tobarCollect.png" alt="">
+                        <img class="article-collect-img article-heard-img collect-status" style="display:none" src="https://csdnimg.cn/release/phoenix/template/new_img/tobarCollectionActive.png" alt="">
+                        <span class="name">收藏</span>
+                        <span class="get-collection">
+                                                </span>
+                    </a>
+                                        </div>
+                </div>
+                <div class="blog-tags-box">
+                <div class="tags-box artic-tag-box">
+                                           <span class="label">分类专栏：</span>
+                                                                                             <a class="tag-link" target="_blank" rel="noopener"
+                                      href="https://blog.csdn.net/jason_teach/category_2160921.html">
+                                       MySQL Database                                   </a>
+                                                                                                                                   
+                </div>
+                </div>
+                                <div class="up-time"><span>最后发布：2014-05-06 12:46:13</span><span>首次发布：2014-05-06 12:46:13</span></div>
+                <div class="slide-content-box">
+                <div class="all-tags-box">
+                                    </div>
+                                                        </div>
+                <div class="operating">
+                                                        </div>
+            </div>
+        </div>
+    </div>
+    <!--python安装手册结束-->
+                    <article class="baidu_pl">
+                 <div id="article_content" class="article_content clearfix">
+            <link rel="stylesheet" href="https://csdnimg.cn/release/phoenix/template/css/ck_htmledit_views-3d4dc5c1de.css" />
+                            <div class="htmledit_views" id="content_views">
+                                            
+<strong><span style="font-size:14px;">通过锁机制，可以实现多线程同时对某个表进行操作。如下图所示，在某个时刻，用户甲、用户乙、用户丙可能会同时或者先后(前面一个作业还没有完成)对数据表A进行查询或者更新的操作。当某个线程涉及到更新操作时，就需要获得独占的访问权。在更新的过程中，所有其它想要访问这个表的线程必须要等到其更新完成为止。此时就会导致锁竞争的问题。从而导致用户等待时间的延长。在这篇文章中，笔者将跟大家讨论，采取哪些措施可以有效的避免锁竞争，减少MySQL用户的等待时间。<br /><img src="" alt="" /><br /><span></span><img src="https://img-blog.csdn.net/20140506124748593?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvZmx5aW5nX2FudHM=/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/SouthEast" align="middle" alt="" /><br />
+　　背景模拟：<br />
+　　为了更加清楚的说明这个问题，笔者先模拟一个日常的案例。通过案例大家来阅读下面的内容，可能条理会更加的清晰。现在MySQL数据库遇到如上图所示这种情况。<br />
+　　首先，用户甲对数据表A发出了一个查询请求。<br />
+　　然后，用户乙又对数据表A发出了一个更新请求。此时用户乙的请求只有在用户甲的作业完成之后才能够得到执行。<br />
+　　最后，用户丙又对数据表A发出了一个查询请求。在MySQL数据库中，更新语句的优先级要比查询语句的优先级高，为此用户丙的查询语句只有在用户乙的更新作业完成之后才能够执行。而用户乙的更新作业又必须在用户甲的查询语句完成之后才能够执行。此时就存在比较严重的锁竞争问题。<br />
+　　现在数据库工程师所要做的就是在数据库设计与优化过程中，采取哪些措施来降低这种锁竞争的不利情况?<br />
+　　措施一：利用Lock Tables来提高更新速度<br />
+　　对于更新作业来说，在一个锁定中进行许多更新要比所有锁定的更新要来得快。为此如果一个表更新频率比较高，如超市的收银系统，那么可以通过使用Lock Tables选项来提高更新速度。更新的速度提高了，那么与Select查询作业的冲突就会明显减少，锁竞争的现象也能够得到明显的抑制。<br />
+　　措施二：将某个表分为几个表来降低锁竞争<br />
+　　如一个大型的购物超市，如沃尔玛，其销售纪录表每天的更新操作非常的多。此时如果用户在更新的同时，另外有用户需要对其进行查询，显然锁竞争的现象会比较严重。针对这种情况，其实可以人为的将某张表分为几个表。如可以为每一台收银机专门设置一张数据表。如此的话，各台收银机之间用户的操作都是在自己的表中完成，相互之间不会产生干扰。在数据统计分析时，可以通过视图将他们整合成一张表。<br />
+　　措施三：调整某个作业的优先级<br />
+　　默认情况下，在MySQL数据库中，更新操作比Select查询有更高的优先级。如上图所示，如果用户乙先发出了一个查询申请，然后用户丙再发出一个更新请求。当用户甲的查询作业完成之后，系统会先执行谁的请求呢?注意，默认情况下系统并不遵循先来后到的规则，即不会先执行用户乙的查询请求，而是执行用户丙的更新进程。这主要是因为，更新进程比查询进程具有更高的优先级。<br />
+　　但是在有些特定的情况下，可能这种优先级不符合企业的需求。此时数据库管理员需要根据实际情况来调整语句的优先级。如果确实需要的话，那么可以通过以下三种方式来实现。<br />
+　　一是通过LOW_PRIOITY属性。这个属性可以将某个特定的语句的优先级降低。如可以调低某个特定的更新语句或者插入语句的优先级。不过需要注意的是，这个属性只有对特定的语句有用。即其作用域只针对某个特定的语句，而不会对全局造成影响。<br />
+　　二是通过HIGH_PRIOITY属性。与通过LOW_PRIOITY属性对应，有一个HIGH_PRIOITY属性。顾名思义，这个属性可以用来提高某个特定的Select查询语句的优先级。如上面这个案例，在用户丙的查询语句中加入HIGH_PRIOITY属性的话，那么用户甲查询完毕之后，会立即执行用户丙的查询语句。等到用户丙执行完毕之后，才会执行用户乙的更新操作。可见，此时查询语句的优先级得到了提升。这里需要注意，跟上面这个属性一样，这个作用域也只限于特定的查询语句。而不会对没有加这个参数的其他查询语句产生影响。也就是说，其他查询语句如果没有加这个属性，那么其优先级别仍然低于更新进程。<br />
+　　三是通过Set LOW_PRIORIT_UPDATES=1选项。以上两个属性都是针对特定的语句，而不会造成全局的影响。如果现在数据库管理员需要对某个连接来调整优先级别，该如何实现呢?如上例，现在用户需要将用户丙连接的查询语句的优先级别提高，而不是每次查询时都需要使用上面的属性。此时就需要使用Set LOW_PRIORIT_UPDATES=1选项。通过这个选项可以制定具体连接中的所有更新进程都是用比较低的优先级。注意这个选项只针对特定的连接有用。对于其他的连接，就不适用。<br />
+　　四是采用Low_Priority_updates选项。上面谈到的属性，前面两个针对特定的语句，后面一个是针对特定的连接，都不会对整个数据库产生影响。如果现在需要在整个数据库范围之内，降低更新语句的优先级，是否可以实现?如上面这个案例，在不使用其他参数的情况下，就让用户丙的查询语句比用户乙的更新具有更先执行?如果用户有这种需求的话，可以使用Low_Priority_updates选项来启动数据库。采用这个选项启动数据库时，系统会给数据库中所有的更新语句比较低的优先级。此时用户丙的查询语句就会比用户用户乙的更新请求更早的执行。而对于查询作业来说，不存在锁定的情况。为此用户甲的查询请求与用户丙的查询请求可以同时进行。为此通过调整语句执行的优先级，可以有效的降低锁竞争的情况。<br />
+　　可见，可以利用属性或者选项来调整某条语句的优先级。如现在有一个应用，主要供用户来进行查询。更新的操作一般都是有管理员来完成，并且对于用户来说更新的数据并不敏感。此时基于用户优先的原则，可以考虑将查询的优先级别提高。如此的话，对于用户来说，其遇到锁竞争的情况就会比较少，从而可以缩短用户的等待时间。在调整用户优先级时，需要考虑其调整的范围。即只是调整特定的语句、还是调整特定的连接，又或者对整个数据库生效。<br />
+　　措施四：对于混合操作的情况，可以采用特定的选项<br />
+　　有时候会遇到混合操作的作业，如即有更新操作又有插入操作又有查询操作时，要根据特定的情况，采用特定的选项。如现在需要对数据表同时进行插入和删除的作业，此时如果能够使用Insert Delayed选项，将会给用户带来很大的帮助。再如对同一个数据表执行Select和Delete语句会有锁竞争的情况。此时数据库管理员也可以根据实际情况来选择使用Delete Limint选项来解决所遇到速度问题。<br />
+　　通常情况下，锁竞争与死锁不同，并不会对数据库的运行带来很大的影响。只是可能会延长用户的等待时间。如果用户并发访问的机率并不是很高，此时锁竞争的现象就会很少。那么采用上面的这些措施并不会带来多大的收益。相反，如果用户对某个表的并发访问比较多，特别是不同的用户会对表执行查询、更新、删除、插入等混合作业，那么采取上面这些措施可以在很大程度上降低锁冲突，减少用户的等待时间。</span></strong>
+                                    </div>
+                                </div>
+            </article>
+</div>
+<script>
+    // 敏感词替换
+    ~function(blogSensitiveWords){
+        if(blogSensitiveWords){   
+            var getContentViews = document.getElementById("content_views");
+            var getContentTitle = document.getElementById("articleContentId");
+            var contentViewsInnerHTML = getContentViews.innerHTML;
+            var contentTitleInnerHTML = getContentTitle.innerHTML;
+            var keyWordsJsonArr = [];
+            var keyWordsArr = blogSensitiveWords.split(',');
+            function repeatTimes(str, num){
+                return num > 1 ? str += repeatTimes(str, --num): str;
+            }
+            for(var i = 0; i < keyWordsArr.length; i++){
+                var keyWordsJson = {} ;
+                keyWordsJson.key = keyWordsArr[i];
+                keyWordsJson.value = repeatTimes("*",keyWordsArr[i].length);
+                keyWordsJsonArr.push(keyWordsJson);
+            }
+            var reg;
+            for(var i = 0; i < keyWordsJsonArr.length; i++){
+                var item = keyWordsJsonArr[i];
+                reg = new RegExp(item.key+"(?!([^<]*>)|([^<]*<\/a>))","ig");
+                contentViewsInnerHTML = contentViewsInnerHTML.replace(reg,item.value);
+                contentTitleInnerHTML = contentTitleInnerHTML.replace(reg,item.value);
+            }
+            getContentViews.innerHTML=contentViewsInnerHTML;
+            getContentTitle.innerHTML=contentTitleInnerHTML;
+        }
+    }(blogSensitiveWords)
+</script>
+            <!--         <div class="hide-article-box hide-article-pos text-center">
+            <a class="btn-readmore" id="btn-readmore-zk" data-report-view='{"mod":"popu_376","dest":"https://blog.csdn.net/flying_ants/java/article/details/25116677","strategy":"readmore","ab":"new"}' data-report-click='{"mod":"popu_376","dest":"https://blog.csdn.net/flying_ants/java/article/details/25116677","strategy":"readmore","ab":"new"}'>
+                展开阅读全文
+                <svg class="icon chevrondown" aria-hidden="true">
+                    <use xlink:href="#csdnc-chevrondown"></use>
+                </svg>
+            </a>
+        </div>
+         -->
+    
+<script>
+    $.get("https://blog.csdn.net/jason_teach/article/uvc/25116677");
+</script>
+
+<div class="more-toolbox" id="toolBarBox">
+    <span id="fixedBar"></span>
+    <div class="left-toolbox">
+        <ul class="toolbox-list">
+            <li class="tool-item tool-active is-like" id="is-like"><a>
+            <img style="display:none;" id="is-like-imgactive" src="https://csdnimg.cn/release/phoenix/template/new_img/tobarThumbUpactive.png" alt="">
+            <img style="display:block;" id="is-like-img" src="https://csdnimg.cn/release/phoenix/template/new_img/tobarThumbUp.png" alt="">   
+            <span class="name" id="is-like-span">点赞</span>
+            <span id="spanCount" class="count"></span>
+            </a></li>
+            <li class="tool-item tool-active tool-item-comment">
+                                <a href="#commentBox">
+                    <img src="https://csdnimg.cn/release/phoenix/template/new_img/tobarComment.png" alt="">
+                    <span class="name">评论</span>
+                    <span class="count"></span>
+                </a>
+            </li>
+            <li class="tool-item tool-active tool-QRcode" id="tool-share">
+                <a href="javascript:;" data-report-click='{"mod":"1582594662_002","spm":"1001.2101.3001.4129","ab":"new"}'>
+                    <img src="https://csdnimg.cn/release/phoenix/template/new_img/tobarShare.png" alt="">
+                    <span class="name">分享</span>
+                </a>
+                <div class="QRcode" id="tool-QRcode" style="left:-92%;">
+                    <span id="QRcode-close">x</span>
+                    <p class="title">
+                    海报分享
+                    </p>
+                    <div id='shareCode'></div>
+                    <p>
+                    扫一扫，分享海报
+                    </p>
+                </div>
+            </li>
+            <li class="tool-item tool-active is-collection ">
+                <a href="javascript:;" data-report-click='{"mod":"popu_824","spm":"1001.2101.3001.4130","ab":"new"}'>
+                    <img id="is-collection-img" style="display:block;" src="https://csdnimg.cn/release/phoenix/template/new_img/tobarCollect.png" alt="">
+                    <img id="is-collection-imgactive" style="display:none;" src="https://csdnimg.cn/release/phoenix/template/new_img/tobarCollectionActive.png" alt="">
+                    <span class="name" id="is-collection">收藏</span>
+                    <span class="count get-collection"></span>
+                </a>
+            </li>
+            <li class="tool-item tool-active tool-phong" id="tool-phong">
+                <a href="javascript:;" data-report-click='{"mod":"popu_831","spm":"1001.2101.3001.4131","dest":"","ab":"new"}'>
+                    <img src="https://csdnimg.cn/release/phoenix/template/new_img/tobarMobile.png" alt="">
+                    <span class="name">
+                        手机看
+                    </span>
+                </a>
+                <div class="QRcode" id="tool-QRcode-phong" style="left:-78%;">
+                    <p class="title">
+                    分享到微信朋友圈
+                    </p>
+                    <span id="QRcode-phong-close">x</span>
+                    <div id='shareQrCode'></div>
+                    <p>
+                    扫一扫，手机阅读 
+                    </p>
+                </div>
+            </li>
+            <!--打赏开始-->
+                                <!--打赏结束-->
+            <li class="tool-item tool-active tool-more">
+                <a>
+                <img class="tool-more-img" src="https://csdnimg.cn/release/phoenix/template/new_img/lookMore.png" alt="">
+                </a>
+                <ul class="more-box">
+                    <li class="item item-report"><a class="article-report">文章举报</a></li>
+                </ul>
+            </li>
+                                    <li class="tool-item">
+                                    <a class="tool-attend tool-bt-button tool-bt-attend" href="javascript:;">关注</a>
+                            </li>
+                    </ul>
+        <div style="display:flex">
+                        <!-- <a class="tool-mover-open" id="btn-readmore" style="display: none;"  data-type="0" data-report-view='{"mod":"popu_376","spm":"1001.2101.3001.4232","dest":"https://blog.csdn.net/flying_ants/java/article/details/25116677","strategy":"packupbar","ab":"new"}' data-report-click='{"mod":"popu_376","spm":"1001.2101.3001.4232","dest":"https://blog.csdn.net/flying_ants/java/article/details/25116677","strategy":"packupbar","ab":"new"}'>
+                <span>收起全文</span>
+                <img id="btn-close-img" style="display: block;" src="https://csdnimg.cn/release/phoenix/template/new_img/CommentArrow.png" alt="">
+            </a> -->
+         </div>
+    </div>  
+</div>
+<script type=text/javascript crossorigin src="https://csdnimg.cn/release/phoenix/production/qrcode-7c90a92189.min.js"></script>
+<script src="//g.csdnimg.cn/??sharewx/1.2.1/sharewx.js" type="text/javascript"></script>
+<script type="text/javascript" crossorigin src="https://g.csdnimg.cn/collection-box/1.2.0/collection-box.js"></script>
+            <div class="recommend-box first-recommend-box">	<div class="recommend-item-box recommend-box-ident recommend-download-box clearfix"  data-report-view='{"mod":"popu_871","extra":"{\"utm_medium\":\"distribute.pc_relevant_t0.none-task-download-BlogCommendFromMachineLearnPai2-1.add_param_isCf\"}","index":"1","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/download.csdn.net\/download\/tenebaul\/5066348","ab":"new"}'>
+		<div class="content clearfix">
+			<div class="">
+			<a href="https://download.csdn.net/download/tenebaul/5066348" target="_blank" rel="noopener" data-report-click='{"mod":"popu_871","extra":"{\"utm_medium\":\"distribute.pc_relevant_t0.none-task-download-BlogCommendFromMachineLearnPai2-1.add_param_isCf\"}","index":"1","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/download.csdn.net\/download\/tenebaul\/5066348","ab":"new"}' data-report-query='utm_medium=distribute.pc_relevant_t0.none-task-download-BlogCommendFromMachineLearnPai2-1.add_param_isCf&depth_1-utm_source=distribute.pc_relevant_t0.none-task-download-BlogCommendFromMachineLearnPai2-1.add_param_isCf' >
+				<h4 class="text-truncate oneline clearfix">
+					<!-- <span class="recommend-article-type">下载</span> -->
+					资源<em>竞争</em>与并发控制				</h4>
+			</a>
+				<span class="data float-right">02-16</span>
+			</div>
+			<a href="https://download.csdn.net/download/tenebaul/5066348" target="_blank" rel="noopener" data-report-click='{"mod":"popu_871","extra":"{\"utm_medium\":\"distribute.pc_relevant_t0.none-task-download-BlogCommendFromMachineLearnPai2-1.add_param_isCf\"}","index":"1","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/download.csdn.net\/download\/tenebaul\/5066348","ab":"new"}' data-report-query='utm_medium=distribute.pc_relevant_t0.none-task-download-BlogCommendFromMachineLearnPai2-1.add_param_isCf&depth_1-utm_source=distribute.pc_relevant_t0.none-task-download-BlogCommendFromMachineLearnPai2-1.add_param_isCf' >
+				<div class="desc oneline">
+					非常浅显的讲述《资源<em>竞争</em>与并发控制》。 <em>1</em>.应用层并发控制？不是重点 2.Lost Update？乐观<em>锁</em>与悲观<em>锁</em> 3.隔离级别：脏读Dirty Read+幻读Phantom Read 4.InnoDB				</div>
+			</a>
+		</div>
+	</div>
+
+</div>                        <div class="recommend-box second-recommend-box">
+                <div class="recommend-item-box type_blog clearfix"  data-report-view='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.add_param_isCf\"}","index":"1","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/yinbucheng\/article\/details\/90017363","ab":"new"}'>
+	<div class="content">
+		<div class="info-box d-flex align-content-center">
+			<p class="from-where">
+			<span class="blog_title_box oneline ">
+												<a target="_blank" rel="noopener" href="https://blog.csdn.net/yinbucheng">
+					<span class="blog_title"> yinbucheng的博客</span>
+					</a>
+									</span>
+		</p>
+		<p class="date-and-readNum oneline">
+						<span class="hover-show">05-09</span>
+			<span class="hover-hide">
+				<img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt="">
+				838</span>
+						</p>
+		</div>
+		<h4 class="text-truncate oneline">
+			<a href="https://blog.csdn.net/yinbucheng/article/details/90017363" target="_blank"  rel="noopener" title="springboot代码中如何减少锁等待时间"  data-report-click='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.add_param_isCf\"}","index":"1","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/yinbucheng\/article\/details\/90017363","ab":"new"}' data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.add_param_isCf&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.add_param_isCf' >
+				<!-- <span class="recommend-article-type">博文</span> -->
+				springboot代码中如何<em>减少</em><em>锁</em><em>等待时间</em>			</a>
+		</h4>
+		<div class="desc">
+			<a href="https://blog.csdn.net/yinbucheng/article/details/90017363" target="_blank"  rel="noopener"  data-report-click='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.add_param_isCf\"}","index":"1","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/yinbucheng\/article\/details\/90017363","ab":"new"}' data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.add_param_isCf&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.add_param_isCf' >
+				springboot中如何<em>减少</em><em>锁</em><em>等待时间</em>在并发编程中经常听到一句话是<em>减少</em><em>锁</em>的访问，我们进行数据库操作是也可以利用上面思想优化自己代码。记得我曾经说过<em>mysql</em>中的加<em>锁</em>时机是访问是才加<em>锁</em>所有有如下优化点<em>1</em>. 如果service方法中不需要保证执行ACID可以不使用事务，让其执行完一条sql就释放<em>锁</em>2.如果service中需要ACID保证，可以将更新，删除语句放在最后面。比如service......			</a>
+		</div>
+	</div>
+	</div>
+
+            </div>
+                        <a id="commentBox" name="commentBox"></a>
+<div class="comment-box">
+	<div class="comment-edit-box d-flex">
+		<a id="commentsedit"></a>
+		<div class="user-img">
+			<a href="javascript:void(0);"  rel="noopener">
+				<img class="show_loginbox" src="//g.csdnimg.cn/static/user-img/anonymous-User-img.png">
+			</a>
+		</div>
+		<form id="commentform">
+			<img class="comment-sofa-flag" src="https://csdnimg.cn/release/phoenix/template/new_img/commentFlag@2x.png">
+			<textarea class="comment-content" name="comment_content" id="comment_content" placeholder="优质评论可以帮助作者获得更高权重" maxlength="1000"></textarea>
+			<div class="opt-box"> <!-- d-flex -->
+				<div id="ubbtools" class="add_code">
+					<a href="#insertcode" code="code" target="_self"><i class="icon iconfont icon-daima"></i></a>
+				</div>
+				<input type="hidden" id="comment_replyId" name="comment_replyId">
+				<input type="hidden" id="article_id" name="article_id" value="25116677">
+				<input type="hidden" id="comment_userId" name="comment_userId" value="">
+				<input type="hidden" id="commentId" name="commentId" value="">
+				<div class="dropdown" id="myDrap">
+					<a class="dropdown-face d-flex align-items-center" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+					<div class="txt-selected text-truncate">添加代码片</div>
+					<svg class="icon d-block" aria-hidden="true">
+						<use xlink:href="#csdnc-triangledown"></use>
+					</svg>
+					</a>
+					<ul class="dropdown-menu" id="commentCode" aria-labelledby="drop4">
+						<li><a data-code="html">HTML/XML</a></li>
+						<li><a data-code="objc">objective-c</a></li>
+						<li><a data-code="ruby">Ruby</a></li>
+						<li><a data-code="php">PHP</a></li>
+						<li><a data-code="csharp">C</a></li>
+						<li><a data-code="cpp">C++</a></li>
+						<li><a data-code="javascript">JavaScript</a></li>
+						<li><a data-code="python">Python</a></li>
+						<li><a data-code="java">Java</a></li>
+						<li><a data-code="css">CSS</a></li>
+						<li><a data-code="sql">SQL</a></li>
+						<li><a data-code="plain">其它</a></li>
+					</ul>
+				</div>  
+				<div class="right-box">
+                                            <span class="tip">评论将由博主筛选后显示，对所有人可见 |</span>
+                                        <span id="tip_comment" class="tip">还能输入<em>1000</em>个字符</span>
+					<input type="button" class="btn btn-sm btn-cancel d-none" value="取消回复">
+					<a data-report-click='{"mod":"1582594662_003","spm":"1001.2101.3001.4227","ab":"new"}'><input type="submit" class="btn btn-sm btn-comment" value="发表评论"></a>
+				</div>
+			</div>
+		</form>
+		<input type="button" class="bt-comment-show" value="评论">
+	</div>
+
+	<div class="comment-list-container">
+		<a id="comments"></a>
+		<div class="comment-list-box">
+		</div>
+		<div id="commentPage" class="pagination-box d-none"></div>
+		<div class="opt-box text-center">
+			<div class="btn btn-sm btn-link-blue" id="btnMoreComment"></div>
+		</div>
+	</div>
+</div>
+            <div class="recommend-box insert-baidu-box">
+                                    <div class="recommend-item-box type_blog clearfix"  data-report-view='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.add_param_isCf\"}","index":"2","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/mmonkeyer\/article\/details\/83680243","ab":"new"}'>
+	<div class="content">
+		<div class="info-box d-flex align-content-center">
+			<p class="from-where">
+			<span class="blog_title_box oneline ">
+												<a target="_blank" rel="noopener" href="https://blog.csdn.net/mmonkeyer">
+					<span class="blog_title"> mmonkeyer的博客</span>
+					</a>
+									</span>
+		</p>
+		<p class="date-and-readNum oneline">
+						<span class="hover-show">08-05</span>
+			<span class="hover-hide">
+				<img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt="">
+				429</span>
+						</p>
+		</div>
+		<h4 class="text-truncate oneline">
+			<a href="https://blog.csdn.net/mmonkeyer/article/details/83680243" target="_blank"  rel="noopener" title="一例胜千言，详谈SQL Sever数据库锁"  data-report-click='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.add_param_isCf\"}","index":"2","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/mmonkeyer\/article\/details\/83680243","ab":"new"}' data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.add_param_isCf&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.add_param_isCf' >
+				<!-- <span class="recommend-article-type">博文</span> -->
+				一例胜千言，详谈SQL Sever数据库<em>锁</em>			</a>
+		</h4>
+		<div class="desc">
+			<a href="https://blog.csdn.net/mmonkeyer/article/details/83680243" target="_blank"  rel="noopener"  data-report-click='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.add_param_isCf\"}","index":"2","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/mmonkeyer\/article\/details\/83680243","ab":"new"}' data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.add_param_isCf&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-2.add_param_isCf' >
+				数据库<em>锁</em>Table of Contents<em>1</em> 前言 2 <em>锁</em>的种类 3 何时加<em>锁</em>？ 4 <em>锁</em>的粒度 5 <em>锁</em>与事物隔离级别的优先级 6 数据库的其它重要Hint以及它们的区别 7 <em>锁</em>的超时等待 8 附：各种<em>锁</em>的兼容关系表 9 如何提高并发效率 <em>1</em>0 后记 <em>1</em> 前言 数据库大并发操作要考虑死<em>锁</em>和<em>锁</em>的性能问题。看到网上大多语焉......			</a>
+		</div>
+	</div>
+	</div>
+
+<div class="recommend-item-box type_blog clearfix"  data-report-view='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.add_param_isCf\"}","index":"3","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/weixin_30391339\/article\/details\/95958206","ab":"new"}'>
+	<div class="content">
+		<div class="info-box d-flex align-content-center">
+			<p class="from-where">
+			<span class="blog_title_box oneline ">
+												<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_30391339">
+					<span class="blog_title"> weixin_30391339的博客</span>
+					</a>
+									</span>
+		</p>
+		<p class="date-and-readNum oneline">
+						<span class="hover-show">03-07</span>
+			<span class="hover-hide">
+				<img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt="">
+				33</span>
+						</p>
+		</div>
+		<h4 class="text-truncate oneline">
+			<a href="https://blog.csdn.net/weixin_30391339/article/details/95958206" target="_blank"  rel="noopener" title="降低锁竞争 减少MySQL用户等待时间"  data-report-click='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.add_param_isCf\"}","index":"3","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/weixin_30391339\/article\/details\/95958206","ab":"new"}' data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.add_param_isCf&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.add_param_isCf' >
+				<!-- <span class="recommend-article-type">博文</span> -->
+				<em>降低</em><em>锁</em><em>竞争</em> <em>减少</em><em>MySQL</em><em>用户</em><em>等待时间</em>			</a>
+		</h4>
+		<div class="desc">
+			<a href="https://blog.csdn.net/weixin_30391339/article/details/95958206" target="_blank"  rel="noopener"  data-report-click='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.add_param_isCf\"}","index":"3","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/weixin_30391339\/article\/details\/95958206","ab":"new"}' data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.add_param_isCf&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-3.add_param_isCf' >
+				通过<em>锁</em>机制，可以实现多线程同时对某个表进行操作。如下图所示，在某个时刻，<em>用户</em>甲、<em>用户</em>乙、<em>用户</em>丙可能会同时或者先后(前面一个作业还没有完成)对数据表A进行查询或者更新的操作。当某个线程涉及到更新操作时，就需要获得独占的访问权。在更新的过程中，所有其它想要访问这个表的线程必须要等到其更新完成为止。此时就会导致<em>锁</em><em>竞争</em>的问题。从而导致<em>用户</em><em>等待时间</em>的延长。在这篇文章中，笔者将跟大家讨论，采取哪些措施可以有效......			</a>
+		</div>
+	</div>
+	</div>
+
+<div class="recommend-item-box type_blog clearfix"  data-report-view='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-4.add_param_isCf\"}","index":"4","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/duannian66\/article\/details\/80815486","ab":"new"}'>
+	<div class="content">
+		<div class="info-box d-flex align-content-center">
+			<p class="from-where">
+			<span class="blog_title_box oneline ">
+												<a target="_blank" rel="noopener" href="https://blog.csdn.net/duannian66">
+					<span class="blog_title"> duannian66的博客</span>
+					</a>
+									</span>
+		</p>
+		<p class="date-and-readNum oneline">
+						<span class="hover-show">06-26</span>
+			<span class="hover-hide">
+				<img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt="">
+				897</span>
+						</p>
+		</div>
+		<h4 class="text-truncate oneline">
+			<a href="https://blog.csdn.net/duannian66/article/details/80815486" target="_blank"  rel="noopener" title="MySQL 锁等待分析"  data-report-click='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-4.add_param_isCf\"}","index":"4","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/duannian66\/article\/details\/80815486","ab":"new"}' data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-4.add_param_isCf&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-4.add_param_isCf' >
+				<!-- <span class="recommend-article-type">博文</span> -->
+				<em>MySQL</em> <em>锁</em>等待分析			</a>
+		</h4>
+		<div class="desc">
+			<a href="https://blog.csdn.net/duannian66/article/details/80815486" target="_blank"  rel="noopener"  data-report-click='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-4.add_param_isCf\"}","index":"4","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/duannian66\/article\/details\/80815486","ab":"new"}' data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-4.add_param_isCf&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-4.add_param_isCf' >
+				前言：好久没有处理<em>MySQL</em><em>锁</em>等待，不免感觉少了点什么，索性就看了下核心实例的innodb <em>锁</em>等待的次数趋势图，我勒个去               大有万马奔腾之势。分析：<em>1</em>：捕获innodb<em>锁</em>等待详细信息     <em>MySQL</em> 目前只存储innodb <em>锁</em>等待实时信息，不存储历史信息。感觉这熊孩纸甚是孤傲。嘿嘿，木事阿拉跟他干到底。     大招：定时3秒一次捕获等待事件插入表中         ......			</a>
+		</div>
+	</div>
+	</div>
+
+<div class="recommend-item-box type_blog clearfix"  data-report-view='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-5.add_param_isCf\"}","index":"5","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/weixin_41050155\/article\/details\/88088419","ab":"new"}'>
+	<div class="content">
+		<div class="info-box d-flex align-content-center">
+			<p class="from-where">
+			<span class="blog_title_box oneline ">
+												<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_41050155">
+					<span class="blog_title"> wppi的博客</span>
+					</a>
+									</span>
+		</p>
+		<p class="date-and-readNum oneline">
+						<span class="hover-show">03-03</span>
+			<span class="hover-hide">
+				<img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt="">
+				5334</span>
+						</p>
+		</div>
+		<h4 class="text-truncate oneline">
+			<a href="https://blog.csdn.net/weixin_41050155/article/details/88088419" target="_blank"  rel="noopener" title="mysql数据库的锁有多少种，mysql中怎么加锁"  data-report-click='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-5.add_param_isCf\"}","index":"5","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/weixin_41050155\/article\/details\/88088419","ab":"new"}' data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-5.add_param_isCf&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-5.add_param_isCf' >
+				<!-- <span class="recommend-article-type">博文</span> -->
+				<em>mysql</em>数据库的<em>锁</em>有多少种，<em>mysql</em>中怎么加<em>锁</em>			</a>
+		</h4>
+		<div class="desc">
+			<a href="https://blog.csdn.net/weixin_41050155/article/details/88088419" target="_blank"  rel="noopener"  data-report-click='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-5.add_param_isCf\"}","index":"5","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/weixin_41050155\/article\/details\/88088419","ab":"new"}' data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-5.add_param_isCf&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-5.add_param_isCf' >
+				一、概述数据库<em>锁</em>定机制简单来说，就是数据库为了保证数据的一致性，而使各种共享资源在被并发访问变得有序所设计的一种规则。对于任何一种数据库来说都需要有相应的<em>锁</em>定机制，所以<em>MySQL</em>自然也不能例外。<em>MySQL</em>数据库由于其自身架构的特点，存在多种数据存储引擎，每种存储引擎所针对的应用场景特点都不太一样，为了满足各自特定应用场景的需求，每种存储引擎的<em>锁</em>定机制都是为各自所面对的特定场景而优化设计，所以各存......			</a>
+		</div>
+	</div>
+	</div>
+
+<div class="recommend-item-box type_blog clearfix"  data-report-view='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-6.add_param_isCf\"}","index":"6","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/cjh6456022\/article\/details\/100292290","ab":"new"}'>
+	<div class="content">
+		<div class="info-box d-flex align-content-center">
+			<p class="from-where">
+			<span class="blog_title_box oneline ">
+												<a target="_blank" rel="noopener" href="https://blog.csdn.net/cjh6456022">
+					<span class="blog_title"> cjh6456022的博客</span>
+					</a>
+									</span>
+		</p>
+		<p class="date-and-readNum oneline">
+						<span class="hover-show">04-18</span>
+			<span class="hover-hide">
+				<img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt="">
+				158</span>
+						</p>
+		</div>
+		<h4 class="text-truncate oneline">
+			<a href="https://blog.csdn.net/cjh6456022/article/details/100292290" target="_blank"  rel="noopener" title="各大数据库厂商怎样看竞争对手"  data-report-click='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-6.add_param_isCf\"}","index":"6","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/cjh6456022\/article\/details\/100292290","ab":"new"}' data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-6.add_param_isCf&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-6.add_param_isCf' >
+				<!-- <span class="recommend-article-type">博文</span> -->
+				各大数据库厂商怎样看<em>竞争</em>对手			</a>
+		</h4>
+		<div class="desc">
+			<a href="https://blog.csdn.net/cjh6456022/article/details/100292290" target="_blank"  rel="noopener"  data-report-click='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-6.add_param_isCf\"}","index":"6","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/cjh6456022\/article\/details\/100292290","ab":"new"}' data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-6.add_param_isCf&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-6.add_param_isCf' >
+				闲来无事在google上面search了一下微软，IBM，ORACLE三家公司怎样评价对手的产品:微软:IBM DB2 UDB 和 SQL Server 2000对比 SQL Server 2005 和 Oracle对比 S...			</a>
+		</div>
+	</div>
+	</div>
+
+<div class="recommend-item-box type_blog clearfix"  data-report-view='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-7.add_param_isCf\"}","index":"7","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/cspyb\/article\/details\/1865538","ab":"new"}'>
+	<div class="content">
+		<div class="info-box d-flex align-content-center">
+			<p class="from-where">
+			<span class="blog_title_box oneline ">
+												<a target="_blank" rel="noopener" href="https://blog.csdn.net/cspyb">
+					<span class="blog_title"> cspyb的专栏</span>
+					</a>
+									</span>
+		</p>
+		<p class="date-and-readNum oneline">
+						<span class="hover-show">11-04</span>
+			<span class="hover-hide">
+				<img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt="">
+				1万+</span>
+						</p>
+		</div>
+		<h4 class="text-truncate oneline">
+			<a href="https://blog.csdn.net/cspyb/article/details/1865538" target="_blank"  rel="noopener" title="数据库加锁的知识"  data-report-click='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-7.add_param_isCf\"}","index":"7","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/cspyb\/article\/details\/1865538","ab":"new"}' data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-7.add_param_isCf&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-7.add_param_isCf' >
+				<!-- <span class="recommend-article-type">博文</span> -->
+				数据库加<em>锁</em>的知识			</a>
+		</h4>
+		<div class="desc">
+			<a href="https://blog.csdn.net/cspyb/article/details/1865538" target="_blank"  rel="noopener"  data-report-click='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-7.add_param_isCf\"}","index":"7","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/cspyb\/article\/details\/1865538","ab":"new"}' data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-7.add_param_isCf&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-7.add_param_isCf' >
+				关于数据库加<em>锁</em>的知识LockType 属性指示编辑过程中对记录使用的<em>锁</em>定类型。设置和返回值设置或返回以下某个 LockTypeEnum 的值。常量 说明adLockReadOnly 默认值，只读。无法更改数据。adLockPessimistic 保守式记录<em>锁</em>定（逐条）。提供者执行必要的操作确保成功编辑记录，通常采用编辑时立即<em>锁</em>定数据源的记录的方式。adLockOptimistic 开放式记录<em>锁</em>...			</a>
+		</div>
+	</div>
+	</div>
+
+<div class="recommend-item-box type_blog clearfix"  data-report-view='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-8.add_param_isCf\"}","index":"8","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/weixin_34364135\/article\/details\/92194179","ab":"new"}'>
+	<div class="content">
+		<div class="info-box d-flex align-content-center">
+			<p class="from-where">
+			<span class="blog_title_box oneline ">
+												<a target="_blank" rel="noopener" href="https://blog.csdn.net/weixin_34364135">
+					<span class="blog_title"> weixin_34364135的博客</span>
+					</a>
+									</span>
+		</p>
+		<p class="date-and-readNum oneline">
+						<span class="hover-show">04-03</span>
+			<span class="hover-hide">
+				<img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt="">
+				28</span>
+						</p>
+		</div>
+		<h4 class="text-truncate oneline">
+			<a href="https://blog.csdn.net/weixin_34364135/article/details/92194179" target="_blank"  rel="noopener" title="如何降低MySQL锁竞争"  data-report-click='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-8.add_param_isCf\"}","index":"8","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/weixin_34364135\/article\/details\/92194179","ab":"new"}' data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-8.add_param_isCf&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-8.add_param_isCf' >
+				<!-- <span class="recommend-article-type">博文</span> -->
+				如何<em>降低</em><em>MySQL</em><em>锁</em><em>竞争</em>			</a>
+		</h4>
+		<div class="desc">
+			<a href="https://blog.csdn.net/weixin_34364135/article/details/92194179" target="_blank"  rel="noopener"  data-report-click='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-8.add_param_isCf\"}","index":"8","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/weixin_34364135\/article\/details\/92194179","ab":"new"}' data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-8.add_param_isCf&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-8.add_param_isCf' >
+				正在加载数据...                                     　　通 过<em>锁</em>机制，可以实现多线程同时对某个表进行操作。如下图所示，在某个时刻，<em>用户</em>甲、<em>用户</em>乙、<em>用户</em>丙可能会同时或者先后(前面一个作业还没有完成)对数据表 A进行查询或者更新的操作。当某个线程涉及到更新操作时，就需要获得独占的访问权。在更新的过程中，所有其它想要访问这个表的线程必须......			</a>
+		</div>
+	</div>
+	</div>
+
+<div class="recommend-item-box type_blog clearfix"  data-report-view='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-9.add_param_isCf\"}","index":"9","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/ljg472010941\/article\/details\/7330060","ab":"new"}'>
+	<div class="content">
+		<div class="info-box d-flex align-content-center">
+			<p class="from-where">
+			<span class="blog_title_box oneline ">
+												<a target="_blank" rel="noopener" href="https://blog.csdn.net/ljg472010941">
+					<span class="blog_title"> Jason liu的专栏</span>
+					</a>
+									</span>
+		</p>
+		<p class="date-and-readNum oneline">
+						<span class="hover-show">03-07</span>
+			<span class="hover-hide">
+				<img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt="">
+				5979</span>
+						</p>
+		</div>
+		<h4 class="text-truncate oneline">
+			<a href="https://blog.csdn.net/ljg472010941/article/details/7330060" target="_blank"  rel="noopener" title="mysql 数据表读锁机制详解"  data-report-click='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-9.add_param_isCf\"}","index":"9","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/ljg472010941\/article\/details\/7330060","ab":"new"}' data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-9.add_param_isCf&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-9.add_param_isCf' >
+				<!-- <span class="recommend-article-type">博文</span> -->
+				<em>mysql</em> 数据表读<em>锁</em>机制详解			</a>
+		</h4>
+		<div class="desc">
+			<a href="https://blog.csdn.net/ljg472010941/article/details/7330060" target="_blank"  rel="noopener"  data-report-click='{"mod":"popu_387","extra":"{\"utm_medium\":\"distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-9.add_param_isCf\"}","index":"9","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/ljg472010941\/article\/details\/7330060","ab":"new"}' data-report-query='utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-9.add_param_isCf&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-9.add_param_isCf' >
+				为了给高并发情况下的<em>mysql</em>进行更好的优化，有必要了解一下<em>mysql</em>查询更新时的<em>锁</em>表机制。一、概述<em>MySQL</em>有三种<em>锁</em>的级别：页级、表级、行级。MyISAM和MEMORY存储引擎采用的是表级<em>锁</em>（table<em>-</em>level locking）；BDB存储引擎采用的是页面<em>锁</em>（page<em>-</em>levellocking），但也支持表级<em>锁</em>；InnoDB存储引擎既支持行级<em>锁</em>（row<em>-</em>level locki...			</a>
+		</div>
+	</div>
+	</div>
+
+                    <!-- <div class="recommend-item-box type_hot_word">
+                    <div class="content clearfix">
+                        <div class="float-left">
+                                                                                <span>
+                                <a href="https://java.csdn.net/" data-report-click='{"mod":"1586412712_001","ab":"new","dest":"https://java.csdn.net/","index":"索引#"}' data-report-view='{"mod":"1586412712_001","ab":"new","dest":"https://java.csdn.net/","index":"#"}'  target="_blank">
+                                Java</a>
+                            </span>
+                                                        <span>
+                                <a href="https://c1.csdn.net/" data-report-click='{"mod":"1586412712_001","ab":"new","dest":"https://c1.csdn.net/","index":"索引#"}' data-report-view='{"mod":"1586412712_001","ab":"new","dest":"https://c1.csdn.net/","index":"#"}'  target="_blank">
+                                C语言</a>
+                            </span>
+                                                        <span>
+                                <a href="https://python.csdn.net/" data-report-click='{"mod":"1586412712_001","ab":"new","dest":"https://python.csdn.net/","index":"索引#"}' data-report-view='{"mod":"1586412712_001","ab":"new","dest":"https://python.csdn.net/","index":"#"}'  target="_blank">
+                                Python</a>
+                            </span>
+                                                        <span>
+                                <a href="https://cplus.csdn.net/" data-report-click='{"mod":"1586412712_001","ab":"new","dest":"https://cplus.csdn.net/","index":"索引#"}' data-report-view='{"mod":"1586412712_001","ab":"new","dest":"https://cplus.csdn.net/","index":"#"}'  target="_blank">
+                                C++</a>
+                            </span>
+                                                        <span>
+                                <a href="https://csharp.csdn.net/" data-report-click='{"mod":"1586412712_001","ab":"new","dest":"https://csharp.csdn.net/","index":"索引#"}' data-report-view='{"mod":"1586412712_001","ab":"new","dest":"https://csharp.csdn.net/","index":"#"}'  target="_blank">
+                                C#</a>
+                            </span>
+                                                        <span>
+                                <a href="https://vbn.csdn.net/" data-report-click='{"mod":"1586412712_001","ab":"new","dest":"https://vbn.csdn.net/","index":"索引#"}' data-report-view='{"mod":"1586412712_001","ab":"new","dest":"https://vbn.csdn.net/","index":"#"}'  target="_blank">
+                                Visual Basic .NET</a>
+                            </span>
+                                                        <span>
+                                <a href="https://js.csdn.net/" data-report-click='{"mod":"1586412712_001","ab":"new","dest":"https://js.csdn.net/","index":"索引#"}' data-report-view='{"mod":"1586412712_001","ab":"new","dest":"https://js.csdn.net/","index":"#"}'  target="_blank">
+                                JavaScript</a>
+                            </span>
+                                                        <span>
+                                <a href="https://php.csdn.net/" data-report-click='{"mod":"1586412712_001","ab":"new","dest":"https://php.csdn.net/","index":"索引#"}' data-report-view='{"mod":"1586412712_001","ab":"new","dest":"https://php.csdn.net/","index":"#"}'  target="_blank">
+                                PHP</a>
+                            </span>
+                                                        <span>
+                                <a href="https://sql.csdn.net/" data-report-click='{"mod":"1586412712_001","ab":"new","dest":"https://sql.csdn.net/","index":"索引#"}' data-report-view='{"mod":"1586412712_001","ab":"new","dest":"https://sql.csdn.net/","index":"#"}'  target="_blank">
+                                SQL</a>
+                            </span>
+                                                        <span>
+                                <a href="https://go.csdn.net/" data-report-click='{"mod":"1586412712_001","ab":"new","dest":"https://go.csdn.net/","index":"索引#"}' data-report-view='{"mod":"1586412712_001","ab":"new","dest":"https://go.csdn.net/","index":"#"}'  target="_blank">
+                                Go语言</a>
+                            </span>
+                                                        <span>
+                                <a href="https://r.csdn.net/" data-report-click='{"mod":"1586412712_001","ab":"new","dest":"https://r.csdn.net/","index":"索引#"}' data-report-view='{"mod":"1586412712_001","ab":"new","dest":"https://r.csdn.net/","index":"#"}'  target="_blank">
+                                R语言</a>
+                            </span>
+                                                        <span>
+                                <a href="https://assembly.csdn.net/" data-report-click='{"mod":"1586412712_001","ab":"new","dest":"https://assembly.csdn.net/","index":"索引#"}' data-report-view='{"mod":"1586412712_001","ab":"new","dest":"https://assembly.csdn.net/","index":"#"}'  target="_blank">
+                                Assembly language</a>
+                            </span>
+                                                        <span>
+                                <a href="https://swift.csdn.net/" data-report-click='{"mod":"1586412712_001","ab":"new","dest":"https://swift.csdn.net/","index":"索引#"}' data-report-view='{"mod":"1586412712_001","ab":"new","dest":"https://swift.csdn.net/","index":"#"}'  target="_blank">
+                                Swift</a>
+                            </span>
+                                                        <span>
+                                <a href="https://ruby.csdn.net/" data-report-click='{"mod":"1586412712_001","ab":"new","dest":"https://ruby.csdn.net/","index":"索引#"}' data-report-view='{"mod":"1586412712_001","ab":"new","dest":"https://ruby.csdn.net/","index":"#"}'  target="_blank">
+                                Ruby</a>
+                            </span>
+                                                        <span>
+                                <a href="https://matlab.csdn.net/" data-report-click='{"mod":"1586412712_001","ab":"new","dest":"https://matlab.csdn.net/","index":"索引#"}' data-report-view='{"mod":"1586412712_001","ab":"new","dest":"https://matlab.csdn.net/","index":"#"}'  target="_blank">
+                                MATLAB</a>
+                            </span>
+                                                        <span>
+                                <a href="https://plsql.csdn.net/" data-report-click='{"mod":"1586412712_001","ab":"new","dest":"https://plsql.csdn.net/","index":"索引#"}' data-report-view='{"mod":"1586412712_001","ab":"new","dest":"https://plsql.csdn.net/","index":"#"}'  target="_blank">
+                                PL/SQL</a>
+                            </span>
+                                                        <span>
+                                <a href="https://perl.csdn.net/" data-report-click='{"mod":"1586412712_001","ab":"new","dest":"https://perl.csdn.net/","index":"索引#"}' data-report-view='{"mod":"1586412712_001","ab":"new","dest":"https://perl.csdn.net/","index":"#"}'  target="_blank">
+                                Perl</a>
+                            </span>
+                                                        <span>
+                                <a href="https://vb.csdn.net/" data-report-click='{"mod":"1586412712_001","ab":"new","dest":"https://vb.csdn.net/","index":"索引#"}' data-report-view='{"mod":"1586412712_001","ab":"new","dest":"https://vb.csdn.net/","index":"#"}'  target="_blank">
+                                Visual Basic</a>
+                            </span>
+                                                        <span>
+                                <a href="https://obj.csdn.net/" data-report-click='{"mod":"1586412712_001","ab":"new","dest":"https://obj.csdn.net/","index":"索引#"}' data-report-view='{"mod":"1586412712_001","ab":"new","dest":"https://obj.csdn.net/","index":"#"}'  target="_blank">
+                                Objective-C</a>
+                            </span>
+                                                        <span>
+                                <a href="https://delphi.csdn.net/" data-report-click='{"mod":"1586412712_001","ab":"new","dest":"https://delphi.csdn.net/","index":"索引#"}' data-report-view='{"mod":"1586412712_001","ab":"new","dest":"https://delphi.csdn.net/","index":"#"}'  target="_blank">
+                                Delphi/Object Pascal</a>
+                            </span>
+                                                        <span>
+                                <a href="https://www.csdn.net/unity/" data-report-click='{"mod":"1586412712_001","ab":"new","dest":"https://www.csdn.net/unity/","index":"索引#"}' data-report-view='{"mod":"1586412712_001","ab":"new","dest":"https://www.csdn.net/unity/","index":"#"}'  target="_blank">
+                                Unity3D</a>
+                            </span>
+                                                    
+                                                                                <span>
+                                <a href="https://www.csdn.net/gather_1e/MtzaAgwsOS1kb3dubG9hZAO0O0OO0O0O.html" target="_blank">
+                                c# 小程序 消息推送</a>
+                            </span>
+                                                        <span>
+                                <a href="https://www.csdn.net/gather_12/MtzaAgxsMC1kb3dubG9hZAO0O0OO0O0O.html" target="_blank">
+                                c# 绘制3维</a>
+                            </span>
+                                                        <span>
+                                <a href="https://www.csdn.net/gather_1b/MtzaAgxsMS1kb3dubG9hZAO0O0OO0O0O.html" target="_blank">
+                                c#酒店管理系统数据库</a>
+                            </span>
+                                                        <span>
+                                <a href="https://www.csdn.net/gather_15/MtzaAgxsMi1kb3dubG9hZAO0O0OO0O0O.html" target="_blank">
+                                c#链接api</a>
+                            </span>
+                                                        <span>
+                                <a href="https://www.csdn.net/gather_14/MtzaAgxsMy1kb3dubG9hZAO0O0OO0O0O.html" target="_blank">
+                                c# 串口发送数据</a>
+                            </span>
+                                                        <span>
+                                <a href="https://www.csdn.net/gather_17/MtzaAgxsNC1kb3dubG9hZAO0O0OO0O0O.html" target="_blank">
+                                c# 线程结束回调</a>
+                            </span>
+                                                        <span>
+                                <a href="https://www.csdn.net/gather_15/MtzaAgxsNS1kb3dubG9hZAO0O0OO0O0O.html" target="_blank">
+                                c# 应用请求无法连接</a>
+                            </span>
+                                                        <span>
+                                <a href="https://www.csdn.net/gather_12/MtzaAgxsNy1kb3dubG9hZAO0O0OO0O0O.html" target="_blank">
+                                c#项目中引用其他依赖项</a>
+                            </span>
+                                                        <span>
+                                <a href="https://www.csdn.net/gather_2a/MtzaAgxsOS1ibG9n.html" target="_blank">
+                                c# cv mat</a>
+                            </span>
+                                                        <span>
+                                <a href="https://www.csdn.net/gather_1e/MtzaAgysMC1kb3dubG9hZAO0O0OO0O0O.html" target="_blank">
+                                c# 赋值byte数组</a>
+                            </span>
+                                                                            </div>
+                    </div>
+                    </div> -->
+                                    <div class="recommend-loading-box">
+                    <img src='https://csdnimg.cn/release/phoenix/images/feedLoading.gif'>
+                </div>
+                <!-- <div class="recommend-end-box">
+                    <p class="text-center">没有更多推荐了，<a href="https://blog.csdn.net/" class="c-blue c-blue-hover c-blue-focus">返回首页</a></p>
+                </div> -->
+            </div>
+                            <div class="template-box">
+                    <span>©️2020 CSDN</span>
+                <span>皮肤主题: 大白</span>
+                <span> 设计师:
+                                            CSDN官方博客                                    </span>
+                <span>
+                    <a href="https://blog.csdn.net/" class="back-home c-blue c-blue-hover c-blue-focus">返回首页</a>
+                </span>
+                </div>
+                        <script src="https://csdnimg.cn/pubfooter/js/publib_footer-1.0.4.js" data-isfootertrack="false" type="text/javascript"></script>
+        </main>
+    </div>
+                <div class="recommend-right  align-items-stretch clearfix" id="rightAside" data-type="recommend">
+            <aside class="recommend-right_aside">
+                <div id="recommend-right" style="height:100%;position:fixed;">
+                    <div class='d-flex flex-column aside-box groupfile' id="groupfile">
+                        <h3 class="aside-title">目录</h3>
+                        <div class="align-items-stretch group_item">
+                            <div class="pos-box">
+                                <div class="scroll-box">
+                                    <div class="toc-box"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                                                                <div id="recommendAdBox">
+                        <div id="kp_box_479" data-pid="479"><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<!-- PC-博客详情页-右侧视窗300*600 -->
+<ins class="adsbygoogle"
+     style="display:inline-block;width:300px;height:600px"
+     data-ad-client="ca-pub-1076724771190722"
+     data-ad-slot="8441704093"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script><img class="pre-img-lasy" data-src="https://kunyu.csdn.net/1.png?p=479&a=2487&c=0&k=&d=1&t=3&u=f25542abcab7430e90a2a37333ce5c26"></div>                        </div>
+                                        <div class="recommend-list-box d-flex flex-column aside-box">
+                    <ul class="recommend-fixed-box align-items-stretch">
+                                                    <li class="right-item">
+                                <a
+                                        href="https://download.csdn.net/download/tenebaul/5066348"
+                                        target="_blank"
+                                     data-report-click='{"mod":"popu_858","extra":"{\"utm_medium\":\"distribute.pc_relevant_right.none-task-download-BlogCommendFromMachineLearnPai2-1.nonecase\"}","index":"1","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/download.csdn.net\/download\/tenebaul\/5066348","ab":"new"}'                                     data-report-view='{"mod":"popu_858","extra":"{\"utm_medium\":\"distribute.pc_relevant_right.none-task-download-BlogCommendFromMachineLearnPai2-1.nonecase\"}","index":"1","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/download.csdn.net\/download\/tenebaul\/5066348","ab":"new"}'                                     data-report-query='utm_medium=distribute.pc_relevant_right.none-task-download-BlogCommendFromMachineLearnPai2-1.nonecase&depth_1-utm_source=distribute.pc_relevant_right.none-task-download-BlogCommendFromMachineLearnPai2-1.nonecase'                                 >
+                                    <div class="context-box ">
+                                        <div class="content clearfix content-width">
+                                            <h5>
+                                                资源<em>竞争</em>与并发控制                                            </h5>
+                                            <!--                                                 <span class="time">02-16</span>
+                                                                                         -->
+                                        </div>
+                                                                                    <span class="download_mark_button ">立即下载 </span>
+                                                                            </div>
+                                </a>
+                            </li>
+                                                    <li class="right-item">
+                                <a
+                                        href="https://blog.csdn.net/yinbucheng/article/details/90017363"
+                                        target="_blank"
+                                     data-report-click='{"mod":"popu_858","extra":"{\"utm_medium\":\"distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-2.nonecase\"}","index":"2","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/yinbucheng\/article\/details\/90017363","ab":"new"}'                                     data-report-view='{"mod":"popu_858","extra":"{\"utm_medium\":\"distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-2.nonecase\"}","index":"2","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/yinbucheng\/article\/details\/90017363","ab":"new"}'                                     data-report-query='utm_medium=distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-2.nonecase&depth_1-utm_source=distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-2.nonecase'                                 >
+                                    <div class="context-box ">
+                                        <div class="content clearfix ">
+                                            <h5>
+                                                springboot代码中如何<em>减少</em><em>锁</em><em>等待时间</em>                                            </h5>
+                                            <!--                                                 <span class="time">05-09</span>
+                                                                                                                                        <span class="read"><img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt="">838 </span>
+                                             -->
+                                        </div>
+                                                                            </div>
+                                </a>
+                            </li>
+                                                    <li class="right-item">
+                                <a
+                                        href="https://blog.csdn.net/mmonkeyer/article/details/83680243"
+                                        target="_blank"
+                                     data-report-click='{"mod":"popu_858","extra":"{\"utm_medium\":\"distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-3.nonecase\"}","index":"3","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/mmonkeyer\/article\/details\/83680243","ab":"new"}'                                     data-report-view='{"mod":"popu_858","extra":"{\"utm_medium\":\"distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-3.nonecase\"}","index":"3","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/mmonkeyer\/article\/details\/83680243","ab":"new"}'                                     data-report-query='utm_medium=distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-3.nonecase&depth_1-utm_source=distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-3.nonecase'                                 >
+                                    <div class="context-box ">
+                                        <div class="content clearfix ">
+                                            <h5>
+                                                一例胜千言，详谈SQL Sever数据库<em>锁</em>                                            </h5>
+                                            <!--                                                 <span class="time">08-05</span>
+                                                                                                                                        <span class="read"><img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt="">429 </span>
+                                             -->
+                                        </div>
+                                                                            </div>
+                                </a>
+                            </li>
+                                                    <li class="right-item">
+                                <a
+                                        href="https://blog.csdn.net/weixin_30391339/article/details/95958206"
+                                        target="_blank"
+                                     data-report-click='{"mod":"popu_858","extra":"{\"utm_medium\":\"distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-4.nonecase\"}","index":"4","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/weixin_30391339\/article\/details\/95958206","ab":"new"}'                                     data-report-view='{"mod":"popu_858","extra":"{\"utm_medium\":\"distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-4.nonecase\"}","index":"4","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/weixin_30391339\/article\/details\/95958206","ab":"new"}'                                     data-report-query='utm_medium=distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-4.nonecase&depth_1-utm_source=distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-4.nonecase'                                 >
+                                    <div class="context-box ">
+                                        <div class="content clearfix ">
+                                            <h5>
+                                                <em>降低</em><em>锁</em><em>竞争</em> <em>减少</em><em>MySQL</em><em>用户</em><em>等待时间</em>                                            </h5>
+                                            <!--                                                 <span class="time">03-07</span>
+                                                                                                                                        <span class="read"><img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt="">33 </span>
+                                             -->
+                                        </div>
+                                                                            </div>
+                                </a>
+                            </li>
+                                                    <li class="right-item">
+                                <a
+                                        href="https://blog.csdn.net/duannian66/article/details/80815486"
+                                        target="_blank"
+                                     data-report-click='{"mod":"popu_858","extra":"{\"utm_medium\":\"distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-5.nonecase\"}","index":"5","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/duannian66\/article\/details\/80815486","ab":"new"}'                                     data-report-view='{"mod":"popu_858","extra":"{\"utm_medium\":\"distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-5.nonecase\"}","index":"5","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/duannian66\/article\/details\/80815486","ab":"new"}'                                     data-report-query='utm_medium=distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-5.nonecase&depth_1-utm_source=distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-5.nonecase'                                 >
+                                    <div class="context-box ">
+                                        <div class="content clearfix ">
+                                            <h5>
+                                                <em>MySQL</em> <em>锁</em>等待分析                                            </h5>
+                                            <!--                                                 <span class="time">06-26</span>
+                                                                                                                                        <span class="read"><img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt="">897 </span>
+                                             -->
+                                        </div>
+                                                                            </div>
+                                </a>
+                            </li>
+                                                    <li class="right-item">
+                                <a
+                                        href="https://blog.csdn.net/weixin_41050155/article/details/88088419"
+                                        target="_blank"
+                                     data-report-click='{"mod":"popu_858","extra":"{\"utm_medium\":\"distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-6.nonecase\"}","index":"6","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/weixin_41050155\/article\/details\/88088419","ab":"new"}'                                     data-report-view='{"mod":"popu_858","extra":"{\"utm_medium\":\"distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-6.nonecase\"}","index":"6","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/weixin_41050155\/article\/details\/88088419","ab":"new"}'                                     data-report-query='utm_medium=distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-6.nonecase&depth_1-utm_source=distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-6.nonecase'                                 >
+                                    <div class="context-box ">
+                                        <div class="content clearfix ">
+                                            <h5>
+                                                <em>mysql</em>数据库的<em>锁</em>有多少种，<em>mysql</em>中怎么加<em>锁</em>                                            </h5>
+                                            <!--                                                 <span class="time">03-03</span>
+                                                                                                                                        <span class="read"><img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt="">5334 </span>
+                                             -->
+                                        </div>
+                                                                            </div>
+                                </a>
+                            </li>
+                                                    <li class="right-item">
+                                <a
+                                        href="https://blog.csdn.net/cjh6456022/article/details/100292290"
+                                        target="_blank"
+                                     data-report-click='{"mod":"popu_858","extra":"{\"utm_medium\":\"distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-7.nonecase\"}","index":"7","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/cjh6456022\/article\/details\/100292290","ab":"new"}'                                     data-report-view='{"mod":"popu_858","extra":"{\"utm_medium\":\"distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-7.nonecase\"}","index":"7","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/cjh6456022\/article\/details\/100292290","ab":"new"}'                                     data-report-query='utm_medium=distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-7.nonecase&depth_1-utm_source=distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-7.nonecase'                                 >
+                                    <div class="context-box ">
+                                        <div class="content clearfix ">
+                                            <h5>
+                                                各大数据库厂商怎样看<em>竞争</em>对手                                            </h5>
+                                            <!--                                                 <span class="time">04-18</span>
+                                                                                                                                        <span class="read"><img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt="">158 </span>
+                                             -->
+                                        </div>
+                                                                            </div>
+                                </a>
+                            </li>
+                                                    <li class="right-item">
+                                <a
+                                        href="https://blog.csdn.net/cspyb/article/details/1865538"
+                                        target="_blank"
+                                     data-report-click='{"mod":"popu_858","extra":"{\"utm_medium\":\"distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-8.nonecase\"}","index":"8","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/cspyb\/article\/details\/1865538","ab":"new"}'                                     data-report-view='{"mod":"popu_858","extra":"{\"utm_medium\":\"distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-8.nonecase\"}","index":"8","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/cspyb\/article\/details\/1865538","ab":"new"}'                                     data-report-query='utm_medium=distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-8.nonecase&depth_1-utm_source=distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-8.nonecase'                                 >
+                                    <div class="context-box ">
+                                        <div class="content clearfix ">
+                                            <h5>
+                                                数据库加<em>锁</em>的知识                                            </h5>
+                                            <!--                                                 <span class="time">11-04</span>
+                                                                                                                                        <span class="read"><img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt="">1万+ </span>
+                                             -->
+                                        </div>
+                                                                            </div>
+                                </a>
+                            </li>
+                                                    <li class="right-item">
+                                <a
+                                        href="https://blog.csdn.net/weixin_34364135/article/details/92194179"
+                                        target="_blank"
+                                     data-report-click='{"mod":"popu_858","extra":"{\"utm_medium\":\"distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-9.nonecase\"}","index":"9","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/weixin_34364135\/article\/details\/92194179","ab":"new"}'                                     data-report-view='{"mod":"popu_858","extra":"{\"utm_medium\":\"distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-9.nonecase\"}","index":"9","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/weixin_34364135\/article\/details\/92194179","ab":"new"}'                                     data-report-query='utm_medium=distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-9.nonecase&depth_1-utm_source=distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-9.nonecase'                                 >
+                                    <div class="context-box ">
+                                        <div class="content clearfix ">
+                                            <h5>
+                                                如何<em>降低</em><em>MySQL</em><em>锁</em><em>竞争</em>                                            </h5>
+                                            <!--                                                 <span class="time">04-03</span>
+                                                                                                                                        <span class="read"><img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt="">28 </span>
+                                             -->
+                                        </div>
+                                                                            </div>
+                                </a>
+                            </li>
+                                                    <li class="right-item">
+                                <a
+                                        href="https://blog.csdn.net/ljg472010941/article/details/7330060"
+                                        target="_blank"
+                                     data-report-click='{"mod":"popu_858","extra":"{\"utm_medium\":\"distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-10.nonecase\"}","index":"10","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/ljg472010941\/article\/details\/7330060","ab":"new"}'                                     data-report-view='{"mod":"popu_858","extra":"{\"utm_medium\":\"distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-10.nonecase\"}","index":"10","strategy":"BlogCommendFromMachineLearnPai2","dest":"https:\/\/blog.csdn.net\/ljg472010941\/article\/details\/7330060","ab":"new"}'                                     data-report-query='utm_medium=distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-10.nonecase&depth_1-utm_source=distribute.pc_relevant_right.none-task-blog-BlogCommendFromMachineLearnPai2-10.nonecase'                                 >
+                                    <div class="context-box ">
+                                        <div class="content clearfix ">
+                                            <h5>
+                                                <em>mysql</em> 数据表读<em>锁</em>机制详解                                            </h5>
+                                            <!--                                                 <span class="time">03-07</span>
+                                                                                                                                        <span class="read"><img src="https://csdnimg.cn/release/phoenix/template/new_img/readCountWhite.png" alt="">5979 </span>
+                                             -->
+                                        </div>
+                                                                            </div>
+                                </a>
+                            </li>
+                                            </ul>
+                    </div>
+                                    </div>
+            </aside>
+        </div>
+    
+</div>
+<div class="mask-dark"></div>
+<script>
+    var recommendCount = 8;
+    recommendCount = recommendCount > 1 ? (recommendCount + (recommendCount>6 ? 2 : 1)) : recommendCount;
+    var ChannelId = 6;
+    var articleId = "25116677";
+    var commentscount = 0;
+    var islock = true;
+    var curentUrl = "https://blog.csdn.net/flying_ants/java/article/details/25116677";
+    var myUrl = "https://my.csdn.net/";
+    //1禁止评论，2正常
+    var commentAuth = 1;
+    //百度搜索
+    var baiduKey = "MySQL之锁-1 降低锁竞争，减少MySQL用户等待时间_会飞的蚂蚁-CSDN博客";
+    //是否插入百度推荐内容
+    var needInsertBaidu = true;
+    // 代码段样式
+    var codeStyle = '';
+	var highlight = ["MySQL","\u9501","-","1","\u964d\u4f4e","\u9501","\u7ade\u4e89","\u51cf\u5c11","MySQL","\u7528\u6237","\u7b49\u5f85\u65f6\u95f4"];//高亮数组
+
+    var share_card_url = 'https://blog.csdn.net/jason_teach/article/shareArticleCardPage?article_id=25116677'
+    var RecommendBlogExpertList = [];
+	var articleType = 2;
+	var CopyrightContent = '';
+            var recommendRegularDomainArr = ["blog.csdn.net\/.+\/article\/details\/","download.csdn.net\/download\/","edu.csdn.net\/course\/detail\/","ask.csdn.net\/questions\/","bbs.csdn.net\/topics\/","www.csdn.net\/gather_.+\/"];
+</script>
+<script src="https://csdnimg.cn/public/sandalstrap/1.4/js/sandalstrap.min.js"></script>
+<script src="https://csdnimg.cn/release/phoenix/vendor/pagination/paging-3d3b805766.js"></script>
+<div class="skin-boxshadow"></div>
+<div class="pay-code">
+        <div class="pay-money">实付<span class="pay-money-span" data-nowprice='0' data-oldprice='0.00'>0元</span></div>
+        <div class=content>
+        <div id="payCode" data-id="">
+                <div class="renovate">
+                    <img src="https://csdnimg.cn/release/phoenix/static_blog/images/pay-time-out.png">
+                    <span>点击重新获取</span>
+                </div>
+            </div>
+            <div class="pay-style"><span><img src="https://csdnimg.cn/release/phoenix/static_blog/images/wx.png"></span><span><img src="https://csdnimg.cn/release/phoenix/static_blog/images/zfb.png"></span><span><img src="https://csdnimg.cn/release/phoenix/static_blog/images/JD.png"></span><span class="text">扫码支付</span></div>
+        </div>
+        <div class="bt-close"><svg t="1567152543821" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="10924" xmlns:xlink="http://www.w3.org/1999/xlink" width="12" height="12"><defs><style type="text/css"></style></defs><path d="M512 438.378667L806.506667 143.893333a52.032 52.032 0 1 1 73.6 73.621334L585.621333 512l294.485334 294.485333a52.074667 52.074667 0 0 1-73.6 73.642667L512 585.621333 217.514667 880.128a52.053333 52.053333 0 1 1-73.621334-73.642667L438.378667 512 143.893333 217.514667a52.053333 52.053333 0 1 1 73.621334-73.621334L512 438.378667z" fill="" p-id="10925"></path></svg></div>
+        <!-- <p style="margin-top: 8px;font-size: 14px;" class="text-center">支付成功即可阅读</p> -->
+        <div class="pay-balance">
+        <input type="radio" class="pay-code-radio" data-type="details"> 
+        <span class="span">钱包余额</span>
+        <span class="balance" style="color:#e33e33;font-size:14px;">0</span>  
+        <div class="pay-code-tile">
+            <img src="https://csdnimg.cn/release/phoenix/static_blog/images/pay-help.png" alt="">
+            <div class="pay-code-content">
+                <div class="span">
+                    <p class="title">抵扣说明：</p>
+                    <p> 1.余额是钱包充值的虚拟货币，按照1:1的比例进行支付金额的抵扣。<br> 2.余额无法直接购买下载，可以购买VIP、C币套餐、付费专栏及课程。</p>
+                </div>
+            </div>
+        </div>
+        </div>
+        <a class="pay-balance-con" href="https://i.csdn.net/#/wallet/balance/recharge" target="_blank"><img src="https://csdnimg.cn/release/phoenix/static_blog/images/recharge.png" alt=""><span  >余额充值</span></a>
+    </div>
+<div style="display:none;">
+	<img src="" onerror='setTimeout(function(){if(!/(csdn.net|iteye.com|baiducontent.com|googleusercontent.com|360webcache.com|sogoucdn.com|bingj.com|baidu.com)$/.test(window.location.hostname)){window.location.href="\x68\x74\x74\x70\x73\x3a\x2f\x2f\x77\x77\x77\x2e\x63\x73\x64\x6e\x2e\x6e\x65\x74"}},3000);'>
+</div>
+</body>
+    <!-- 高亮未与 markdown兼容 -->
+	<link rel="stylesheet" href="https://csdnimg.cn/release/blog_editor_html/release1.6.0/ckeditor/plugins/chart/chart.css" />
+	<script type="text/javascript" src="https://csdnimg.cn/release/blog_editor_html/release1.6.0/ckeditor/plugins/chart/lib/chart.min.js"></script>
+    <script type="text/javascript" src="https://csdnimg.cn/release/blog_editor_html/release1.6.0/ckeditor/plugins/chart/widget2chart.js"></script>
+    <script type="text/javascript" src="https://csdnimg.cn/release/phoenix/production/pc_wap_highlight-db1e81323a.js"></script>
+<script type="text/javascript" src="https://csdnimg.cn/release/phoenix/production/pc_wap_common-ac9b004d59.js"></script>
+<link rel="stylesheet" href="https://csdnimg.cn/release/blog_editor_html/release1.6.0/ckeditor/plugins/codesnippet/lib/highlight/styles/atom-one-light.css">
+<script>
+ // 全局声明
+ if (window.csdn === undefined) {
+      window.csdn = {};
+    }
+    window.csdn.sideToolbar = {
+        options: {
+            report:{
+                isShow: true,
+            },
+            qr: {
+                isShow: false,
+            }
+        }
+    }
+    $(function(){
+        $(document).on('click',"a.option-box[data-type='report']",function() {
+            window.csdn.userLogin.loadAjax(function(res){
+                showReport(false,articleTitles);
+            })
+        });
+    })
+</script>
+<script src="https://csdnimg.cn/release/phoenix/vendor/iconfont/csdnc-c439e66521.js"></script>
+<script src="https://csdnimg.cn/release/phoenix/template/new_js/common-8b5cf01a6b.min.js"></script>
+<script src="https://csdnimg.cn/release/phoenix/template/new_js/detail-72284da26f.min.js"></script>
+<script src="//csdnimg.cn/release/download/old_static/js/qrcode.js"></script>
+<script src="https://csdnimg.cn/release/cart/pub/1.0.4/cart_jsonp.js?v=2"></script>
+<script src="https://csdnimg.cn/release/phoenix/template/new_js/column_pay-1d16e18aa0.min.js"></script>
+	
+<script src="https://g.csdnimg.cn/copyright/1.0.3/copyright.js" type="text/javascript"></script>
+<script>
+    $(".MathJax").remove();
+    if ($('div.markdown_views pre.prettyprint code.hljs').length > 0) {
+        $('div.markdown_views')[0].className = 'markdown_views';
+    }
+</script>
+<script type="text/javascript" src="https://csdnimg.cn/release/blog_mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+            "HTML-CSS": {
+                    linebreaks: { automatic: true, width: "94%container" },
+                    imageFont: null
+            },
+            tex2jax: {
+                preview: "none"
+            },
+            mml2jax: {
+                preview: 'none'
+            }
+    });
+</script>
+    <script src="//g.csdnimg.cn/baidu-search/1.0.3/baidu-search.js"  type="text/javascript"></script>
+</html>
