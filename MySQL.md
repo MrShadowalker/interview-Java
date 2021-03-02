@@ -194,7 +194,7 @@ B-Tree，首先定义一条数据记录为一个二元组[key, data]，key为记
 
 结构如下：
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/1218157-20190830140822969-1341301777.png)
+![img](./MySQL.assets/1218157-20190830140822969-1341301777.png)
 
  
 
@@ -202,7 +202,7 @@ B-Tree，首先定义一条数据记录为一个二元组[key, data]，key为记
 
 由B-Tree变种而来，区别：内节点不存储data，只存储key；叶子节点不存储指针。由于B+Tree内节点去掉了data域，因此可以拥有更大的出度，拥有更好的性能。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/1218157-20190830141625039-1242267057.png)
+![img](./MySQL.assets/1218157-20190830141625039-1242267057.png)
 
  
 
@@ -210,7 +210,7 @@ B-Tree，首先定义一条数据记录为一个二元组[key, data]，key为记
 
 3、InnoDB存储引擎，在经典B+Tree的基础上进行了优化，增加了顺序访问指针。在B+Tree的每个叶子节点增加一个指向相邻叶子节点的指针，就形成了带有顺序访问指针的B+Tree。这样就提高了区间访问性能。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/1218157-20190830142424180-420134134.png)
+![img](./MySQL.assets/1218157-20190830142424180-420134134.png)
 
  
 
@@ -238,29 +238,29 @@ MySQL 优化器会自动判断 in 是否走二级索引，or 查询和 in 一样
 
 name列创建普通索引：
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4ad1e262c7.png)
+![img](./MySQL.assets/169fab4ad1e262c7.png)
 
 前导模糊查询不能命中索引：
 
 EXPLAIN SELECT * FROM user WHERE name LIKE '%s%';
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4ae00ad805.png)
+![img](./MySQL.assets/169fab4ae00ad805.png)
 
 非前导模糊查询则可以使用索引，可优化为使用非前导模糊查询：
 
 EXPLAIN SELECT * FROM user WHERE name LIKE 's%';
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4ae1b1e740.png)
+![img](./MySQL.assets/169fab4ae1b1e740.png)
 
 3）数据类型出现隐式转换的时候不会命中索引，特别是当列类型是字符串，一定要将字符常量值用引号引起来。
 
 EXPLAIN SELECT * FROM user WHERE name=1;
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4aeeea3142.png)
+![img](./MySQL.assets/169fab4aeeea3142.png)
 
 EXPLAIN SELECT * FROM user WHERE name='1';
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4af64502e8.png)
+![img](./MySQL.assets/169fab4af64502e8.png)
 
 4）复合索引的情况下，查询条件不包含索引列最左边部分（不满足最左原则），不会命中符合索引。
 
@@ -268,31 +268,31 @@ name,age,status列创建复合索引：
 
 ALTER TABLE user ADD INDEX index_name (name,age,status);
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4ae468dd5f.png)
+![img](./MySQL.assets/169fab4ae468dd5f.png)
 
 user表索引详情：
 
 SHOW INDEX FROM user;
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4ae260d343.jpeg)
+![img](./MySQL.assets/169fab4ae260d343.jpeg)
 
 根据最左原则，可以命中复合索引index_name：
 
 EXPLAIN SELECT * FROM user WHERE name='swj' AND status=1;
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4affd9796f.jpeg)
+![img](./MySQL.assets/169fab4affd9796f.jpeg)
 
 注意，最左原则并不是说是查询条件的顺序：
 
 EXPLAIN SELECT * FROM user WHERE status=1 AND name='swj';
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b0047390e.jpeg)
+![img](./MySQL.assets/169fab4b0047390e.jpeg)
 
 而是查询条件中是否包含索引最左列字段：
 
 EXPLAIN SELECT * FROM user WHERE status=2 ;
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b06548ad2.jpeg)
+![img](./MySQL.assets/169fab4b06548ad2.jpeg)
 
 5）union、in、or都能够命中索引，建议使用in。
 
@@ -304,19 +304,19 @@ UNION ALL
 
 SELECT*FROM user WHERE status = 2;
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b06d96e59.jpeg)
+![img](./MySQL.assets/169fab4b06d96e59.jpeg)
 
 in:
 
 EXPLAIN SELECT * FROM user WHERE status IN (1,2);
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b14bfcb89.jpeg)
+![img](./MySQL.assets/169fab4b14bfcb89.jpeg)
 
 or:
 
 EXPLAIN SELECT*FROM user WHERE status=1OR status=2;
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b1c978ec4.jpeg)
+![img](./MySQL.assets/169fab4b1c978ec4.jpeg)
 
 查询的CPU消耗：or>in>union。
 
@@ -324,7 +324,7 @@ EXPLAIN SELECT*FROM user WHERE status=1OR status=2;
 
 EXPLAIN SELECT * FROM payment WHERE customer_id = 203 OR amount = 3.96;
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b23724f6c.jpeg)
+![img](./MySQL.assets/169fab4b23724f6c.jpeg)
 
 因为or后面的条件列中没有索引，那么后面的查询肯定要走全表扫描，在存在全表扫描的情况下，就没有必要多一次索引扫描增加IO访问。
 
@@ -336,25 +336,25 @@ status列创建索引：
 
 ALTER TABLE user ADD INDEX index_status (status);
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b25c75f18.png)
+![img](./MySQL.assets/169fab4b25c75f18.png)
 
 user表索引详情：
 
 SHOW INDEX FROM user;
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b2c6ecb0a.jpeg)
+![img](./MySQL.assets/169fab4b2c6ecb0a.jpeg)
 
 负向条件不能命中缓存：
 
 EXPLAIN SELECT * FROM user WHERE status !=1 AND status != 2;
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b3331840f.jpeg)
+![img](./MySQL.assets/169fab4b3331840f.jpeg)
 
 可以优化为in查询，但是前提是区分度要高，返回数据的比例在30%以内：
 
 EXPLAIN SELECT * FROM user WHERE status IN (0,3,4);
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b38f8b6a9.jpeg)
+![img](./MySQL.assets/169fab4b38f8b6a9.jpeg)
 
 8）范围条件查询可以命中索引。范围条件有：<、<=、>、>=、between等。
 
@@ -362,45 +362,45 @@ status,age列分别创建索引：
 
 ALTER TABLE user ADD INDEX index_status (status);
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b25c75f18.png)
+![img](./MySQL.assets/169fab4b25c75f18.png)
 
 ALTER TABLE user ADD INDEX index_age (age);
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b4082bcd3.png)
+![img](./MySQL.assets/169fab4b4082bcd3.png)
 
 user表索引详情：
 
 SHOW INDEX FROM user;
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b555acbb1.jpeg)
+![img](./MySQL.assets/169fab4b555acbb1.jpeg)
 
 范围条件查询可以命中索引：
 
 EXPLAIN SELECT * FROM user WHERE status>5;
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b4450f7a8.jpeg)
+![img](./MySQL.assets/169fab4b4450f7a8.jpeg)
 
 范围列可以用到索引（联合索引必须是最左前缀），但是范围列后面的列无法用到索引，索引最多用于一个范围列，如果查询条件中有两个范围列则无法全用到索引：
 
 EXPLAIN SELECT * FROM user WHERE status>5 AND age<24;
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b563095df.jpeg)
+![img](./MySQL.assets/169fab4b563095df.jpeg)
 
 如果是范围查询和等值查询同时存在，优先匹配等值查询列的索引：
 
 EXPLAIN SELECT * FROM user WHERE status>5 AND age=24;
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b5cd19ef9.png)
+![img](./MySQL.assets/169fab4b5cd19ef9.png)
 
 8）数据库执行计算不会命中索引。
 
 EXPLAIN SELECT * FROM user WHERE age>24;
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b5f67f5db.png)
+![img](./MySQL.assets/169fab4b5f67f5db.png)
 
 EXPLAIN SELECT * FROM user WHERE age+1>24;
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b627a3aa3.jpeg)
+![img](./MySQL.assets/169fab4b627a3aa3.jpeg)
 
 计算逻辑应该尽量放到业务层处理，节省数据库的CPU的同时最大限度的命中索引。
 
@@ -410,7 +410,7 @@ EXPLAIN SELECT * FROM user WHERE age+1>24;
 
 user表的索引详情：
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b7a2dd2ac.jpeg)
+![img](./MySQL.assets/169fab4b7a2dd2ac.jpeg)
 
 因为status字段是索引列，所以直接从索引中就可以获取值，不必回表查询：
 
@@ -418,13 +418,13 @@ Using Index代表从索引中查询：
 
 EXPLAIN SELECT status FROM user where status=1;
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b7c297188.png)
+![img](./MySQL.assets/169fab4b7c297188.png)
 
 当查询其他列时，就需要回表查询，这也是为什么要避免SELECT*的原因之一：
 
 EXPLAIN SELECT * FROM user where status=1;
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b80770fc3.png)
+![img](./MySQL.assets/169fab4b80770fc3.png)
 
 10）建立索引的列，不允许为null。
 
@@ -434,19 +434,19 @@ remark列建立索引：
 
 ALTER TABLE user ADD INDEX index_remark (remark);
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b81039ab4.png)
+![img](./MySQL.assets/169fab4b81039ab4.png)
 
 IS NULL可以命中索引：
 
 EXPLAIN SELECT * FROM user WHERE remark IS NULL;
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b97c18e40.png)
+![img](./MySQL.assets/169fab4b97c18e40.png)
 
 IS NOT NULL不能命中索引：
 
 EXPLAIN SELECT * FROM user WHERE remark IS NOT NULL;
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/169fab4b992d6c22.png)
+![img](./MySQL.assets/169fab4b992d6c22.png)
 
 虽然IS NULL可以命中索引，但是NULL本身就不是一种好的数据库设计，应该使用NOT NULL约束以及默认值。
 
@@ -503,11 +503,11 @@ e. 创建索引时避免以下错误观念：索引越多越好，认为一个�
 这部分是要参照索引的图来的，如图：
 
 **（1）主键索引（聚集索引）**
-![在这里插入图片描述](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0xKRlBIUA==,size_16,color_FFFFFF,t_70.png)
+![在这里插入图片描述](./MySQL.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0xKRlBIUA==,size_16,color_FFFFFF,t_70.png)
 
 **（2）辅助索引（二级索引）**
 
-![在这里插入图片描述](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0xKRlBIUA==,size_16,color_FFFFFF,t_70-20200826111850437.png)
+![在这里插入图片描述](./MySQL.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L0xKRlBIUA==,size_16,color_FFFFFF,t_70-20200826111850437.png)
 
 **3、回表的概念**
 
@@ -648,7 +648,7 @@ e. 创建索引时避免以下错误观念：索引越多越好，认为一个�
 
 **MySQL默认的事务隔离级别为repeatable-read**
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/1183794-20170615222358540-978383734.png)
+![img](./MySQL.assets/1183794-20170615222358540-978383734.png)
 
 
 
@@ -741,7 +741,7 @@ MVCC 主要适用于MySQL的 RC（不可重复读），RR（可重复读） 隔�
 
 英文全称为Multi-Version Concurrency Control,翻译为中文即 多版本并发控制。无非就是乐观锁的一种实现方式。在Java编程中，如果把乐观锁看成一个接口，MVCC便是这个接口的一个实现类而已。
 
-![MySQL中MVCC的使用及原理详解](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/1536289030904c0df31db36.jpeg)
+![MySQL中MVCC的使用及原理详解](./MySQL.assets/1536289030904c0df31db36.jpeg)
 
 
 
@@ -775,7 +775,7 @@ MVCC的实现，通过保存数据在某个时间点的快照来实现的。这�
 
 假设事务id为1，那么插入后的数据行如下：
 
-![MySQL中MVCC的使用及原理详解](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/1536286392011332dc79980.jpeg)
+![MySQL中MVCC的使用及原理详解](./MySQL.assets/1536286392011332dc79980.jpeg)
 
  
 
@@ -785,7 +785,7 @@ MVCC的实现，通过保存数据在某个时间点的快照来实现的。这�
 
 update table set name= 'new_value' where id=1;
 
-![MySQL中MVCC的使用及原理详解](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/15362864790262a85896e55.jpeg)
+![MySQL中MVCC的使用及原理详解](./MySQL.assets/15362864790262a85896e55.jpeg)
 
  
 
@@ -793,7 +793,7 @@ update table set name= 'new_value' where id=1;
 
 delete from table where id=1;
 
-![MySQL中MVCC的使用及原理详解](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/15362865324150dfbc7bf66.jpeg)
+![MySQL中MVCC的使用及原理详解](./MySQL.assets/15362865324150dfbc7bf66.jpeg)
 
 
 
@@ -841,7 +841,7 @@ delete from table where id=1;
 
 如下图所示，在某个时刻，用户甲、用户乙、用户丙可能会同时或者先后(前面一个作业还没有完成)对数据表A进行查询或者更新的操作。当某个线程涉及到更新操作时，就需要获得独占的访问权。在更新的过程中，所有其它想要访问这个表的线程必须要等到其更新完成为止。此时就会导致锁竞争的问题。从而导致用户等待时间的延长。在这篇文章中，笔者将跟大家讨论，采取哪些措施可以有效的避免锁竞争，减少MySQL用户的等待时间。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/SouthEast.jpeg)
+![img](./MySQL.assets/SouthEast.jpeg)
 　　
 
 背景模拟：
@@ -934,7 +934,7 @@ delete from table where id=1;
 *朕想要了解皇宫的国库的相关情况，想知道酒窖有什么酒，剩多少，窖藏多少年，于是派最信任的高公公去清点，高公公去国库清点后报给了朕；朕又想知道藏书情况，于是又派高公公去清点并回来报告给朕，又想知道金银珠宝如何，又派高公公清点。。。过一段时间又想知道藏书情况，高公公还得重新再去清点，皇上问一次，高公公就得跑一次路。*
 
 *后来皇上觉得高公公不容易，就成立了国库管理部门，小邓子负责酒窖，小卓子负责藏书，而小六子负责金库的清点。。。后来皇上每次想了解国库就直接问话负责人，负责人就按照职责要求进行汇报。*
-![视图](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/SouthEast-20200826115013341.png)
+![视图](./MySQL.assets/SouthEast-20200826115013341.png)
 
 安排专人管理后，每次皇上想要了解国库情况，就不必让高公公每次都跑一趟，而是指定的人员按照指定的任务完成指定的汇报工作就可以了。
 
@@ -943,9 +943,9 @@ delete from table where id=1;
 > **视图是虚拟表，本身不存储数据，而是按照指定的方式进行查询。**
 
 比如，我们希望从前文提到的四张表，order_baisc,order_details，user和product中查找所有记录，需要写入代码指令：
-![查询](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/SouthEast-20200826115013565.png)
+![查询](./MySQL.assets/SouthEast-20200826115013565.png)
 想再次查询这几个表中uid为u0001的用户的记录，有需要键入一次操作指令：
-![查询](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/SouthEast-20200826115013412.png)
+![查询](./MySQL.assets/SouthEast-20200826115013412.png)
 也就是说，每次查询都得重新键入查询指令SQL代码，这种费时费力的体力活，对于时间就是生命的你我来说，是不划算的。所以借助视图，来执行相同或相似的查询。
 
 ### **2 创建视图**
@@ -966,7 +966,7 @@ delete from table where id=1;
 > 使用视图和使用表完全一样，只需要把视图当成一张表就OK了。**视图是一张虚拟表。**
 
 eg：创建order_baisc,order_details，user和product的查询视图，并通过视图查找uid为u0001的记录：
-![创建视图](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/SouthEast-20200826115013420.png)
+![创建视图](./MySQL.assets/SouthEast-20200826115013420.png)
 
 **2.3 修改视图CREATE OR REPLACE VIEW**
 
@@ -977,7 +977,7 @@ CREATE OR REPLACE VIEW 视图名 AS SELECT [...] FROM [...];1
 ```
 
 eg:
-![修改视图](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/SouthEast-20200826115013399.png)
+![修改视图](./MySQL.assets/SouthEast-20200826115013399.png)
 
 **2.4 查看视图**
 **(1)查看数据库中有哪些视图 show tables**
@@ -987,7 +987,7 @@ eg:
 >SHOW TABLES;1
 ```
 
-![查看视图](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/SouthEast-20200826115013684.png)
+![查看视图](./MySQL.assets/SouthEast-20200826115013684.png)
 
 通过`show tables;`反馈得到所有的表和视图。同样的，我们可以通过模糊检索的方式专门查看视图，这个时候，视图的命令统一采用的优势就体现出来了。
 **（2）查看视图详情**
@@ -999,7 +999,7 @@ eg:
 >SHOW FIELDS FROM 视图名;123
 ```
 
-![查看视图详情](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/SouthEast-20200826115013387.png)
+![查看视图详情](./MySQL.assets/SouthEast-20200826115013387.png)
 
 两种方法得到的详情都是一毛一样的。
 
@@ -1008,7 +1008,7 @@ eg:
 **3.1 表格数据变更**
 将表product中的数据进行更新，在通过视图检索：
 
-![视图与数据变更](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/SouthEast-20200826115013506.png)
+![视图与数据变更](./MySQL.assets/SouthEast-20200826115013506.png)
 
 可以看到表格数据变化后，在通过视图检索，得到的结果也同步发生了变化，因此，在此证明了：
 
@@ -1024,7 +1024,7 @@ eg:
 
 在此查询视图，发现插入了数据。
 
-![视图变更数据](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/SouthEast-20200826115013585.png)
+![视图变更数据](./MySQL.assets/SouthEast-20200826115013585.png)
 
 - （2）跨表插入数据
   通过上图，我们可以看到，跨表插入数据系统反馈报错，提示不能修改超过一个表的数据。
@@ -1036,13 +1036,13 @@ eg:
 
   eg:对表product创建一个单价超过3000的视图，并加上“WITH CHECK OPTION”，之后插入一个价格为42的记录：
 
-  ![“WITH CHECK OPTION”](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/SouthEast-20200826115013611.png)
+  ![“WITH CHECK OPTION”](./MySQL.assets/SouthEast-20200826115013611.png)
 
   可以看到系统提示错误CHECK OPTION FAILED。因为视图限制了价格要高于3000.
   后面再次尝试了不加“WITH CHECK OPTION”的视图，后者可以成功插入。
 
   同样的，在不加“WITH CHECK OPTION”的情况下，通过视图修改记录，也可以成功执行：
-  ![修改记录](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/SouthEast-20200826115013656.png)
+  ![修改记录](./MySQL.assets/SouthEast-20200826115013656.png)
 
 通过视图修改，可能导致数据无故消失，因此：
 
@@ -1115,35 +1115,35 @@ eg:
 
 **观点一：**
 
-![640?wx_fmt=png](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/640.png)
+![640?wx_fmt=png](./MySQL.assets/640.png)
 
 **观点二：**
 
-![640?wx_fmt=png](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/640-20200826135427569.jpeg)
+![640?wx_fmt=png](./MySQL.assets/640-20200826135427569.jpeg)
 
 **观点三：**
 
-![640?wx_fmt=png](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/640-20200826135427499.jpeg)
+![640?wx_fmt=png](./MySQL.assets/640-20200826135427499.jpeg)
 
 **观点四：**
 
-![640?wx_fmt=png](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/640-20200826135427491.png)
+![640?wx_fmt=png](./MySQL.assets/640-20200826135427491.png)
 
 **观点五：**
 
-![640?wx_fmt=png](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/640-20200826135427456.png)
+![640?wx_fmt=png](./MySQL.assets/640-20200826135427456.png)
 
 **观点六：**
 
-![640?wx_fmt=png](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/640-20200826135427534.png)
+![640?wx_fmt=png](./MySQL.assets/640-20200826135427534.png)
 
 **观点七：**
 
-![640?wx_fmt=png](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/640-20200826135427386.png)
+![640?wx_fmt=png](./MySQL.assets/640-20200826135427386.png)
 
 **观点八：**
 
-![640?wx_fmt=png](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/640-20200826135427550.jpeg)
+![640?wx_fmt=png](./MySQL.assets/640-20200826135427550.jpeg)
 
 
 
@@ -1973,7 +1973,7 @@ key_length 算法
 
 　　缓存体系结构：
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/1383365-20190628164226493-430550273.png)
+![img](./MySQL.assets/1383365-20190628164226493-430550273.png)
 
 　　MyBatis 跟缓存相关的类都在cache 包里面，其中有一个Cache 接口，只有一个默认的实现类 PerpetualCache，它是用HashMap 实现的。我们可以通过 以下类找到这个缓存的庐山真面目
 
@@ -1987,11 +1987,11 @@ key_length 算法
 
 　　除此之外，还有很多的装饰器，通过这些装饰器可以额外实现很多的功能：回收策略、日志记录、定时刷新等等。但是无论怎么装饰，经过多少层装饰，最后使用的还是基本的实现类（默认PerpetualCache）。可以通过 CachingExecutor 类 Debug 去查看。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/1383365-20190628165835198-1731504252.png)
+![img](./MySQL.assets/1383365-20190628165835198-1731504252.png)
 
 　　所有的缓存实现类总体上可分为三类：基本缓存、淘汰算法缓存、装饰器缓存。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/1383365-20190628172253737-1751427739.png)
+![img](./MySQL.assets/1383365-20190628172253737-1751427739.png)
 
 ## 一级缓存（本地缓存）：
 
@@ -2007,7 +2007,7 @@ key_length 算法
 
 　　如下图所示，MyBatis会在一次会话的表示----一个SqlSession对象中创建一个本地缓存(local cache)，对于每一次查询，都会尝试根据查询的条件去本地缓存中查找是否在缓存中，如果在缓存中，就直接从缓存中取出，然后返回给用户；否则，从数据库读取数据，将查询结果存入缓存并返回给用户。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/1383365-20190628172851422-987384747.png)
+![img](./MySQL.assets/1383365-20190628172851422-987384747.png)
 
 一级缓存的生命周期有多长？
 
@@ -2041,7 +2041,7 @@ System.out.println(mapper1.selectBlogById(1002));
 
 　　执行以上sql我们可以看到控制台打印如下信息（需配置mybatis.configuration.log-impl=org.apache.ibatis.logging.stdout.StdOutImpl），会发现我们两次的查询就发送了一次查询数据库的操作，这说明了缓存在发生作用：
 
-*![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/1383365-20190628173854959-1659491558.png)*
+*![img](./MySQL.assets/1383365-20190628173854959-1659491558.png)*
 
 　　PS：一级缓存在BaseExecutor 的query()——queryFromDatabase()中存入。在queryFromDatabase()之前会get()。
 
@@ -2135,7 +2135,7 @@ System.out.println(mapper2.selectBlogById(1002));
 
 　　实际上MyBatis 用了一个装饰器的类来维护，就是CachingExecutor。如果启用了二级缓存，MyBatis 在创建Executor 对象的时候会对Executor 进行装饰。CachingExecutor 对于查询请求，会判断二级缓存是否有缓存结果，如果有就直接返回，如果没有委派交给真正的查询器Executor 实现类，比如SimpleExecutor 来执行查询，再走到一级缓存的流程。最后会把结果缓存起来，并且返回给用户。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/1383365-20190628180149776-546074458.png)
+![img](./MySQL.assets/1383365-20190628180149776-546074458.png)
 
 　　开启二级缓存的方法
 
@@ -2301,7 +2301,7 @@ public interface InitializingObject {
 
 和其它数据库相比，MySQL有点与众不同，它的架构可以在多种不同场景中应用并发挥良好作用。主要体现在存储引擎的架构上，**插件式的存储引擎架构将查询处理和其它的系统任务以及数据的存储提取相分离**。这种架构可以根据业务的需求和实际需要选择合适的存储引擎。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-efaf3d4bfc0fccbffdadcdc2910a24f2_1440w.jpg)
+![img](./MySQL.assets/v2-efaf3d4bfc0fccbffdadcdc2910a24f2_1440w.jpg)
 
 - **连接层**：最上层是一些客户端和连接服务。**主要完成一些类似于连接处理、授权认证、及相关的安全方案**。在该层上引入了线程池的概念，为通过认证安全接入的客户端提供线程。同样在该层上可以实现基于SSL的安全链接。服务器也会为安全接入的每个客户端验证它所具有的操作权限。
 - **服务层**：第二层服务层，主要完成大部分的核心服务功能， 包括查询解析、分析、优化、缓存、以及所有的内置函数，所有跨存储引擎的功能也都在这一层实现，包括触发器、存储过程、视图等
@@ -2313,7 +2313,7 @@ public interface InitializingObject {
 
 客户端请求 ---> 连接器（验证用户身份，给予权限） ---> 查询缓存（存在缓存则直接返回，不存在则执行后续操作） ---> 分析器（对SQL进行词法分析和语法分析操作） ---> 优化器（主要对执行的sql优化选择最优的执行方案方法） ---> 执行器（执行时会先看用户是否有执行权限，有才去使用这个引擎提供的接口） ---> 去引擎层获取数据返回（如果开启查询缓存则会缓存查询结果）
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-0d2070e8f84c4801adbfa03bda1f98d9_1440w.jpg)
+![img](./MySQL.assets/v2-0d2070e8f84c4801adbfa03bda1f98d9_1440w.jpg)
 
 ------
 
@@ -2422,11 +2422,11 @@ InnoDB 中 count(*) 语句是在执行的时候，全表扫描统计总数量，
 - 日期类型：Date、DateTime、TimeStamp、Time、Year
 - 其他数据类型：BINARY、VARBINARY、ENUM、SET、Geometry、Point、MultiPoint、LineString、MultiLineString、Polygon、GeometryCollection等
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-16d0e4916e2be1fe222adbd6cb48f1ac_1440w.jpg)
+![img](./MySQL.assets/v2-16d0e4916e2be1fe222adbd6cb48f1ac_1440w.jpg)
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-ce86e6a48c0a3de87d4a98179939c33d_1440w.jpg)
+![img](./MySQL.assets/v2-ce86e6a48c0a3de87d4a98179939c33d_1440w.jpg)
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-f9337633bf8feeccf54c0f4dfcf0e81f_1440w.jpg)
+![img](./MySQL.assets/v2-f9337633bf8feeccf54c0f4dfcf0e81f_1440w.jpg)
 
 > CHAR 和 VARCHAR 的区别？
 
@@ -2476,7 +2476,7 @@ BLOB 保存二进制数据，TEXT 保存字符数据。
 - 索引的目的在于提高查询效率，可以类比字典、 火车站的车次表、图书的目录等 。
 - 可以简单的理解为“排好序的快速查找数据结构”，数据本身之外，**数据库还维护者一个满足特定查找算法的数据结构**，这些数据结构以某种方式引用（指向）数据，这样就可以在这些数据结构上实现高级查找算法。这种数据结构，就是索引。下图是一种可能的索引方式示例。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-bd10a033b7ca95bd5f809d615bfb6fb3_1440w.jpg)
+![img](./MySQL.assets/v2-bd10a033b7ca95bd5f809d615bfb6fb3_1440w.jpg)
 
 左边的数据表，一共有两列七条记录，最左边的是数据记录的物理地址
 为了加快Col2的查找，可以维护一个右边所示的二叉查找树，每个节点分别包含索引键值，和一个指向对应数据记录物理地址的指针，这样就可以运用二叉查找在一定的复杂度内获取到对应的数据，从而快速检索出符合条件的记录。
@@ -2577,7 +2577,7 @@ B-Tree 结构的数据可以让系统高效的找到数据所在的磁盘块。�
 
 B-Tree 中的每个节点根据实际情况可以包含大量的关键字信息和分支，如下图所示为一个 3 阶的 B-Tree：
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-125de5261b98dc57b79044c96b5271c6_1440w.jpg)
+![img](./MySQL.assets/v2-125de5261b98dc57b79044c96b5271c6_1440w.jpg)
 
 每个节点占用一个盘块的磁盘空间，一个节点上有两个升序排序的关键字和三个指向子树根节点的指针，指针存储的是子节点所在磁盘块的地址。两个关键词划分成的三个范围域对应三个指针指向的子树的数据的范围域。以根节点为例，关键字为17和35，P1指针指向的子树的数据范围为小于17，P2指针指向的子树的数据范围为17~35，P3指针指向的子树的数据范围为大于35。
 
@@ -2606,7 +2606,7 @@ B+Tree相对于B-Tree有几点不同：
 
 将上一节中的B-Tree优化，由于B+Tree的非叶子节点只存储键值信息，假设每个磁盘块能存储4个键值及指针信息，则变成B+Tree后其结构如下图所示：
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-17f271250ec2e12a0db6a198198e0bd6_1440w.jpg)
+![img](./MySQL.assets/v2-17f271250ec2e12a0db6a198198e0bd6_1440w.jpg)
 
 
 
@@ -2627,7 +2627,7 @@ B+Tree性质
 
 MyISAM引擎的索引文件和数据文件是分离的。**MyISAM引擎索引结构的叶子节点的数据域，存放的并不是实际的数据记录，而是数据记录的地址**。索引文件与数据文件分离，这样的索引称为"**非聚簇索引**"。MyISAM的主索引与辅助索引区别并不大，只是主键索引不能有重复的关键字。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-5762ad7e5f040eafbf342cc81f197921_1440w.jpg)
+![img](./MySQL.assets/v2-5762ad7e5f040eafbf342cc81f197921_1440w.jpg)
 
 在MyISAM中，索引（含叶子节点）存放在单独的.myi文件中，叶子节点存放的是数据的物理地址偏移量（通过偏移量访问就是随机访问，速度很快）。
 
@@ -2643,7 +2643,7 @@ MyISAM引擎的索引文件和数据文件是分离的。**MyISAM引擎索引结
 
 我们知道InnoDB索引是聚集索引，它的索引和数据是存入同一个.idb文件中的，因此它的索引结构是在同一个树节点中同时存放索引和数据，如下图中最底层的叶子节点有三行数据，对应于数据表中的id、stu_id、name数据项。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-633257dbcc69f4d6b99657d181b1ce64_1440w.jpg)
+![img](./MySQL.assets/v2-633257dbcc69f4d6b99657d181b1ce64_1440w.jpg)
 
 在Innodb中，索引分叶子节点和非叶子节点，非叶子节点就像新华字典的目录，单独存放在索引段中，叶子节点则是顺序排列的，在数据段中。Innodb的数据文件可以按照表来切分（只需要开启`innodb_file_per_table)`，切分后存放在`xxx.ibd`中，默认不切分，存放在`xxx.ibdata`中。
 
@@ -2659,7 +2659,7 @@ MyISAM引擎的索引文件和数据文件是分离的。**MyISAM引擎索引结
 
 这也就是所谓的“**回表查询**”
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-9abcf8b509c59219febe4e1c98592b27_1440w.jpg)
+![img](./MySQL.assets/v2-9abcf8b509c59219febe4e1c98592b27_1440w.jpg)
 
 **InnoDB 索引结构需要注意的点**
 
@@ -2780,14 +2780,14 @@ UNION和UNION ALL都是将两个结果集合并为一个，**两个要联合的S
   FROM <left_table> ON <join_condition> <join_type> JOIN <right_table> WHERE <where_condition> GROUP BY <group_by_list> HAVING <having_condition> SELECT DISTINCT <select_list> ORDER BY <order_by_condition> LIMIT <limit_number>
 - 总结
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-40a8322fb0ea44bbf9598d6594e0b314_1440w.jpg)
+![img](./MySQL.assets/v2-40a8322fb0ea44bbf9598d6594e0b314_1440w.jpg)
 
 > MySQL 的内连接、左连接、右连接有什么区别？
 > 什么是内连接、外连接、交叉连接、笛卡尔积呢？
 
 ### **Join图**
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-972019117ae012c5bec7ef64f9d508d3_1440w.jpg)
+![img](./MySQL.assets/v2-972019117ae012c5bec7ef64f9d508d3_1440w.jpg)
 
 ------
 
@@ -2802,7 +2802,7 @@ MySQL 事务主要用于处理操作量大，复杂度高的数据。比如说�
 
 ### **ACID — 事务基本要素**
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-a75e7786857b49c0431e658ede2cd926_1440w.jpg)
+![img](./MySQL.assets/v2-a75e7786857b49c0431e658ede2cd926_1440w.jpg)
 
 事务是由一组SQL语句组成的逻辑处理单元，具有4个属性，通常简称为事务的ACID属性。
 
@@ -2992,7 +2992,7 @@ MySQL 从 5.0.3 InnoDB 存储引擎开始支持XA协议的分布式事务。一�
 
 在MySQL中，使用分布式事务涉及一个或多个资源管理器和一个事务管理器。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-2b795bbb35de128b63864f9f66b50ee8_1440w.jpg)
+![img](./MySQL.assets/v2-2b795bbb35de128b63864f9f66b50ee8_1440w.jpg)
 
 如图，MySQL 的分布式事务模型。模型中分三块：应用程序（AP）、资源管理器（RM）、事务管理器（TM）:
 
@@ -3262,7 +3262,7 @@ Shell> MySQLadmin extended-status -u username -p password——显示状态信�
 - Explain + SQL语句
 - 执行计划包含的信息（如果有分区表的话还会有**partitions**）
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-0e207fa687d2d422af290c52bebf7915_1440w.jpeg)
+![img](./MySQL.assets/v2-0e207fa687d2d422af290c52bebf7915_1440w.jpeg)
 
 各字段解释
 
@@ -3304,7 +3304,7 @@ tip: 一般来说，得保证查询至少达到range级别，最好到达ref
 - - 实际使用的索引，如果为NULL，则没有使用索引
   - **查询中若使用了覆盖索引，则该索引和查询的 select 字段重叠，仅出现在key列表中**
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-9751223f21797fddcb44b15a50c34424_1440w.jpeg)
+![img](./MySQL.assets/v2-9751223f21797fddcb44b15a50c34424_1440w.jpeg)
 
 - **key_len**
 
@@ -3328,7 +3328,7 @@ tip: 一般来说，得保证查询至少达到range级别，最好到达ref
 
 **case**:
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-3eb1e477392942efc763607abaae1bad_1440w.jpg)
+![img](./MySQL.assets/v2-3eb1e477392942efc763607abaae1bad_1440w.jpg)
 
 1. 第一行（执行顺序4）：id列为1，表示是union里的第一个select，select_type列的primary表示该查询为外层查询，table列被标记为，表示查询结果来自一个衍生表，其中derived3中3代表该查询衍生自第三个select查询，即id为3的select。【select d1.name......】
 2. 第二行（执行顺序2）：id为3，是整个查询中第三个select的一部分。因查询包含在from中，所以为derived。【select id,name from t1 where other_column=''】
@@ -3578,7 +3578,7 @@ MySQL 支持的数据类型非常多，选择正确的数据类型对于获取�
   - 按热度拆分，高点击率的词条生成各自的一张表，低热度的词条都放在一张大表里，待低热度的词条达到一定的贴数后，再把低热度的表单独拆分成一张表。
   - 根据ID的值放入对应的表，第一个表user_0000，第二个100万的用户数据放在第二 个表user_0001中，随用户增加，直接添加用户表就行了。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-721eaee72df0bf41f9590a0fd948952f_1440w.jpg)
+![img](./MySQL.assets/v2-721eaee72df0bf41f9590a0fd948952f_1440w.jpg)
 
 ### **MySQL分库**
 
@@ -3616,7 +3616,7 @@ MySQL 支持的数据类型非常多，选择正确的数据类型对于获取�
 2. salve 将 master 的 binary log events 拷贝到它的中继日志（relay log）;
 3. slave 重做中继日志中的事件，将改变应用到自己的数据库中。MySQL 复制是异步且是串行化的。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-cd12a431f29aedbc2ec6cc66ff25ca96_1440w.jpg)
+![img](./MySQL.assets/v2-cd12a431f29aedbc2ec6cc66ff25ca96_1440w.jpg)
 
 ### **复制的基本原则**
 
@@ -3655,7 +3655,7 @@ MySQL 作为互联网中非常热门的数据库，其底层的存储引擎和�
 
 我们知道，索引的作用是做数据的快速检索，而快速检索的实现的本质是数据结构。通过不同数据结构的选择，实现各种数据快速检索。在数据库中，高效的查找算法是非常重要的，因为数据库中存储了大量数据，一个高效的索引能节省巨大的时间。比如下面这个数据表，如果 MySQL 没有实现索引算法，那么查找 id=7 这个数据，那么只能采取暴力顺序遍历查找，找到 id=7 这个数据需要比较 7 次，如果这个表存储的是 1000W 个数据，查找 id=1000W 这个数据那就要比较 1000W 次，这种速度是不能接受的。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-5141ed6f1bddd61750763b51bdc9ecb4_1440w.jpg)
+![img](./MySQL.assets/v2-5141ed6f1bddd61750763b51bdc9ecb4_1440w.jpg)
 
 ## **一、MySQL 索引底层数据结构选型**
 
@@ -3665,7 +3665,7 @@ MySQL 作为互联网中非常热门的数据库，其底层的存储引擎和�
 
 哈希算法：也叫散列算法，就是把任意值(key)通过哈希函数变换为固定长度的 key 地址，通过这个地址进行具体数据的数据结构。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-7805f7b4bab4c98adc045e3667046398_1440w.jpg)
+![img](./MySQL.assets/v2-7805f7b4bab4c98adc045e3667046398_1440w.jpg)
 
 考虑这个数据库表 user，表中一共有 7 个数据，我们需要检索 id=7 的数据，SQL 语法是：
 
@@ -3677,9 +3677,9 @@ select \* from user where id=7;
 
 但是哈希算法有个数据碰撞的问题，也就是哈希函数可能对不同的 key 会计算出同一个结果，比如 hash(7)可能跟 hash(199)计算出来的结果一样，也就是不同的 key 映射到同一个结果了，这就是碰撞问题。解决碰撞问题的一个常见处理方式就是链地址法，即用链表把碰撞的数据接连起来。计算哈希值之后，还需要检查该哈希值是否存在碰撞数据链表，有则一直遍历到链表尾，直达找到真正的 key 对应的数据为止。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-4deae667d7d5c9a1a166cb0e8bac9dd6_1440w.jpg)
+![img](./MySQL.assets/v2-4deae667d7d5c9a1a166cb0e8bac9dd6_1440w.jpg)
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-df9820ea9f7146d09af8280040f185f5_1440w.jpg)
+![img](./MySQL.assets/v2-df9820ea9f7146d09af8280040f185f5_1440w.jpg)
 
 从算法时间复杂度分析来看，哈希算法时间复杂度为 O（1），检索速度非常快。比如查找 id=7 的数据，哈希索引只需要计算一次就可以获取到对应的数据，检索速度非常快。但是 MySQL 并没有采取哈希作为其底层算法，这是为什么呢？
 
@@ -3697,7 +3697,7 @@ select \* from user where id \>3;
 
 二叉查找树是一种支持数据快速查找的数据结构，如图下所示:
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-032790aff0ddf52b676413573acce776_1440w.jpg)
+![img](./MySQL.assets/v2-032790aff0ddf52b676413573acce776_1440w.jpg)
 
 二叉查找树的时间复杂度是 O(lgn)，比如针对上面这个二叉树结构，我们需要计算比较 3 次就可以检索到 id=7 的数据，相对于直接遍历查询省了一半的时间，从检索效率上看来是能做到高速检索的。此外二叉树的结构能不能解决哈希索引不能提供的范围查找功能呢？
 
@@ -3705,7 +3705,7 @@ select \* from user where id \>3;
 
 但是普通的二叉查找树有个致命缺点：极端情况下会退化为线性链表，二分查找也会退化为遍历查找，时间复杂退化为 O（N），检索性能急剧下降。比如以下这个情况，二叉树已经极度不平衡了，已经退化为链表了，检索速度大大降低。此时检索 id=7 的数据的所需要计算的次数已经变为 7 了。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-1cc416d59d4c44cf029e9e2103347bb8_1440w.jpg)
+![img](./MySQL.assets/v2-1cc416d59d4c44cf029e9e2103347bb8_1440w.jpg)
 
 在数据库中，数据的自增是一个很常见的形式，比如一个表的主键是 id，而主键一般默认都是自增的，如果采取二叉树这种数据结构作为索引，那上面介绍到的不平衡状态导致的线性查找的问题必然出现。因此，简单的二叉查找树存在不平衡导致的检索性能降低的问题，是不能直接用于实现 MySQL 底层索引的。
 
@@ -3719,21 +3719,21 @@ select \* from user where id \>3;
 
 红黑树顺序插入 1~7 个节点，查找 id=7 时需要计算的节点数为 4。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-46e7e44e8ba85e606d68ea9644092d08_1440w.jpg)
+![img](./MySQL.assets/v2-46e7e44e8ba85e606d68ea9644092d08_1440w.jpg)
 
 红黑树顺序插入 1~16 个节点，查找 id=16 需要比较的节点数为 6 次。观察一下这个树的形态，是不是当数据是顺序插入时，树的形态一直处于“右倾”的趋势呢？从根本上上看，红黑树并没有完全解决二叉查找树虽然这个“右倾”趋势远没有二叉查找树退化为线性链表那么夸张，但是数据库中的基本主键自增操作，主键一般都是数百万数千万的，如果红黑树存在这种问题，对于查找性能而言也是巨大的消耗，我们数据库不可能忍受这种无意义的等待的。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-60cea4af963b156ee5f40030977ab77c_1440w.jpg)
+![img](./MySQL.assets/v2-60cea4af963b156ee5f40030977ab77c_1440w.jpg)
 
 现在考虑另一种更为严格的自平衡二叉树 AVL 树。因为 AVL 树是个绝对平衡的二叉树，因此他在调整二叉树的形态上消耗的性能会更多。
 
 AVL 树顺序插入 1~7 个节点，查找 id=7 所要比较节点的次数为 3。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-4c39b8eacc6879d661ddb1ed4190aff2_1440w.jpg)
+![img](./MySQL.assets/v2-4c39b8eacc6879d661ddb1ed4190aff2_1440w.jpg)
 
 AVL 树顺序插入 1~16 个节点，查找 id=16 需要比较的节点数为 4。从查找效率而言，AVL 树查找的速度要高于红黑树的查找效率（AVL 树是 4 次比较，红黑树是 6 次比较）。从树的形态看来，AVL 树不存在红黑树的“右倾”问题。也就是说，大量的顺序插入不会导致查询性能的降低，这从根本上解决了红黑树的问题。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-0dad51645707e973b152e44e4b7479c5_1440w.jpg)
+![img](./MySQL.assets/v2-0dad51645707e973b152e44e4b7479c5_1440w.jpg)
 
 总结一下 AVL 树的优点：
 
@@ -3750,21 +3750,21 @@ AVL 树顺序插入 1~16 个节点，查找 id=16 需要比较的节点数为 4�
 
 下面这个 B 树，每个节点限制最多存储两个 key，一个节点如果超过两个 key 就会自动分裂。比如下面这个存储了 7 个数据 B 树，只需要查询两个节点就可以知道 id=7 这数据的具体位置，也就是两次磁盘 IO 就可以查询到指定数据，优于 AVL 树。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-f508590121487b595c4ad4fa83d8aa15_1440w.jpg)
+![img](./MySQL.assets/v2-f508590121487b595c4ad4fa83d8aa15_1440w.jpg)
 
 下面是一个存储了 16 个数据的 B 树，同样每个节点最多存储 2 个 key，查询 id=16 这个数据需要查询比较 4 个节点，也就是经过 4 次磁盘 IO。看起来查询性能与 AVL 树一样。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-f335bdb3e922a5f334416f557df20848_1440w.jpg)
+![img](./MySQL.assets/v2-f335bdb3e922a5f334416f557df20848_1440w.jpg)
 
 但是考虑到磁盘 IO 读一个数据和读 100 个数据消耗的时间基本一致，那我们的优化思路就可以改为：尽可能在一次磁盘 IO 中多读一点数据到内存。这个直接反映到树的结构就是，每个节点能存储的 key 可以适当增加。
 
 当我们把单个节点限制的 key 个数设置为 6 之后，一个存储了 7 个数据的 B 树，查询 id=7 这个数据所要进行的磁盘 IO 为 2 次。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-0fdff8f9a516383548cd0e636f593e52_1440w.jpg)
+![img](./MySQL.assets/v2-0fdff8f9a516383548cd0e636f593e52_1440w.jpg)
 
 一个存储了 16 个数据的 B 树，查询 id=7 这个数据所要进行的磁盘 IO 为 2 次。相对于 AVL 树而言磁盘 IO 次数降低为一半。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-7d5e34c698b1e4192ad0ff93c2c897d0_1440w.jpg)
+![img](./MySQL.assets/v2-7d5e34c698b1e4192ad0ff93c2c897d0_1440w.jpg)
 
 所以数据库索引数据结构的选型而言，B 树是一个很不错的选择。总结来说，B 树用作数据库索引有以下优点：
 
@@ -3779,7 +3779,7 @@ B 树和 B+树有什么不同呢？
 
 第二，B+树的叶子节点是数据阶段用了一个链表串联起来，便于范围查找。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-bda6661499c51dcff63eb12fd4b3795d_1440w.png)
+![img](./MySQL.assets/v2-bda6661499c51dcff63eb12fd4b3795d_1440w.png)
 
 通过 B 树和 B+树的对比我们看出，B+树节点存储的是索引，在单个节点存储容量有限的情况下，单节点也能存储大量索引，使得整个 B+树高度降低，减少了磁盘 IO。其次，B+树的叶子节点是真正数据存储的地方，叶子节点用了链表连接起来，这个链表本身就是有序的，在数据范围查找时，更具备效率。因此 MySQL 的索引用的就是 B+树，B+树在查找效率、范围查找中都有着非常不错的性能。
 
@@ -3789,13 +3789,13 @@ MySQL 底层数据引擎以插件形式设计，最常见的是 Innodb 引擎和
 
 MyISAM 虽然数据查找性能极佳，但是不支持事务处理。Innodb 最大的特色就是支持了 ACID 兼容的事务功能，而且他支持行级锁。MySQL 建立表的时候就可以指定引擎，比如下面的例子，就是分别指定了 Myisam 和 Innodb 作为 user 表和 user2 表的数据引擎。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-e4e24288dca3ef02735c41a2a3a69556_1440w.jpg)
+![img](./MySQL.assets/v2-e4e24288dca3ef02735c41a2a3a69556_1440w.jpg)
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-0df18cce6c3871fa9e4ac99050bf1692_1440w.jpg)
+![img](./MySQL.assets/v2-0df18cce6c3871fa9e4ac99050bf1692_1440w.jpg)
 
 执行这两个指令后，系统出现了以下的文件，说明这两个引擎数据和索引的组织方式是不一样的。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-8a065d6e21a2adbf06d2e6b5dd02e969_1440w.jpg)
+![img](./MySQL.assets/v2-8a065d6e21a2adbf06d2e6b5dd02e969_1440w.jpg)
 
 Innodb 创建表后生成的文件有：
 
@@ -3814,7 +3814,7 @@ Myisam 创建表后生成的文件有
 
 MyISAM 用的是非聚集索引方式，即数据和索引落在不同的两个文件上。MyISAM 在建表时以主键作为 KEY 来建立主索引 B+树，树的叶子节点存的是对应数据的物理地址。我们拿到这个物理地址后，就可以到 MyISAM 数据文件中直接定位到具体的数据记录了。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-d9a03627e8e1319e46f42e6963c35e30_1440w.jpg)
+![img](./MySQL.assets/v2-d9a03627e8e1319e46f42e6963c35e30_1440w.jpg)
 
 当我们为某个字段添加索引时，我们同样会生成对应字段的索引树，该字段的索引树的叶子节点同样是记录了对应数据的物理地址，然后也是拿着这个物理地址去数据文件里定位到具体的数据记录。
 
@@ -3824,7 +3824,7 @@ InnoDB 是聚集索引方式，因此数据和索引都存储在同一个文件�
 
 这是建表的时候 InnoDB 就会自动建立好主键 ID 索引树，这也是为什么 MySQL 在建表时要求必须指定主键的原因。当我们为表里某个字段加索引时 InnoDB 会怎么建立索引树呢？比如我们要给 user_name 这个字段加索引，那么 InnoDB 就会建立 user_name 索引 B+树，节点里存的是 user_name 这个 KEY，叶子节点存储的数据的是主键 KEY。注意，叶子存储的是主键 KEY！拿到主键 KEY 后，InnoDB 才会去主键索引树里根据刚在 user_name 索引树找到的主键 KEY 查找到对应的数据。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MySQL.assets/v2-6e16b355e3d0f05ed8bfb0f7c71de8f1_1440w.jpg)
+![img](./MySQL.assets/v2-6e16b355e3d0f05ed8bfb0f7c71de8f1_1440w.jpg)
 
 问题来了，为什么 InnoDB 只在主键索引树的叶子节点存储了具体数据，但是其他索引树却不存具体数据呢，而要多此一举先找到主键，再在主键索引树找到对应的数据呢?
 

@@ -685,7 +685,7 @@ class Solution {
 
 
 
-<img src="/Users/Shadowalker/Library/Application%20Support/typora-user-images/%E6%88%AA%E5%B1%8F2020-08-28%2016.32.16.png" alt="截屏2020-08-28 16.32.16" style="zoom:50%;" />
+<img src="Data-Structure-and-Algorithm.assets/截屏2020-08-28 16.32.16-4706084.png" alt="截屏2020-08-28 16.32.16" style="zoom:50%;" />
 
 ```java
 class Solution {

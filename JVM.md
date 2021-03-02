@@ -15,7 +15,7 @@ tags: [字节跳动,面试,JVM]
 
 Java 程序在运行时，会为JVM单独划出一块内存区域，而这块内存区域又可以再次划分出一块**运行时数据区**，运行时数据区域大致可以分为五个部分：
 
-![img](/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/v2-acd8af593a3e8c4a54c6858cecb4cf18_b.jpg)
+![img](./JVM.assets/v2-acd8af593a3e8c4a54c6858cecb4cf18_b.jpg)
 
 从上面的图中，有两种颜色不同的区域，红色的是线程共享区域，绿色的是线程私有区域
 
@@ -553,15 +553,15 @@ public void test(){
 
 关于JVM是什么的介绍就到这里，还是老样子，先来看看这篇文章的结构：
 
-<img src="/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/v2-dc3d96979312a13e098a97cc8276a7da_b.jpg" alt="img" style="zoom:150%;" />
+<img src="./JVM.assets/v2-dc3d96979312a13e098a97cc8276a7da_b.jpg" alt="img" style="zoom:150%;" />
 
 
 
-<img src="/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/截屏2020-08-17 11.37.43.png" alt="截屏2020-08-17 11.37.43" style="zoom: 150%;" />
+<img src="./JVM.assets/截屏2020-08-17 11.37.43.png" alt="截屏2020-08-17 11.37.43" style="zoom: 150%;" />
 
 
 
-<img src="/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/截屏2020-08-17 13.17.45.png" alt="截屏2020-08-17 13.17.45" style="zoom: 150%;" />
+<img src="./JVM.assets/截屏2020-08-17 13.17.45.png" alt="截屏2020-08-17 13.17.45" style="zoom: 150%;" />
 
 
 
@@ -808,7 +808,7 @@ StoreLoad Barriers是一个“全能型”的屏障，它同时具有其他3个�
 
 Java程序在运行时，会为JVM单独划出一块内存区域，而这块内存区域又可以再次划分出一块**运行时数据区**，运行时数据区域大致可以分为五个部分：
 
-![img](/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/v2-acd8af593a3e8c4a54c6858cecb4cf18_b.jpg)
+![img](./JVM.assets/v2-acd8af593a3e8c4a54c6858cecb4cf18_b.jpg)
 
 从上面的图中，有两种颜色不同的区域，红色的是线程共享区域，绿色的是线程私有区域。
 
@@ -827,7 +827,7 @@ Java程序在运行时，会为JVM单独划出一块内存区域，而这块内�
 
 其实，Java堆区还可以划分为**新生代和老年代**，新生代又可以进一步划分为**Eden区、Survivor 1区、Survivor 2区**。具体比例参数的话，可以看一下下面这张图。
 
-![img](/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/v2-2dde3f11a1706c8a845cfba459de80c4_b.jpg)
+![img](./JVM.assets/v2-2dde3f11a1706c8a845cfba459de80c4_b.jpg)
 
 
 
@@ -981,7 +981,7 @@ Integer只有一个int类型的成员变量value，所以其对象实际数据�
 
 
 
-<img src="/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/截屏2020-08-17 14.20.19.png" alt="截屏2020-08-17 14.20.19"  />
+<img src="./JVM.assets/截屏2020-08-17 14.20.19.png" alt="截屏2020-08-17 14.20.19"  />
 
 
 
@@ -1013,9 +1013,9 @@ Java虚拟机栈中存储的是基本数据类型和对象引用。基本数据�
 - 使用句柄访问，通常会在Java堆中划分一块句柄池。
 - 使用直接指针，这样Java虚拟机栈中存储的就是该对象在堆中的地址。
 
-![img](/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/v2-37584974023871b7d317c625c851e4c7_b.jpg)
+![img](./JVM.assets/v2-37584974023871b7d317c625c851e4c7_b.jpg)
 
-![img](/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/v2-6a1d1fd045e4545326c75ba766101787_b.jpg)
+![img](./JVM.assets/v2-6a1d1fd045e4545326c75ba766101787_b.jpg)
 
 这两种访问对象的方法各有优势。使用直接指针进行访问，就可以直接定位到对象，减小了一次指针定位的时间开销（使用句柄的话会通过句柄池的指针二次定位对象），最大的好处就是速度更快。但是使用句柄的话，就是当对象发生移动的时候，可以不用改变栈中存储的reference，只需要改变句柄池中实例数据的指针。
 
@@ -1035,7 +1035,7 @@ Java 安全模型的核心就是 Java 沙箱（sandbox）。沙箱是一个限�
 
 JDK1.0 安全模型：
 
-<img src="/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/截屏2020-08-17 14.46.19.png" alt="截屏2020-08-17 14.46.19" style="zoom:50%;" />
+<img src="./JVM.assets/截屏2020-08-17 14.46.19.png" alt="截屏2020-08-17 14.46.19" style="zoom:50%;" />
 
 但如此严格的安全机制也给程序的功能扩展带来障碍，比如当用户希望远程代码访问本地系统的文件时，就无法实现。因此在后续Java 1.1 版本中，针对安全机制做了改进，增加了安全策略，允许用户指定代码对本地资源的访问权限，如下如所示 
 
@@ -1043,7 +1043,7 @@ JDK1.1 安全模型：
 
 
 
-<img src="/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/截屏2020-08-18 01.01.50.png" alt="截屏2020-08-18 01.01.50" style="zoom:50%;" />
+<img src="./JVM.assets/截屏2020-08-18 01.01.50.png" alt="截屏2020-08-18 01.01.50" style="zoom:50%;" />
 
 在 Java1.2 版本中，再次进行了安全机制，增加了代码签名。不论本地代码还是远程代码，都按照用户的安全策略设定，由类加载器加载到虚拟机中不同的运行空间，来实现差异化的代码执行权限控制。
 
@@ -1051,13 +1051,13 @@ JDK1.2 安全模型：
 
 
 
-<img src="/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/截屏2020-08-18 01.23.50.png" alt="截屏2020-08-18 01.23.50" style="zoom:50%;" />
+<img src="./JVM.assets/截屏2020-08-18 01.23.50.png" alt="截屏2020-08-18 01.23.50" style="zoom:50%;" />
 
 当前最新的安全机制实现，则引入了域（Domain）的概念。虚拟机会把所有代码加载到不同的系统域和应用域，系统域部分专门负责与关键资源进行交互，而各个应用域部分则通过系统域的部分代理来对各种需要的资源进行访问。虚拟机中不同的受保护域（Protected Domain），对应不一样的权限（Permission）。存在于不同域中的类文件就具有了当前域的全部权限。
 
 JDK1.6：
 
-<img src="/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/截屏2020-08-18 01.26.28.png" alt="截屏2020-08-18 01.26.28" style="zoom:50%;" />
+<img src="./JVM.assets/截屏2020-08-18 01.26.28.png" alt="截屏2020-08-18 01.26.28" style="zoom:50%;" />
 
 
 
@@ -1546,7 +1546,7 @@ public class TestHotDeploy {
 
 通过一系列被称之为 GC Roots **的根节点开始，沿着引用链进行搜索，凡是在引用链上的对象都不会被回收。
 
-![img](/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/v2-e60127d091ed5b6094dc16a19cefaba9_b.jpg)
+![img](./JVM.assets/v2-e60127d091ed5b6094dc16a19cefaba9_b.jpg)
 
 就像上图的那样，绿色部分的对象都在GC Roots的引用链上，就不会被垃圾回收器回收，灰色部分的对象没有在引用链上，自然就被判定为可回收对象。
 
@@ -1608,7 +1608,7 @@ public class TestHotDeploy {
 
 见名知义，标记--清除算法就是对无效的对象进行标记，然后清除。如下图：
 
-![img](/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/v2-c0b5c188ec77c04e1dd46776e1a76747_b.jpg)
+![img](./JVM.assets/v2-c0b5c188ec77c04e1dd46776e1a76747_b.jpg)
 
 对于标记--清除算法，你一定会清楚看到，在进行垃圾回收之后，堆空间有大量的碎片，出现了不规整的情况。在给大对象分配内存的时候，由于无法找到足够的连续的内存空间，就不得不再一次触发垃圾收集。另外，如果Java堆中存在大量的垃圾对象，那么垃圾回收的就必然进行大量的标记和清除动作，这个势必造成**回收效率的降低**。
 
@@ -1616,7 +1616,7 @@ public class TestHotDeploy {
 
 标记--复制算法就是把Java堆分成两块，每次垃圾回收时只使用其中一块，然后把存活的对象全部移动到另一块区域。如下图：
 
-![img](/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/v2-188c8891ba0e2e5c9957a0342194dd8c_b.jpg)
+![img](./JVM.assets/v2-188c8891ba0e2e5c9957a0342194dd8c_b.jpg)
 
 标记--复制算法有一个很明显的缺点，那就是每次只使用堆空间的一半，造成了**Java堆空间使用率的的下降**。
 
@@ -1624,7 +1624,7 @@ public class TestHotDeploy {
 
 还记得这张图么？
 
-![img](/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/v2-db615ae5bba0549e96e71623469a461e_b.jpg)
+![img](./JVM.assets/v2-db615ae5bba0549e96e71623469a461e_b.jpg)
 
 前面讲Java内存结构的时候，提到过Java堆的具体划分，那现在就来好好的说一说。
 
@@ -1651,7 +1651,7 @@ public class TestHotDeploy {
 
 标记--整理算法算是一种折中的垃圾收集算法，在对象标记的过程，和前面两个执行的是一样步骤。但是，进行标记之后，存活的对象会移动到堆的一端，然后直接清理存活对象以外的区域就可以了。这样，既避免了内存碎片，也不存在堆空间浪费的说法了。但是，每次进行垃圾回收的时候，都要暂停所有的用户线程，特别是对老年代的对象回收，则需要更长的回收时间，这对用户体验是非常不好的。尤其是多线程时，更不好。如下图：
 
-![img](/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/v2-24ab15b9177bc18ee82da9caf75f79ce_b.jpg)
+![img](./JVM.assets/v2-24ab15b9177bc18ee82da9caf75f79ce_b.jpg)
 
 
 
@@ -1717,7 +1717,7 @@ G1后面还有 ZGC，Shenandoah 等垃圾回收器，但是线上使用很少
 
 Serial 收集器是最基础、历史最悠久的收集器，它在进行垃圾收集的时候会暂停所有的工作线程STW，直到完成垃圾收集过程。下面是Serial垃圾收集器的运行示意图：
 
-![img](/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/v2-eb98bf6fe2f8838fff3ed75f90989640_b.jpg)
+![img](./JVM.assets/v2-eb98bf6fe2f8838fff3ed75f90989640_b.jpg)
 
 ### **ParNew 收集器**
 
@@ -1725,7 +1725,7 @@ Serial 收集器是最基础、历史最悠久的收集器，它在进行垃圾�
 
 ParNew 垃圾收集器实则是Serial 垃圾收集器的多线程版本，这个多线程在于ParNew垃圾收集器可以使用多条线程进行垃圾回收。
 
-![img](/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/v2-b89c9a8db27085dc3a3b7408afc904f8_b.jpg)
+![img](./JVM.assets/v2-b89c9a8db27085dc3a3b7408afc904f8_b.jpg)
 
 ### **Parallel Scavenge 收集器**
 
@@ -1735,13 +1735,13 @@ ParNew 垃圾收集器实则是Serial 垃圾收集器的多线程版本，这个
 
 那什么是吞吐量呢？
 
-<img src="/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/v2-7fdf260c7f4ffab3f78594615eebb328_b.jpg" alt="img" style="zoom:50%;" />
+<img src="./JVM.assets/v2-7fdf260c7f4ffab3f78594615eebb328_b.jpg" alt="img" style="zoom:50%;" />
 
 ### **Serial Old 收集器**
 
 Serial Old 收集器是Serial 收集器的老年代版本。其垃圾收集器的运行原理和Serial 收集器是一样的。
 
-![img](/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/v2-b89c9a8db27085dc3a3b7408afc904f8_b.jpg)
+![img](./JVM.assets/v2-b89c9a8db27085dc3a3b7408afc904f8_b.jpg)
 
 
 
@@ -1751,7 +1751,7 @@ Serial Old 收集器是Serial 收集器的老年代版本。其垃圾收集器�
 
 Parallel Old 收集器同样是Parallel Scavenge 收集器的老年代版本，支持多线程并发收集。下面就是它的运行示意图：
 
-![img](/Users/Shadowalker/Documents/字节跳动面试/JVM.assets/v2-b89c9a8db27085dc3a3b7408afc904f8_b.jpg)
+![img](./JVM.assets/v2-b89c9a8db27085dc3a3b7408afc904f8_b.jpg)
 
 ### **CMS 收集器**
 
