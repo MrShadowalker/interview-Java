@@ -1706,7 +1706,7 @@ Redis 发布订阅(pub/sub)是一种消息通信模式：发送者(pub)发送消
 Redis 客户端可以订阅任意数量的频道。
 
 Redis提供了发布订阅功能，可以用于消息的传输，Redis的发布订阅机制包括三个部分，发布者，订阅者和Channel。 
-![这里写图片描述](/Users/Shadowalker/Documents/字节跳动面试/Redis.assets/SouthEast.jpeg) 
+![这里写图片描述](./Redis.assets/SouthEast.jpeg) 
 发布者和订阅者都是Redis客户端，Channel则为Redis服务器端，发布者将消息发送到某个的频道，订阅了这个频道的订阅者就能接收到这条消息。Redis的这种发布订阅机制与基于主题的发布订阅类似，Channel相当于主题。
 
 publisher/subscriber，Redis_cli
@@ -1882,7 +1882,7 @@ A 恢复了，B 也是主节点，需要重新 slaveof 到 A 才行。
 
 
 
-![img](/Users/Shadowalker/Documents/字节跳动面试/Redis.assets/11320039-57a77ca2757d0924.png)
+![img](./Redis.assets/11320039-57a77ca2757d0924.png)
 
 
 
@@ -1893,7 +1893,7 @@ A 恢复了，B 也是主节点，需要重新 slaveof 到 A 才行。
 
 然而一个哨兵进程对 Redis 服务器进行监控，可能会出现问题，为此，我们可以使用多个哨兵进行监控。各个哨兵之间还会进行监控，这样就形成了多哨兵模式。
 
-![img](/Users/Shadowalker/Documents/字节跳动面试/Redis.assets/11320039-3f40b17c0412116c.png)
+![img](./Redis.assets/11320039-3f40b17c0412116c.png)
 
 
 

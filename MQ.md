@@ -669,6 +669,6 @@ ZeroMQ套接字是与传输层无关的：ZeroMQ套接字对所有传输层协�
 
  
 
-![主流消息中间件比较](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/MQ.assets/SouthEast.jpeg)
+![主流消息中间件比较](./MQ.assets/SouthEast.jpeg)
 
 **综合选择RabbitMq** 
