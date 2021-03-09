@@ -43,7 +43,7 @@ Java 程序在运行时，会为JVM单独划出一块内存区域，而这块内
 
 针对引用计数算法的 BUG，JVM 采用了另一种方法：定义一个名为"GC Roots"的对象作为起始点，这个"GC Roots"可以有多个，从这些节点开始向下搜索，搜索所走过的路径称为引用链(Reference Chain)，当一个对象到GC Roots没有任何引用链相连时，则证明此对象是不可用的，即可以进行垃圾回收。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/1527989-20181120213515733-877630399.png)
+![img](./JVM.assets/1527989-20181120213515733-877630399.png)
 
 在上图中可以看到，如果时选用引用计数算法，object5, object6, object7之间互相引用，所以无法被回收。但是如果选用了可达性分析算法，虽然他们之间时相互引用，但是他们没有任何引用链和GC Roots连接，所以是可回收对象。
 
@@ -575,9 +575,9 @@ Java 虚拟机规范中定义了 Java 内存模型（Java Memory Model，JMM）�
 
 Java 内存模型（不仅仅是JVM内存分区）：调用栈和本地变量存放在线程栈上，对象存放在堆上。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-bd607bd9a5598a8330ad329033e04b91_1440w.jpg)
+![img](./JVM.assets/v2-bd607bd9a5598a8330ad329033e04b91_1440w.jpg)
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-a1a75c9f7264cf78d0927663371ca9d2_1440w.jpg)
+![img](./JVM.assets/v2-a1a75c9f7264cf78d0927663371ca9d2_1440w.jpg)
 
 - 一个本地变量可能是原始类型，在这种情况下，它总是“呆在”线程栈上。
 - 一个本地变量也可能是指向一个对象的一个引用。在这种情况下，引用（这个本地变量）存放在线程栈上，但是对象本身存放在堆上。
@@ -602,7 +602,7 @@ Java 内存模型（不仅仅是JVM内存分区）：调用栈和本地变量存
 
 现代计算机硬件架构的简单图示：
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-67833188e191c5e7a11d34e613ca352c_1440w.jpg)
+![img](./JVM.assets/v2-67833188e191c5e7a11d34e613ca352c_1440w.jpg)
 
 - **多CPU**：一个现代计算机通常由两个或者多个 CPU。其中一些 CPU 还有多核。从这一点可以看出，在一个有两个或者多个 CPU 的现代计算机上同时运行多个线程是可能的。每个 CPU 在某一时刻运行一个线程是没有问题的。这意味着，如果你的 Java 程序是多线程的，在你的 Java 程序中每个 CPU 上一个线程可能同时（并发）执行。
 - **CPU寄存器**：每个 CPU 都包含一系列的寄存器，它们是 CPU 内内存的基础。CPU 在寄存器上执行操作的速度远大于在主存上执行的速度。这是因为 CPU 访问寄存器的速度远大于主存。
@@ -614,7 +614,7 @@ Java 内存模型（不仅仅是JVM内存分区）：调用栈和本地变量存
 
 - **缓存一致性问题**：在多处理器系统中，每个处理器都有自己的高速缓存，而它们又共享同一主内存（MainMemory）。基于高速缓存的存储交互很好地解决了处理器与内存的速度矛盾，但是也引入了新的问题：缓存一致性（CacheCoherence）。当多个处理器的运算任务都涉及同一块主内存区域时，将可能导致各自的缓存数据不一致的情况，如果真的发生这种情况，那同步回到主内存时以谁的缓存数据为准呢？为了解决一致性的问题，需要各个处理器访问缓存时都遵循一些协议，在读写时要根据协议来进行操作，这类协议有MSI、MESI（IllinoisProtocol）、MOSI、Synapse、Firefly及DragonProtocol，等等：
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-1a021d2833b7a537dcdfdf0025f52a6c_1440w.jpg)
+![img](./JVM.assets/v2-1a021d2833b7a537dcdfdf0025f52a6c_1440w.jpg)
 
 - **指令重排序问题**：为了使得处理器内部的运算单元能尽量被充分利用，处理器可能会对输入代码进行乱序执行（Out-Of-Order Execution）优化，处理器会在计算之后将乱序执行的结果重组，保证该结果与顺序执行的结果是一致的，但并不保证程序中各个语句计算的先后顺序与输入代码中的顺序一致。因此，如果存在一个计算任务依赖另一个计算任务的中间结果，那么其顺序性并不能靠代码的先后顺序来保证。与处理器的乱序执行优化类似，Java 虚拟机的即时编译器中也有类似的指令重排序（Instruction Reorder）优化。
 
@@ -622,7 +622,7 @@ Java 内存模型（不仅仅是JVM内存分区）：调用栈和本地变量存
 
 Java 内存模型与硬件内存架构之间存在差异。硬件内存架构没有区分线程栈和堆。对于硬件，所有的线程栈和堆都分布在主内存中。部分线程栈和堆可能有时候会出现在 CPU 缓存中和 CPU 内部的寄存器中。如下图所示：
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-1a7b7bb752799b6c067a0eaca0a1a9b2_1440w.jpg)
+![img](./JVM.assets/v2-1a7b7bb752799b6c067a0eaca0a1a9b2_1440w.jpg)
 
 从抽象的角度来看，JMM 定义了线程和主内存之间的抽象关系：
 
@@ -631,11 +631,11 @@ Java 内存模型与硬件内存架构之间存在差异。硬件内存架构没
 - 从更低的层次来说，主内存就是硬件的内存，而为了获取更好的运行速度，虚拟机及硬件系统可能会让工作内存优先存储于寄存器和高速缓存中。
 - Java 内存模型中的线程的工作内存（working memory）是 CPU 的寄存器和高速缓存的抽象描述。而 JVM 的静态内存储模型（JVM内存模型）只是一种对内存的物理划分而已，它只局限在内存，而且只局限在 JVM 的内存。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-af520d543f0f4f205f822ec3b151ad46_1440w.jpg)
+![img](./JVM.assets/v2-af520d543f0f4f205f822ec3b151ad46_1440w.jpg)
 
 
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-037270b0876b6af680d1832bcc9dca32_1440w.jpg)
+![img](./JVM.assets/v2-037270b0876b6af680d1832bcc9dca32_1440w.jpg)
 
 ### JMM 模型下的线程间通信
 
@@ -647,7 +647,7 @@ Java 内存模型与硬件内存架构之间存在差异。硬件内存架构没
 
 2）线程B到主内存中去读取线程A之前已更新过的共享变量。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-8750cb14ecaa93509e3f1981563513e1_1440w.jpg)
+![img](./JVM.assets/v2-8750cb14ecaa93509e3f1981563513e1_1440w.jpg)
 
 关于主内存与工作内存之间的具体交互协议，即一个变量如何从主内存拷贝到工作内存、如何从工作内存同步到主内存之间的实现细节，Java 内存模型定义了以下八种操作来完成：
 
@@ -692,7 +692,7 @@ Java 内存模型建立所围绕的问题：在多线程并发过程中，如何
 
 下图示意了这种情形。跑在左边 CPU 的线程拷贝这个共享对象到它的 CPU 缓存中，然后将 count 变量的值修改为2。这个修改对跑在右边CPU上的其它线程是不可见的，因为修改后的count的值还没有被刷新回主存中去。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-7abd7500588012315f4f0e068e20e341_1440w.jpg)
+![img](./JVM.assets/v2-7abd7500588012315f4f0e068e20e341_1440w.jpg)
 
 解决这个内存可见性问题你可以使用：
 
@@ -717,27 +717,27 @@ Java语言提供了volatile和synchronized两个关键字来保证线程之间�
 
 3）内存系统的重排序。由于处理器使用缓存和读/写缓冲区，这使得加载和存储操作看上去可能是在乱序执行。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-a92ef160e8ba8d33541fb57b8a32de9c_1440w.jpg)
+![img](./JVM.assets/v2-a92ef160e8ba8d33541fb57b8a32de9c_1440w.jpg)
 
 每个处理器上的写缓冲区，仅仅对它所在的处理器可见。这会导致处理器执行内存操作的顺序可能会与内存实际的操作执行顺序不一致。由于现代的处理器都会使用写缓冲区，因此现代的处理器都会允许对写-读操作进行重排序：
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-f8a75081bcad888a7e73b4785a672e5b_1440w.jpg)
+![img](./JVM.assets/v2-f8a75081bcad888a7e73b4785a672e5b_1440w.jpg)
 
 **数据依赖：**
 
 编译器和处理器在重排序时，会遵守数据依赖性，编译器和处理器不会改变存在数据依赖关系的两个操作的执行顺序。（这里所说的数据依赖性仅针对单个处理器中执行的指令序列和单个线程中执行的操作，不同处理器之间和不同线程之间的数据依赖性不被编译器和处理器考虑）
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-36500a7455955c58d02138913d5c0cd7_1440w.jpg)
+![img](./JVM.assets/v2-36500a7455955c58d02138913d5c0cd7_1440w.jpg)
 
 **指令重排序对内存可见性的影响：**
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-8ef063a1b514d9cfbdf059984f83ed2f_1440w.jpg)
+![img](./JVM.assets/v2-8ef063a1b514d9cfbdf059984f83ed2f_1440w.jpg)
 
 当1和2之间没有数据依赖关系时，1和2之间就可能被重排序（3和4类似）。这样的结果就是：读线程B执行4时，不一定能看到写线程A在执行1时对共享变量的修改。
 
 **指令重排序改变多线程程序的执行结果例子：**
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-111bfd93bcd92fd2ee495a12cb34f9aa_1440w.jpg)
+![img](./JVM.assets/v2-111bfd93bcd92fd2ee495a12cb34f9aa_1440w.jpg)
 
 flag变量是个标记，用来标识变量a是否已被写入。这里假设有两个线程A和B，A首先执行writer()方法，随后B线程接着执行reader()方法。线程B在执行操作4时，能否看到线程A在操作1对共享变量a的写入呢？
 
@@ -766,7 +766,7 @@ flag变量是个标记，用来标识变量a是否已被写入。这里假设有
 
 为了保证内存可见性，Java编译器在生成指令序列的适当位置会插入内存屏障指令来禁止特定类型的处理器重排序。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-6db326ce298332a673151117edcb1fcd_1440w.jpg)
+![img](./JVM.assets/v2-6db326ce298332a673151117edcb1fcd_1440w.jpg)
 
 StoreLoad Barriers是一个“全能型”的屏障，它同时具有其他3个屏障的效果。现代的多处理器大多支持该屏障（其他类型的屏障不一定被所有处理器支持）。执行该屏障开销会很昂贵，因为当前处理器通常要把写缓冲区中的数据全部刷新到内存中（Buffer Fully Flush）。
 
@@ -778,7 +778,7 @@ StoreLoad Barriers是一个“全能型”的屏障，它同时具有其他3个�
 
 想象一下，如果线程A读一个共享对象的变量count到它的CPU缓存中。再想象一下，线程B也做了同样的事情，但是往一个不同的CPU缓存中。现在线程A将count加1，线程B也做了同样的事情。现在count已经被增加了两次，每个CPU缓存中一次。如果这些增加操作被顺序的执行，变量count应该被增加两次，然后原值+2被写回到主存中去。然而，两次增加都是在没有适当的同步下并发执行的。无论是线程A还是线程B将count修改后的版本写回到主存中取，修改后的值仅会被原值大1，尽管增加了两次：
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-02ae4be429d4b48a18442efe91131155_1440w.jpg)
+![img](./JVM.assets/v2-02ae4be429d4b48a18442efe91131155_1440w.jpg)
 
 解决这个问题可以使用Java同步块。一个同步块可以保证在同一时刻仅有一个线程可以进入代码的临界区。同步块还可以保证代码块中所有被访问的变量将会从主存中读入，当线程退出同步代码块时，所有被更新的变量都会被刷新回主存中去，不管这个变量是否被声明为volatile。
 
@@ -967,7 +967,7 @@ Integer只有一个int类型的成员变量value，所以其对象实际数据�
 
 关于对象的内存结构，需要注意数组的内存结构和普通对象的内存结构稍微不同，因为数据有一个长度length字段，所以在对象头后面还多了一个int类型的length字段，占4个字节，接下来才是数组中的数据，如下：
 
-![Hotspot JVM](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/17428786-e0a8016aae446c64.png)
+![Hotspot JVM](./JVM.assets/17428786-e0a8016aae446c64.png)
 
 
 
@@ -1103,7 +1103,7 @@ Java 在诞生的时候喊出了一个非常牛逼的口号：“Write Once, Run
 
 
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-c263eb51a16b1286dd859940e5763a33_1440w.jpg)
+![img](./JVM.assets/v2-c263eb51a16b1286dd859940e5763a33_1440w.jpg)
 
 
 
@@ -1251,7 +1251,7 @@ sun.misc.Launcher$ExtClassLoader@15db9742
 
 
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-ff2dae59f9bf4563436a7a564b41ee1c_1440w.jpg)
+![img](./JVM.assets/v2-ff2dae59f9bf4563436a7a564b41ee1c_1440w.jpg)
 
 
 
@@ -1307,7 +1307,7 @@ public static void main(String[] args) throws ClassNotFoundException {
 }
 ```
 
-![在这里插入图片描述](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQwNzM0MjQ3,size_16,color_FFFFFF,t_70.png)
+![在这里插入图片描述](./JVM.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzQwNzM0MjQ3,size_16,color_FFFFFF,t_70.png)
 
 好了，目的已经达成了，可以看出来确实是使用了自定义的类加载器去加载了该类。即使它是在classpath 路径下面的。我还是成功打破了双亲委派模型。第二种方式，感兴趣的可以自己去尝试一下。
 
@@ -1468,7 +1468,7 @@ public class HotDeploy implements Runnable {
 ```
 
 这里会使用一个 Animal 类，它同样很简单，注意它得包名和存放的路径结构。
-![在这里插入图片描述](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/20200711235459645.png)
+![在这里插入图片描述](./JVM.assets/20200711235459645.png)
 
 ```java
 package dragon;
@@ -1526,7 +1526,7 @@ public class TestHotDeploy {
 #### 演示效果图
 
 这里我修改了检测间隔时间为两秒钟。
-![在这里插入图片描述](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/20200712000829435.gif)
+![在这里插入图片描述](./JVM.assets/20200712000829435.gif)
 
 
 
@@ -1697,13 +1697,13 @@ public class TestHotDeploy {
 
    MinorGC=YGC，MajorGC=FGC
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-e455813f628c0912a246c22065f48c09_1440w.jpg)
+![img](./JVM.assets/v2-e455813f628c0912a246c22065f48c09_1440w.jpg)
 
 
 
 ## 经典的垃圾收集器
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-a69ac8a71efbd83cd44d13032ac548ff_1440w.jpg)
+![img](./JVM.assets/v2-a69ac8a71efbd83cd44d13032ac548ff_1440w.jpg)
 
 
 
@@ -2564,7 +2564,7 @@ GC 相关的研究者们主要是思考这3件事情。
 
 而堆和方法区则不一样，一个接口中的多个实现类需要的内存可能不一样，一个方法中的多个分支需要的内存也可能不一样，我们只有在程序处于运行期间时才能知道会创建哪些对象，这部分内存的分配和回收都是动态的。GC 关注的也就是这部分的内存区域。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-da697285d109465a52b1bd197e8f0c70_1440w.jpg)
+![img](./JVM.assets/v2-da697285d109465a52b1bd197e8f0c70_1440w.jpg)
 
 ## 二、GC 的存活标准
 
@@ -2581,7 +2581,7 @@ GC 相关的研究者们主要是思考这3件事情。
 
 主流的Java虚拟机里面没有选用引用计数算法来管理内存，其中最主要的原因是它很难解决对象之间相互循环引用的问题。发生循环引用的对象的引用计数永远不会为0，结果这些对象就永远不会被释放。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-e61b05db6c287db56ee0a5c4852317e7_1440w.jpg)
+![img](./JVM.assets/v2-e61b05db6c287db56ee0a5c4852317e7_1440w.jpg)
 
 ### 2. 可达性分析算法
 
@@ -2594,7 +2594,7 @@ Java 中，GC Roots 是指：
 - 方法区中常量引用的对象
 - 方法区中类静态属性引用的对象
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-9aa4ca30e0daed540321fba1f8fb44ce_1440w.jpg)
+![img](./JVM.assets/v2-9aa4ca30e0daed540321fba1f8fb44ce_1440w.jpg)
 
 ### 3. Java 中的引用
 
@@ -2656,7 +2656,7 @@ PhantomReference<MyClass> phantomReference = new PhantomReference<>(new MyClass(
 
 该方法简单快速，但是缺点也很明显，一个是效率问题，标记和清除两个过程的效率都不高；另一个是空间问题，标记清除之后会产生大量不连续的内存碎片，空间碎片太多可能会导致以后在程序运行过程中需要分配较大对象时，无法找到足够的连续内存而不得不提前触发另一次垃圾收集动作。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-a7c0c9dc956f5d3ab344595c7e96ec0b_1440w.jpg)
+![img](./JVM.assets/v2-a7c0c9dc956f5d3ab344595c7e96ec0b_1440w.jpg)
 
 后续的收集算法都是基于这种思路并对其不足进行改进而得到的。
 
@@ -2666,7 +2666,7 @@ PhantomReference<MyClass> phantomReference = new PhantomReference<>(new MyClass(
 
 它将可用内存按容量划分为大小相等的两块，每次只使用其中的一块。当这一块的内存用完了，就将还存活着的对象复制到另外一块上面，然后再把已使用过的内存空间一次清理掉。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-f81a44723f5377d8574adbc1d5f83401_1440w.jpg)
+![img](./JVM.assets/v2-f81a44723f5377d8574adbc1d5f83401_1440w.jpg)
 
 这样使得每次都是对整个半区进行内存回收，内存分配时也就不用考虑内存碎片等复杂情况，只要移动堆顶指针，按顺序分配内存即可，实现简单，运行高效。
 
@@ -2676,7 +2676,7 @@ PhantomReference<MyClass> phantomReference = new PhantomReference<>(new MyClass(
 
 在前面的文章中我们提到过，HotSpot默认的`Eden:survivor1:survivor2=8:1:1`，如下图所示。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-e455813f628c0912a246c22065f48c09_1440w.jpg)
+![img](./JVM.assets/v2-e455813f628c0912a246c22065f48c09_1440w.jpg)
 
 延伸知识点：内存分配担保
 
@@ -2684,7 +2684,7 @@ PhantomReference<MyClass> phantomReference = new PhantomReference<>(new MyClass(
 
 内存的分配担保就好比我们去银行借款，如果我们信誉很好，在98%的情况下都能按时偿还，于是银行可能会默认我们下一次也能按时按量地偿还贷款，只需要有一个担保人能保证如果我不能还款时，可以从他的账户扣钱，那银行就认为没有风险了。内存的分配担保也一样，如果另外一块Survivor空间没有足够空间存放上一次新生代收集下来的存活对象时，这些对象将直接通过分配担保机制进入老年代。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-769e41a53e5740312b917c2d7cd1d74a_1440w.jpg)
+![img](./JVM.assets/v2-769e41a53e5740312b917c2d7cd1d74a_1440w.jpg)
 
 ### 3. 标记-整理算法
 
@@ -2692,7 +2692,7 @@ PhantomReference<MyClass> phantomReference = new PhantomReference<>(new MyClass(
 
 根据老年代的特点，提出了另外一种标记-整理（Mark-Compact）算法，标记过程仍然与“标记-清除”算法一样，但后续步骤不是直接对可回收对象进行清理，而是让所有存活的对象都向一端移动，然后直接清理掉端边界以外的内存。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-06b3ab74f79d6d5bec62f215f441bf7a_1440w.jpg)
+![img](./JVM.assets/v2-06b3ab74f79d6d5bec62f215f441bf7a_1440w.jpg)
 
 ### 4. 分代收集算法
 
@@ -2713,7 +2713,7 @@ PhantomReference<MyClass> phantomReference = new PhantomReference<>(new MyClass(
 
 关注微信公众号：Java技术栈，在后台回复：JVM，可以获取我整理的 N 篇最新JVM 教程，都是干货。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-46af95e6b105941f3c8fbb387afd43ea_1440w.jpg)
+![img](./JVM.assets/v2-46af95e6b105941f3c8fbb387afd43ea_1440w.jpg)
 
 ## 四、GC 术语
 
@@ -2737,13 +2737,13 @@ PhantomReference<MyClass> phantomReference = new PhantomReference<>(new MyClass(
 
 意思就是说，在JVM中你通常会看到两种收集器组合使用。下图是JVM 中所有的收集器（Java 8 ），其中有连线的就是可以组合的。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-a69ac8a71efbd83cd44d13032ac548ff_1440w.jpg)
+![img](./JVM.assets/v2-a69ac8a71efbd83cd44d13032ac548ff_1440w.jpg)
 
 为了减小复杂性，快速记忆，我这边直接给出比较常用的几种组合。其他的要么是已经废弃了要么就是在现实情况下不实用的。
 
 
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-89fd2b2de7fb2a35e96b7af09cfe1248_1440w.jpg)
+![img](./JVM.assets/v2-89fd2b2de7fb2a35e96b7af09cfe1248_1440w.jpg)
 
 接下去我们开始具体介绍上各个垃圾收集器。这里需要提一下的是，我这边是将垃圾收集器分成以下几类来讲述的：
 
@@ -2764,7 +2764,7 @@ Serial 翻译过来可以理解成单线程。单线程收集器有Serial 和 Se
 
 “单线程”的意义并不仅仅是说明它只会使用一个处理器或一条收集线程去完成垃圾收集工作，更重要的是强调在它进行垃圾收集时，必须暂停其他所有工作线程，直到它收集结束（STW阶段）。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-baebce680862f9f945dad35b087f58ec_1440w.jpg)
+![img](./JVM.assets/v2-baebce680862f9f945dad35b087f58ec_1440w.jpg)
 
 STW 会带给用户恶劣的体验，所以从JDK 1.3开始，一直到现在最新的JDK 13，HotSpot虚拟机开发团队为消除或者降低用户线程因垃圾收集而导致停顿的努力一直持续进行着，从Serial收集器到Parallel收集器，再到Concurrent Mark Sweep（CMS）和Garbage First（G1）收集器，最终至现在垃圾收集器的最前沿成果Shenandoah和ZGC等。
 
@@ -2776,7 +2776,7 @@ STW 会带给用户恶劣的体验，所以从JDK 1.3开始，一直到现在最
 
 按照程序发展的思路，单线程处理之后，下一步很自然就到了多核处理器时代，程序多线程并行处理的时代。并行收集器是多线程的收集器，在多核CPU下能够很好的提高收集性能。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-074af36d0990f0e4495e7a3ef84e72d8_1440w.jpg)
+![img](./JVM.assets/v2-074af36d0990f0e4495e7a3ef84e72d8_1440w.jpg)
 
 这里我们会介绍：
 
@@ -2806,7 +2806,7 @@ Parallel Scavenge收集器与ParNew收集器类似，也是使用复制算法的
 
 Parallel Scavenge收集器提供了几个参数用于精确控制吞吐量和停顿时间：
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-84cb29fddb7deb4eaa38f5c2ef7a742c_1440w.jpg)
+![img](./JVM.assets/v2-84cb29fddb7deb4eaa38f5c2ef7a742c_1440w.jpg)
 
 #### C. Parallel Old收集器
 
@@ -2832,7 +2832,7 @@ CMS(Concurrent Mark Sweep，并发标记清除) 收集器是以获取最短回�
 
 4）并发清除（CMS concurrent sweep）：
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-7b7c74ae4e6045bcb9a5a5ef299198fd_1440w.jpg)
+![img](./JVM.assets/v2-7b7c74ae4e6045bcb9a5a5ef299198fd_1440w.jpg)
 
 ❔❔❔ 提问环节：为什么CMS要使用“标记-清除”算法呢？刚才我们不是提到过“标记-清除”算法，会留下很多内存碎片吗？
 
@@ -2840,7 +2840,7 @@ CMS(Concurrent Mark Sweep，并发标记清除) 收集器是以获取最短回�
 
 对于上述的问题JVM提供了两个参数：
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-7f6ec2158950a0ff33d6e55541b61a41_1440w.jpg)
+![img](./JVM.assets/v2-7f6ec2158950a0ff33d6e55541b61a41_1440w.jpg)
 
 另外，由于最后一步并发清除时，并不阻塞其它线程，所以还有一个副作用，在清理的过程中，仍然可能会有新垃圾对象产生，只能等到下一轮 GC，才会被清理掉。
 
@@ -2856,7 +2856,7 @@ Region中还有一类特殊的Humongous区域，专门用来存储大对象。G1
 
 Humongous，简称 H 区，是专用于存放超大对象的区域，通常 >= 1/2 Region Size，G1的大多数行为都把Humongous Region作为老年代的一部分来进行看待。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-3f48b74c41fceebe751156e05cd78fff_1440w.jpg)
+![img](./JVM.assets/v2-3f48b74c41fceebe751156e05cd78fff_1440w.jpg)
 
 认识了G1中的内存规划之后，我们就可以理解为什么它叫做"Garbage First"。所有的垃圾回收，都是基于 region 的。G1根据各个Region回收所获得的空间大小以及回收所需时间等指标在后台维护一个优先列表，每次根据允许的收集时间，优先回收价值最大（垃圾）的Region，从而可以有计划地避免在整个Java堆中进行全区域的垃圾收集。这也是 "Garbage First" 得名的由来。
 
@@ -2881,7 +2881,7 @@ G1从整体来看是基于“标记-整理”算法实现的收集器，但从�
 - 最终标记（Final Marking）：Stop The World，使用多条标记线程并发执行。
 - 筛选回收（Live Data Counting and Evacuation）：回收废弃对象，此时也要 Stop The World，并使用多条筛选回收线程并发执行。（还会更新Region的统计数据，对各个Region的回收价值和成本进行排序）
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-5e29768c06e9da47583a0500eeacdadf_1440w.jpg)
+![img](./JVM.assets/v2-5e29768c06e9da47583a0500eeacdadf_1440w.jpg)
 
 从上述阶段的描述可以看出，G1收集器除了并发标记外，其余阶段也是要完全暂停用户线程的，换言之，它并非纯粹地追求低延迟，官方给它设定的目标是在延迟可控的情况下获得尽可能高的吞吐量
 
@@ -2889,7 +2889,7 @@ G1从整体来看是基于“标记-整理”算法实现的收集器，但从�
 
 在分配一般对象时，当所有eden region使用达到最大阈值并且无法申请足够内存时，会触发一次YGC。每次YGC会回收所有Eden以及Survivor区，并且将存活对象复制到Old区以及另一部分的Survivor区。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-17c7010b1b81d0e5d19e3e79c099878e_1440w.jpg)
+![img](./JVM.assets/v2-17c7010b1b81d0e5d19e3e79c099878e_1440w.jpg)
 
 下面是一段经过抽取的GC日志：
 
@@ -2905,7 +2905,7 @@ GC pause (G1 Evacuation Pause) (young)  ├── Parallel Time    ├── GC 
 
 Mixed GC的整个子任务和YGC完全一样，只是回收的范围不一样。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-28b11ca576157c88baac75b5bc99d9eb_1440w.jpg)
+![img](./JVM.assets/v2-28b11ca576157c88baac75b5bc99d9eb_1440w.jpg)
 
 注：G1 一般来说是没有FGC的概念的。因为它本身不提供FGC的功能。
 
@@ -2921,7 +2921,7 @@ G1 能预测 GC 停顿时间， STW 时间可控（G1 uses a pause prediction mo
 
 相关参数：
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-e5e4828ef68af89d6e5c3b7bf0392d68_1440w.jpg)
+![img](./JVM.assets/v2-e5e4828ef68af89d6e5c3b7bf0392d68_1440w.jpg)
 
 本系列关于JVM 垃圾回收的知识就到这里了。
 
@@ -2991,7 +2991,7 @@ G1：是一款面向服务端应用的垃圾收集器
 
 看上去跟CMS收集器的运作过程有几分相似，不过确实也这样。初始阶段仅仅只是标记一下GC Roots能直接关联到的对象，并且修改TAMS（Next Top Mark Start）的值，让下一阶段用户程序并发运行时，能在正确可以用的Region中创建新对象，这个阶段需要停顿线程，但耗时很短。并发标记阶段是从GC Roots开始对堆中对象进行可达性分析，找出存活对象，这一阶段耗时较长但能与用户线程并发运行。而最终标记阶段需要吧Remembered Set Logs的数据合并到Remembered Set中，这阶段需要停顿线程，但可并行执行。最后筛选回收阶段首先对各个Region的回收价值和成本进行排序，根据用户所期望的GC停顿时间来制定回收计划，这一过程同样是需要停顿线程的，但Sun公司透露这个阶段其实也可以做到并发，但考虑到停顿线程将大幅度提高收集效率，所以选择停顿。下图为G1收集器运行示意图：
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/1266222-20180825175006862-736908574.png)
+![img](./JVM.assets/1266222-20180825175006862-736908574.png)
 
 
 
@@ -3068,7 +3068,7 @@ class MyObject{
 
   可达性分析算法是从离散数学中的图论引入的，程序把所有的引用关系看作一张图，从一个节点GC ROOT开始，寻找对应的引用节点，找到这个节点以后，继续寻找这个节点的引用节点，当所有的引用节点寻找完毕之后，剩余的节点则被认为是没有被引用到的节点，即无用的节点，无用的节点将会被判定为是可回收的对象。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/1344248-20180318001527338-249406891.jpg)
+![img](./JVM.assets/1344248-20180318001527338-249406891.jpg)
 
  在Java语言中，可作为GC Roots的对象包括下面几种：（京东）
 
@@ -3268,17 +3268,17 @@ class MyObject{
 
 这是最基础的垃圾回收算法，之所以说它是最基础的是因为它最容易实现，思想也是最简单的。标记-清除算法分为两个阶段：标记阶段和清除阶段。标记阶段的任务是标记出所有需要被回收的对象，清除阶段就是回收被标记的对象所占用的空间。具体过程如下图所示：
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/201605151037404.jpg)
+![img](./JVM.assets/201605151037404.jpg)
 
 从图中可以很容易看出标记-清除算法实现起来比较容易，但是有一个比较严重的问题就是容易产生内存碎片，碎片太多可能会导致后续过程中需要为大对象分配空间时无法找到足够的空间而提前触发新的一次垃圾收集动作。  
 
 标记-清除算法采用从根集合（GC Roots）进行扫描，对存活的对象进行标记，标记完毕后，再扫描整个空间中未被标记的对象，进行回收，如下图所示。标记-清除算法不需要进行对象的移动，只需对不存活的对象进行处理，在存活对象比较多的情况下极为高效，但由于标记-清除算法直接回收不存活的对象，因此会造成内存碎片。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/1344248-20180318001610762-1345240312.jpg)
+![img](./JVM.assets/1344248-20180318001610762-1345240312.jpg)
 
 ### 3.2 复制算法(Copying)
 
-为了解决Mark-Sweep算法的缺陷，Copying算法就被提了出来。它将可用内存按容量划分为大小相等的两块，每次只使用其中的一块。当这一块的内存用完了，就将还存活着的对象复制到另外一块上面，然后再把已使用的内存空间一次清理掉，这样一来就不容易出现内存碎片的问题。具体过程如下图所示：![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/201605151037405.jpg)
+为了解决Mark-Sweep算法的缺陷，Copying算法就被提了出来。它将可用内存按容量划分为大小相等的两块，每次只使用其中的一块。当这一块的内存用完了，就将还存活着的对象复制到另外一块上面，然后再把已使用的内存空间一次清理掉，这样一来就不容易出现内存碎片的问题。具体过程如下图所示：![img](./JVM.assets/201605151037405.jpg)
 
 这种算法虽然实现简单，运行高效且不容易产生内存碎片，但是却对内存空间的使用做出了高昂的代价，因为能够使用的内存缩减到原来的一半。
 
@@ -3286,7 +3286,7 @@ class MyObject{
 
 复制算法的提出是为了克服句柄的开销和解决内存碎片的问题。它开始时把堆分成 一个对象 面和多个空闲面， 程序从对象面为对象分配空间，当对象满了，基于copying算法的垃圾 收集就从根集合（GC Roots）中扫描活动对象，并将每个 活动对象复制到空闲面(使得活动对象所占的内存之间没有空闲洞)，这样空闲面变成了对象面，原来的对象面变成了空闲面，程序会在新的对象面中分配内存。
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/1344248-20180318001650696-538864007.jpg)
+![img](./JVM.assets/1344248-20180318001650696-538864007.jpg)
 
 ### 3.3 标记-整理算法(Mark-compact)
 
@@ -3294,7 +3294,7 @@ class MyObject{
 
 标记-整理算法采用标记-清除算法一样的方式进行对象的标记，但在清除时不同，在回收不存活的对象占用的空间后，会将所有的存活对象往左端空闲空间移动，并更新对应的指针**。标记-整理算法是在标记-清除算法的基础上，又进行了对象的移动**，因此成本更高，但是却解决了内存碎片的问题。具体流程见下图：
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/1344248-20180318001700870-1306024111.jpg)
+![img](./JVM.assets/1344248-20180318001700870-1306024111.jpg)
 
 ### 3.4 分代收集算法 **Generational Collection（分代收集）算法**  
 
@@ -3304,7 +3304,7 @@ class MyObject{
 
 而由于**老年代的特点是每次回收都只回收少量对象，一般使用的是Mark-Compact算法。**
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/1344248-20180318001736534-846754340.jpg)
+![img](./JVM.assets/1344248-20180318001736534-846754340.jpg)
 
 #### 3.4.1 年轻代（Young Generation）的回收算法 (回收主要以Copying为主)
 
@@ -3348,7 +3348,7 @@ b) 内存比新生代也大很多(大概比例是1:2)，当老年代内存满时
 
 下面一张图是HotSpot虚拟机包含的所有收集器，图是借用过来滴：
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/1344248-20180318001758565-463873178.png)
+![img](./JVM.assets/1344248-20180318001758565-463873178.png)
 
 - Serial收集器（复制算法)
   新生代单线程收集器，标记和清理都是单线程，优点是简单高效。是client级别默认的GC方式，可以通过`-XX:+UseSerialGC`来强制指定。
@@ -3426,7 +3426,7 @@ G1垃圾收集器也是以关注延迟为目标、服务器端应用的垃圾收
 
 
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-1133ae3986680076767319deb8240e2a_1440w.jpg)
+![img](./JVM.assets/v2-1133ae3986680076767319deb8240e2a_1440w.jpg)
 
 
 
@@ -3452,7 +3452,7 @@ G1同样可以通过-Xms/-Xmx来指定堆空间大小。当发生年轻代收集
 
 
 
-![img](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/JVM.assets/v2-2e01e8281ddd51fb2820ba8e97c96933_1440w.jpg)
+![img](./JVM.assets/v2-2e01e8281ddd51fb2820ba8e97c96933_1440w.jpg)
 
 #### 分代
 

@@ -2096,6 +2096,8 @@ sentinel down-after-milliseconds配置项只是一个哨兵在超过规定时间
 
 ## Redis 缓存穿透、击穿、雪崩
 
+https://www.bilibili.com/video/BV1xf4y1278g
+
 服务器高可用问题
 
 ### 缓存穿透

@@ -23,8 +23,6 @@ tags: [字节跳动,面试,MQ]
 
 ## Kafka
 
-### 问了一堆kafka
-
 ### kafka 如何保证高可用
 
 ### kafka 能否保证顺序消费
@@ -39,35 +37,35 @@ tags: [字节跳动,面试,MQ]
 
 # RocketMQ
 
-**01.为什么要用RocketMq？**
+**01.为什么要用RocketMQ？**
 
-**02.RocketMq的部署架构了解吗？**
+**02.RocketMQ的部署架构了解吗？**
 
 **03.它有哪几种部署类型？分别有什么特点？**
 
-**04.你自己部署过RocketMq吗？简单说一下你当时部署的过程**
+**04.你自己部署过RocketMQ吗？简单说一下你当时部署的过程**
 
 **05.rocketmq如何保证高可用性？**
 
 **06.rocketmq的工作流程是怎样的？**
 
-**07.RocketMq使用哪种方式消费消息，pull还是push？**
+**07.RocketMQ使用哪种方式消费消息，pull还是push？**
 
-**08.RocketMq如何负载均衡？**
+**08.RocketMQ如何负载均衡？**
 
-**09.RocketMq的存储机制了解吗？**
+**09.RocketMQ的存储机制了解吗？**
 
-**10.RocketMq的存储结构是怎样的？**
+**10.RocketMQ的存储结构是怎样的？**
 
-**11.RocketMq如何进行消息的去重？**
+**11.RocketMQ如何进行消息的去重？**
 
-**12.RocketMq性能比较高的原因？**
+**12.RocketMQ性能比较高的原因？**
 
 
 
 ## 01. 为什么要用 RocketMQ？
 
-总得来说，RocketMq具有以下几个优势：
+总得来说，RocketMQ具有以下几个优势：
 
 - 吞吐量高：单机吞吐量可达十万级
 
@@ -87,7 +85,7 @@ tags: [字节跳动,面试,MQ]
 
   
 
-## 02. RocketMQ的部署架构了解吗？
+## 02. RocketMQ 的部署架构了解吗？
 
 ![image-20200914144110029](MQ.assets/image-20200914144110029.png)
 
@@ -97,21 +95,21 @@ tags: [字节跳动,面试,MQ]
 
 - NameServer 担任路由消息的提供者。生产者或消费者能够通过NameServer查找各Topic相应的Broker IP列表分别进行发送消息和消费消息。nameServer由多个无状态的节点构成，节点之间**无任何信息同步**
 
-  broker会定期向NameServer以发送心跳包的方式，轮询向所有NameServer注册以下元数据信息：
+  Broker会定期向NameServer以发送心跳包的方式，轮询向所有NameServer注册以下元数据信息：
 
-  **1）broker的基本信息（ip port等）**
+  **1）Broker的基本信息（ip port等）**
 
   **2）主题topic的地址信息**
 
-  **3）broker集群信息**
+  **3）Broker集群信息**
 
-  **4）存活的broker信息**
+  **4）存活的Broker信息**
 
   **5）filter 过滤器**
 
-  也就是说，每个NameServer注册的信息都是一样的，而且是当前系统中的所有broker的元数据信息
+  也就是说，每个NameServer注册的信息都是一样的，而且是当前系统中的所有Broker的元数据信息
 
-- Producer负责生产消息，一般由业务系统负责生产消息。一个消息生产者会把业务应用系统里产生的消息发送到broker服务器。RocketMQ提供多种发送方式，同步发送、异步发送、顺序发送、单向发送。同步和异步方式均需要Broker返回确认信息，单向发送不需要
+- Producer负责生产消息，一般由业务系统负责生产消息。一个消息生产者会把业务应用系统里产生的消息发送到Broker服务器。RocketMQ提供多种发送方式，同步发送、异步发送、顺序发送、单向发送。同步和异步方式均需要Broker返回确认信息，单向发送不需要
 
 - Broker，消息中转角色，负责存储消息、转发消息。在RocketMQ系统中负责接收从生产者发送来的消息并存储、同时为消费者的拉取请求作准备
 
@@ -169,15 +167,15 @@ RocketMQ有4种部署类型
 
 ![img](MQ.assets/640.png)
 
-2）broker的配置
+2）Broker的配置
 
 分别配置rocketmq安装目录下四个配置文件：
 
 ```bash
-master1:/conf/2m-2s-async/broker-a.properties
-slave2:/conf/2m-2s-async/broker-b-s.properties
-master2:/conf/2m-2s-async/broker-b.properties
-slave1:/conf/2m-2s-async/broker-a-s.properties
+master1:/conf/2m-2s-async/Broker-a.properties
+slave2:/conf/2m-2s-async/Broker-b-s.properties
+master2:/conf/2m-2s-async/Broker-b.properties
+slave1:/conf/2m-2s-async/Broker-a-s.properties
 ```
 
 
@@ -186,9 +184,9 @@ slave1:/conf/2m-2s-async/broker-a-s.properties
 
 总的思路是：
 
-a.master节点的brokerId为0，slave节点的brokerId为1（大于0即可）；
+a.master节点的BrokerId为0，slave节点的BrokerId为1（大于0即可）；
 
-b.同一组broker的broker-Name相同，如master1和slave1都为broker-a;
+b.同一组Broker的Broker-Name相同，如master1和slave1都为Broker-a;
 
 c.每个borker节点配置相同的NameServer;
 
@@ -202,7 +200,7 @@ e.刷盘方式分为同步刷盘和异步刷盘，为了保证性能而不去考
 
 **a 检查修改参数**
 
-启动前分别检查修改runbroker.sh和runserver.sh两个文件中的JVM参数，默认的JAVA_OPT参数的值比较大，若直接启动可能会失败，需要根据实际情况重新配置
+启动前分别检查修改runBroker.sh和runserver.sh两个文件中的JVM参数，默认的JAVA_OPT参数的值比较大，若直接启动可能会失败，需要根据实际情况重新配置
 
 
 
@@ -225,44 +223,44 @@ nohup sh bin/mqnamesrv > /dev/null 2>&1 &
 tail -f ~/logs/rocketmqlogs/namesrv.log
 ```
 
-**c 分别启动4个broker节点
+**c 分别启动4个Broker节点
 **
 
 **maste1**
 
 ```
-nohup sh bin/mqbroker -c 
-/usr/local/rocketmq/conf/2m-2s-async/broker-a.properties &
+nohup sh bin/mqBroker -c 
+/usr/local/rocketmq/conf/2m-2s-async/Broker-a.properties &
 ```
 
 **slave1**
 
 ```
-nohup sh bin/mqbroker -c 
-/usr/local/rocketmq/conf/2m-2s-async/broker-a-s.properties &
+nohup sh bin/mqBroker -c 
+/usr/local/rocketmq/conf/2m-2s-async/Broker-a-s.properties &
 ```
 
 **maste2**
 
 ```
-nohup sh bin/mqbroker -c 
-/usr/local/rocketmq/conf/2m-2s-async/broker-b.properties &
+nohup sh bin/mqBroker -c 
+/usr/local/rocketmq/conf/2m-2s-async/Broker-b.properties &
 ```
 
 **slave2**
 
 ```
-nohup sh bin/mqbroker -c 
-/usr/local/rocketmq/conf/2m-2s-async/broker-b-s.properties &
+nohup sh bin/mqBroker -c 
+/usr/local/rocketmq/conf/2m-2s-async/Broker-b-s.properties &
 ```
 
 查看日志：
 
 ```
-tail -f ~/logs/rocketmqlogs/broker.log
+tail -f ~/logs/rocketmqlogs/Broker.log
 ```
 
-**总结：**集群环境部署，主要就是以上三个步骤，需要注意的是过程中broker配置文件的配置正确性，还需要注意一下启动前对jvm参数的检查
+**总结：**集群环境部署，主要就是以上三个步骤，需要注意的是过程中Broker配置文件的配置正确性，还需要注意一下启动前对jvm参数的检查
 
 
 
@@ -270,19 +268,19 @@ tail -f ~/logs/rocketmqlogs/broker.log
 
 
 
-1）集群化部署NameServer。Broker集群会将所有的broker基本信息、topic信息以及两者之间的映射关系，轮询存储在每个NameServer中（也就是说每个NameServer存储的信息完全一样）。因此，NameServer集群化，不会因为其中的一两台服务器挂掉，而影响整个架构的消息发送与接收；
+1）集群化部署NameServer。Broker集群会将所有的Broker基本信息、topic信息以及两者之间的映射关系，轮询存储在每个NameServer中（也就是说每个NameServer存储的信息完全一样）。因此，NameServer集群化，不会因为其中的一两台服务器挂掉，而影响整个架构的消息发送与接收；
 
-2）集群化部署多broker。producer发送消息到broker的master，若当前的master挂掉，则会自动切换到其他的master
+2）集群化部署多Broker。Producer发送消息到Broker的master，若当前的master挂掉，则会自动切换到其他的master
 
-cosumer默认会访问broker的master节点获取消息，那么master节点挂了之后，该怎么办呢？它就会自动切换到同一个broker组的slave节点进行消费
+cosumer默认会访问Broker的master节点获取消息，那么master节点挂了之后，该怎么办呢？它就会自动切换到同一个Broker组的slave节点进行消费
 
-那么你肯定会想到会有这样一个问题：consumer要是直接消费slave节点，那master在宕机前没有来得及把消息同步到slave节点，那这个时候，不就会出现消费者不就取不到消息的情况了？
+那么你肯定会想到会有这样一个问题：Consumer要是直接消费slave节点，那master在宕机前没有来得及把消息同步到slave节点，那这个时候，不就会出现消费者不就取不到消息的情况了？
 
 这样，就引出了下一个措施，来保证消息的高可用性
 
 3）设置同步复制
 
-前面已经提到，消息发送到broker的master节点上，master需要将消息复制到slave节点上，rocketmq提供两种复制方式：同步复制和异步复制
+前面已经提到，消息发送到Broker的master节点上，master需要将消息复制到slave节点上，rocketmq提供两种复制方式：同步复制和异步复制
 
 异步复制，就是消息发送到master节点，只要master写成功，就直接向客户端返回成功，后续再异步写入slave节点
 
@@ -290,11 +288,11 @@ cosumer默认会访问broker的master节点获取消息，那么master节点挂�
 
 那么，要保证高可用性，就需要将复制方式配置成同步复制，这样即使master节点挂了，slave上也有当前master的所有备份数据，那么不仅保证消费者消费到的消息是完整的，并且当master节点恢复之后，也容易恢复消息数据
 
-在master的配置文件中直接配置brokerRole：SYNC_MASTER即可
+在master的配置文件中直接配置BrokerRole：SYNC_MASTER即可
 
 ## 06. RocketMQ的工作流程是怎样的？
 
-RocketMq的工作流程如下：
+RocketMQ的工作流程如下：
 
 **1）首先启动NameServer**。NameServer启动后监听端口，等待Broker、Producer以及Consumer连上来
 
@@ -312,17 +310,17 @@ RocketMq的工作流程如下：
 
 
 
-RocketMq提供两种方式：pull和push进行消息的消费
+RocketMQ提供两种方式：pull和push进行消息的消费
 
 
 
-而RocketMq的push方式，本质上也是采用pull的方式进行实现的。也就是说这两种方式本质上都是采用consumer轮询从broker拉取消息的
+而RocketMQ的push方式，本质上也是采用pull的方式进行实现的。也就是说这两种方式本质上都是采用Consumer轮询从Broker拉取消息的
 
 
 
-push方式里，consumer把轮询过程封装了一层，并注册了MessageListener监听器。当轮询取到消息后，便唤醒MessageListener的consumeMessage()来消费，对用户而言，**感觉好像消息是被推送过来的**
+push方式里，Consumer把轮询过程封装了一层，并注册了MessageListener监听器。当轮询取到消息后，便唤醒MessageListener的consumeMessage()来消费，对用户而言，**感觉好像消息是被推送过来的**
 
-其实想想，消息统一都发到了broker，而broker又不会主动去push消息，那么消息肯定都是需要消费者主动去拉的喽~
+其实想想，消息统一都发到了Broker，而Broker又不会主动去push消息，那么消息肯定都是需要消费者主动去拉的喽~
 
 
 
@@ -330,11 +328,11 @@ push方式里，consumer把轮询过程封装了一层，并注册了MessageList
 
 
 
-1）producer发送消息的负载均衡：默认会**轮询**向Topic的所有queue发送消息，以达到消息平均落到不同的queue上；而由于queue可以落在不同的broker上，就可以发到不同broker上（当然也可以指定发送到某个特定的queue上）
+1）Producer发送消息的负载均衡：默认会**轮询**向Topic的所有queue发送消息，以达到消息平均落到不同的queue上；而由于queue可以落在不同的Broker上，就可以发到不同Broker上（当然也可以指定发送到某个特定的queue上）
 
 
 
-2）consumer订阅消息的负载均衡：假设有5个队列，两个消费者，则第一个消费者消费3个队列，第二个则消费2个队列，以达到平均消费的效果。而需要注意的是，当consumer的数量大于队列的数量的话，根据rocketMq的机制，多出来的队列不会去消费数据，因此建议consumer的数量小于或者等于queue的数量，避免不必要的浪费
+2）Consumer订阅消息的负载均衡：假设有5个队列，两个消费者，则第一个消费者消费3个队列，第二个则消费2个队列，以达到平均消费的效果。而需要注意的是，当Consumer的数量大于队列的数量的话，根据rocketMq的机制，多出来的 Consumer 不会去消费数据，因此建议Consumer的数量小于或者等于queue的数量，避免不必要的浪费
 
 
 
@@ -342,11 +340,11 @@ push方式里，consumer把轮询过程封装了一层，并注册了MessageList
 
 
 
-RocketMq采用文件系统进行消息的存储，相对于ActiveMq采用关系型数据库进行存储的方式就更直接，性能更高了
+RocketMQ采用文件系统进行消息的存储，相对于ActiveMq采用关系型数据库进行存储的方式就更直接，性能更高了
 
 
 
-**RocketMq与Kafka在****写消息****与****发送消息****上，继续沿用了Kafka的这两个方面：****顺序写****和****零拷贝**
+**RocketMQ与Kafka在****写消息****与****发送消息****上，继续沿用了Kafka的这两个方面：****顺序写****和****零拷贝**
 
 
 
@@ -389,14 +387,14 @@ Socket.send(buffer)
 
 ![img](MQ.assets/640-20200914142702022.png)
 
-那么采用零拷贝的方式发送消息，必定会大大减少读取的开销，使得RocketMq读取消息的性能有一个质的提升
+那么采用零拷贝的方式发送消息，必定会大大减少读取的开销，使得RocketMQ读取消息的性能有一个质的提升
 
 
-此外，还需要再提一点，零拷贝技术采用了MappedByteBuffer内存映射技术，采用这种技术有一些限制，其中有一条就是传输的文件不能超过2G，这也就是为什么RocketMq的存储消息的文件CommitLog的大小规定为1G的原因
+此外，还需要再提一点，零拷贝技术采用了MappedByteBuffer内存映射技术，采用这种技术有一些限制，其中有一条就是传输的文件不能超过2G，这也就是为什么RocketMQ的存储消息的文件CommitLog的大小规定为1G的原因
 
 
 
-小结：RocketMq采用文件系统存储消息，并采用顺序写写入消息，使用零拷贝发送消息，极大得保证了RocketMq的性能
+小结：RocketMQ采用文件系统存储消息，并采用顺序写写入消息，使用零拷贝发送消息，极大得保证了RocketMQ的性能
 
 
 
@@ -404,7 +402,7 @@ Socket.send(buffer)
 
 
 
-如图所示，消息生产者发送消息到broker，都是会按照顺序存储在CommitLog文件中，每个commitLog文件的大小为1G
+如图所示，消息生产者发送消息到Broker，都是会按照顺序存储在CommitLog文件中，每个commitLog文件的大小为1G
 
 
 
@@ -420,7 +418,7 @@ CosumerQueue-消费逻辑队列：存储消息在CommitLog的offset
 
 
 
-IndexFile-索引文件：存储消息的key和时间戳等信息，使得RocketMq可以采用key和时间区间来查询消息
+IndexFile-索引文件：存储消息的key和时间戳等信息，使得RocketMQ可以采用key和时间区间来查询消息
 
 
 
@@ -432,7 +430,7 @@ IndexFile-索引文件：存储消息的key和时间戳等信息，使得RocketM
 
 
 
-我们知道，只要通过网络交换数据，就无法避免因为网络不可靠而造成的消息重复这个问题。比如说RocketMq中，当consumer消费完消息后，因为网络问题未及时发送ack到broker,broker就不会删掉当前已经消费过的消息，那么，该消息将会被重复投递给消费者去消费
+我们知道，只要通过网络交换数据，就无法避免因为网络不可靠而造成的消息重复这个问题。比如说 RocketMQ 中，当Consumer消费完消息后，因为网络问题未及时发送 ack 到 Broker，Broker 就不会删掉当前已经消费过的消息，那么，该消息将会被重复投递给消费者去消费
 
 
 
@@ -440,7 +438,7 @@ IndexFile-索引文件：存储消息的key和时间戳等信息，使得RocketM
 
 
 
-RocketMq本身并不保证消息不重复，这样肯定会因为每次的判断，导致性能打折扣，所以它将去重操作直接放在了消费端：
+RocketMQ本身并不保证消息不重复，这样肯定会因为每次的判断，导致性能打折扣，所以它将去重操作直接放在了消费端：
 
 
 
@@ -448,7 +446,7 @@ RocketMq本身并不保证消息不重复，这样肯定会因为每次的判断
 
 1）消费端处理消息的业务逻辑保持幂等性。那么不管来多少条重复消息，可以实现处理的结果都一样
 
-2）还可以建立一张日志表，使用消息主键作为表的主键，在处理消息前，先insert表，再做消息处理。这样可以避免消息重复消费
+2）还可以建立一张日志表，使用消息主键作为表的主键，在处理消息前，先 insert 表，再做消息处理。这样可以避免消息重复消费
 
 
 
@@ -458,7 +456,7 @@ RocketMq本身并不保证消息不重复，这样肯定会因为每次的判断
 
 
 
-就是前面在文件存储机制中所提到的：RocketMq采用文件系统存储消息，采用顺序写的方式写入消息，使用零拷贝发送消息，这三者的结合极大地保证了RocketMq的性能
+就是前面在文件存储机制中所提到的：RocketMQ 采用文件系统存储消息，采用顺序写的方式写入消息，使用零拷贝发送消息，这三者的结合极大地保证了RocketMQ的性能
 
 
 
@@ -468,7 +466,7 @@ RocketMq本身并不保证消息不重复，这样肯定会因为每次的判断
 
 ### 1、概述
 
-消息队列已经逐渐成为企业IT系统内部通信的核心手段。它具有低耦合、可靠投递、广播、流量控制、最终一致性等一系列功能，成为异步RPC的主要手段之一。当今市面上有很多主流的消息中间件，如老牌的ActiveMQ、RabbitMQ，炙手可热的Kafka，阿里巴巴自主开发RocketMQ等。
+消息队列已经逐渐成为企业IT系统内部通信的核心手段。它具有低耦合、可靠投递、广播、流量控制、最终一致性等一系列功能，成为异步RPC的主要手段之一。当今市面上有很多主流的消息中间件，如老牌的 ActiveMQ、RabbitMQ，炙手可热的 Kafka，阿里巴巴自主开发RocketMQ等。
 
  
 
@@ -480,11 +478,11 @@ RocketMq本身并不保证消息不重复，这样肯定会因为每次的判断
 
    **2.2 Producer**
 
-消息生产者，业务的发起方，负责生产消息传输给broker
+消息生产者，业务的发起方，负责生产消息传输给Broker
 
    **2.3 Consumer**
 
-消息消费者，业务的处理方，负责从broker获取消息并进行业务逻辑处理
+消息消费者，业务的处理方，负责从Broker获取消息并进行业务逻辑处理
 
    **2.4 Topic**
 
@@ -517,7 +515,7 @@ Pub/Sub发布订阅（广播）：使用topic作为通信载体
 说明： 
 消息生产者（发布）将消息发布到topic中，同时有多个消息消费者（订阅）消费该消息。和点对点方式不同，发布到topic的消息会被所有订阅者消费。
 
-queue实现了负载均衡，将producer生产的消息发送到消息队列中，由多个消费者消费。但一个消息只能被一个消费者接受，当没有消费者可用时，这个消息会被保存直到有一个可用的消费者。 
+queue实现了负载均衡，将Producer生产的消息发送到消息队列中，由多个消费者消费。但一个消息只能被一个消费者接受，当没有消费者可用时，这个消息会被保存直到有一个可用的消费者。 
 topic实现了发布和订阅，当你发布一个消息，所有订阅这个topic的服务都能得到这个消息，所以从1到N个订阅者都能得到一个消息的拷贝。
 
  
