@@ -375,9 +375,12 @@ Socket.send(buffer)
 先读取、再发送，实际会经过以下四次复制
 
 1、将磁盘文件，读取到操作系统内核缓冲区**Read Buffer**
+
 2、将内核缓冲区的数据，复制到应用程序缓冲区**Application Buffer**
+
 3、将应用程序缓冲区**Application Buffer**中的数据，复制到socket网络发送缓冲区
-4、将**Socket buffer**的数据，复制到**网卡**，由网卡进行网络传输
+
+​     4、将**Socket buffer**的数据，复制到**网卡**，由网卡进行网络传输
 
 ![img](MQ.assets/640-20200914142702260.png)
 
