@@ -171,17 +171,17 @@ public ReentrantLock(boolean fair) { sync = fair ? new FairSync() : new NonfairS
 
 AbstractQueuedSynchronizer
 
-提到 Java 加锁，我们通常会想到 synchronized 关键字或者是  Java Util Concurrent（后面简称JUC）包下面的 Lock，今天就来扒一扒 Lock 是如何实现的，比如我们可以先提出一些问题：当我们通实例化一个ReentrantLock 并且调用它的 lock 或 unlock 的时候，这其中发生了什么？如果多个线程同时对同一个锁实例进行 lock 或 unlcok 操作，这其中又发生了什么？ 
+提到 Java 加锁，我们通常会想到 synchronized 关键字或者是  Java Util Concurrent（后面简称JUC）包下面的 Lock，今天就来扒一扒 Lock 是如何实现的，比如我们可以先提出一些问题：当我们通实例化一个ReentrantLock 并且调用它的 lock 或 unlock 的时候，这其中发生了什么？如果多个线程同时对同一个锁实例进行 lock 或 unlcok 操作，这其中又发生了什么？
 
-### **什么是可重入锁？**
+### 什么是可重入锁？
 
 ReentrantLock 是可重入锁，什么是可重入锁呢？**可重入锁就是当前持有该锁的线程能够多次获取该锁，无需等待。**可重入锁是如何实现的呢？这要从 ReentrantLock 的一个内部类 Sync 的父类说起，Sync 的父类是 AbstractQueuedSynchronizer（后面简称 AQS ）。
 
-### **什么是AQS？**
+### 什么是AQS？
 
 AQS 是 JDK1.5 提供的一个基于 FIFO 等待队列实现的一个用于实现同步器的基础框架，这个基础框架的重要性可以这么说，JUC 包里面几乎所有的有关锁、多线程并发以及线程同步器等重要组件的实现都是基于AQS这个框架。**AQS 的核心思想是基于 volatile int state 这样的一个属性同时配合 Unsafe 工具对其原子性的操作来实现对当前锁的状态进行修改。**当 state 的值为 0 的时候，标识改 Lock 不被任何线程所占有。
 
-### **ReentrantLock锁的架构**
+### ReentrantLock锁的架构
 
 ReentrantLock 的架构相对简单，主要包括一个 Sync 的内部抽象类以及 Sync 抽象类的两个实现类。上面已经说过了 Sync 继承自 AQS，他们的结构示意图如下：
 
@@ -1772,11 +1772,13 @@ OK，到这一步了，相信你会有几个疑惑了，ThreadLocalMap是什么�
 
 还有一个getMap
 
+```java
 ThreadLocalMap getMap(Thread t) {
-
-return t.threadLocals;
-
+    return t.threadLocals;
 }
+```
+
+
 
 调用当期线程t，返回当前线程t中的成员变量threadLocals。而threadLocals其实就是ThreadLocalMap。
 
@@ -1864,24 +1866,23 @@ public void test3(){
     System.out.println("是否被回收"+sf.get());    }
 ```
 
-运行结果：是否被回收cn.zyzpp.MyObject@42110406打开被注释掉的new byte[1024*100]语句，这条语句请求一块大的堆空间，使堆内存使用紧张。并显式的再调用一次GC，结果如下：是否被回收null说明在系统内存紧张的情况下，软引用被回收。
+运行结果：是否被回收 cn.zyzpp.MyObject@42110406 打开被注释掉的 new byte[1024*100] 语句，这条语句请求一块大的堆空间，使堆内存使用紧张。并显式的再调用一次 GC，结果如下：是否被回收 null 说明在系统内存紧张的情况下，软引用被回收。
 
 #### 3.弱引用弱引用是一种比软引用较弱的引用类型。
 
-在系统GC时，只要发现弱引用，不管系统堆空间是否足够，都会将对象进行回收。在java中，可以用java.lang.ref.WeakReference实例来保存对一个Java对象的弱引用。
+在系统 GC 时，只要发现弱引用，不管系统堆空间是否足够，都会将对象进行回收。在 Java 中，可以用 java.lang.ref.WeakReference 实例来保存对一个 Java 对象的弱引用。
 
 ```java
-public void test3(){        
-
+public void test3() {
     MyObject obj = new MyObject();
     WeakReference sf = new WeakReference(obj);
-    obj = null;System.out.println("是否被回收"+sf.get());
+    obj = null;System.out.println("是否被回收" + sf.get());
     System.gc();
-    System.out.println("是否被回收"+sf.get());    
+    System.out.println("是否被回收" + sf.get());    
 }
 ```
 
-运行结果：是否被回收cn.zyzpp.MyObject@42110406是否被回收null软引用，弱引用都非常适合来保存那些可有可无的缓存数据，如果这么做，当系统内存不足时，这些缓存数据会被回收，不会导致内存溢出。而当内存资源充足时，这些缓存数据又可以存在相当长的时间，从而起到加速系统的作用。
+运行结果：是否被回收 cn.zyzpp.MyObject@42110406 是否被回收 null 软引用，弱引用都非常适合来保存那些可有可无的缓存数据，如果这么做，当系统内存不足时，这些缓存数据会被回收，不会导致内存溢出。而当内存资源充足时，这些缓存数据又可以存在相当长的时间，从而起到加速系统的作用。
 
 #### 4.虚引用虚引用是所有类型中最弱的一个。
 
@@ -1900,7 +1901,7 @@ public void test3(){
 
 运行结果：是否被回收null是否被回收null对虚引用的get()操作，总是返回null，因为sf.get()方法的实现如下：    public T get() {        return null;    }
 
-#### 5.WeakHashMap类及其实现WeakHashMap类在java.util包内，它实现了Map接口，是HashMap的一种实现，它使用弱引用作为内部数据的存储方案。
+#### 5.WeakHashMap 类及其实现 WeakHashMap 类在 java.util 包内，它实现了 Map 接口，是 HashMap 的一种实现，它使用弱引用作为内部数据的存储方案。
 
 > WeakHashMap是弱引用的一种典型应用，它可以作为简单的缓存表解决方案。一下两段代码分别使用WeakHashMap和HashMap保存大量的数据：
 
@@ -1919,9 +1920,9 @@ public void test(){
 }
 ```
 
-使用-Xmx2M限定堆内存，使用WeakHashMap的代码正常运行结束，而使用HashMap的代码段抛出异常java.lang.OutOfMemoryError: Java heap space
+使用 -Xmx2M 限定堆内存，使用 WeakHashMap 的代码正常运行结束，而使用 HashMap 的代码段抛出异常 java.lang.OutOfMemoryError: Java heap space
 
-##### 由此可见，WeakHashMap会在系统内存紧张时使用弱引用，自动释放掉持有弱引用的内存数据。但如果WeakHashMap的key都在系统内持有强引用，那么WeakHashMap就退化为普通的HashMap，因为所有的表项都无法被自动清理。
+##### 由此可见，WeakHashMap 会在系统内存紧张时使用弱引用，自动释放掉持有弱引用的内存数据。但如果 WeakHashMap 的 key 都在系统内持有强引用，那么 WeakHashMap 就退化为普通的 HashMap，因为所有的表项都无法被自动清理。
 
 
 
@@ -2128,9 +2129,13 @@ Delayqueue 千万级并发限时订单处理，可以了解一下，电商场景
 
 
 
-Map 存储的是 K-V 键值对。ArrayList 结构不支持存储，因此在此基础上扩展，每个元素下可以堆叠其他元素，每一列元素+堆叠元素=bucket（桶）。
+Map 存储的是 K-V 键值对。
 
-1.7 数组+链表  1.8 数组+链表+红黑树
+ArrayList 结构不支持存储，因此在此基础上扩展，每个元素下可以堆叠其他元素，每一列元素 + 堆叠元素 = bucket（桶）。
+
+1.7 数组 + 链表  
+
+1.8 数组 + 链表 + 红黑树
 
 <img src="/Users/Shadowalker/Documents/interview-Java/Java.assets/image-20200810133215204.png" alt="image-20200810133215204" style="zoom: 67%;" />
 
@@ -2312,7 +2317,7 @@ final Node<K,V>[] resize() {
 ## JDK1.7 中实现 HashMap
 
 ```java
-int hash = key.hashcode;
+int hash = key.hashCode;
 int i - hash % table.length;
 
 header = ...;
@@ -2523,7 +2528,6 @@ HashTable 加锁过多，CHM 采取分段锁Segment的方式，相邻多个数�
 
 ```java
 static final int DEFAULT_CONCURRENCY_LEVEL = 16; // 并发级别
-
 ```
 
 
@@ -2589,7 +2593,7 @@ public V put(@NotNull K k key, @NotNuull V value) {
 
 分段锁 Segment[] 是个数组
 
-Segment对象是一个小 HashMap，存放Entry[]
+Segment 对象是一个小 HashMap，存放 Entry[]
 
 
 
@@ -2621,18 +2625,24 @@ CAS -> CPU 响应时间很快，造成 JVM 吞吐量不高
 #### ConcurrentHashMap的put（）方法：
 
 final V putVal(K key, V value, boolean onlyIfAbsent) {….}
+
 1.key或value是否为空，是的话，抛异常new NullPointerException();
+
 2.table是否为空或length==0；是的话，初始化table；
+
 3.根据key算出的hash值经过优化得到索引值i，如果i==-1，说明此时有线程扩容此链表，你需要去帮忙扩容。
+
 4.i>=0，则找到table[i]对应的索引，为空的话，就CAS添加；
+
 5.table[i]不为空，取出节点锁住，表示锁住此索引的所有链表或红黑树。判断是key是否重复，重复的话就更新value，否者尾插入法，更新。如果是红黑树就红黑树插入。
+
 6.插入后判断链表的节点数是否大于8，是的话，转换为红黑树，
+
 7.最后判断concurrentHashMap容量，大于扩容值，就进行扩容。
 
 HashMap的put（）和resize（）都是尾插节点；（JDK1.8）
+
 ConcurrentHashMap的put（）是尾插节点，tansfer（）是头插节点；（JDK1.8）
-
-
 
 
 
@@ -2646,13 +2656,13 @@ HashMap应该算是Java后端工程师面试的必问题，因为其中的知识
 
 **安琪拉**: 我是安琪拉，草丛三婊之一，最强中单（钟馗不服）！哦，不对，串场了，我是**，目前在--公司做--系统开发。
 
-**面试官**: 看你简历上写熟悉Java集合，HashMap用过的吧？
+**面试官**: 看你简历上写熟悉 Java 集合，HashMap 用过的吧？
 
 **安琪拉**: 用过的。(还是熟悉的味道)
 
-**面试官**: 那你跟我讲讲HashMap的内部数据结构？
+**面试官**: 那你跟我讲讲 HashMap 的内部数据结构？
 
-**安琪拉**: 目前我用的是JDK1.8版本的，内部使用数组 + 链表红黑树；
+**安琪拉**: 目前我用的是 JDK1.8 版本的，内部使用数组 + 链表红黑树；
 
 **安琪拉**: 方便我给您画个数据结构图吧：
 
@@ -2667,7 +2677,7 @@ HashMap应该算是Java后端工程师面试的必问题，因为其中的知识
 1. 判断数组是否为空，为空进行初始化;
 2. 不为空，计算 k 的 hash 值，通过`(n - 1) & hash`计算应当存放在数组中的下标 index;
 3. 查看 table[index] 是否存在数据，没有数据就构造一个Node节点存放在 table[index] 中；
-4. 存在数据，说明发生了hash冲突(存在二个节点key的hash值一样), 继续判断key是否相等，相等，用新的value替换原数据(onlyIfAbsent为false)；
+4. 存在数据，说明发生了 hash 冲突(存在二个节点 key 的 hash 值一样)， 继续判断 key 是否相等，相等，用新的value替换原数据(onlyIfAbsent为false)；
 5. 如果不相等，判断当前节点类型是不是树型节点，如果是树型节点，创造树型节点插入红黑树中；
 6. 如果不是树型节点，创建普通Node加入链表中；判断链表长度是否大于 8， 大于的话链表转换为红黑树；
 7. 插入完成之后判断当前节点数是否大于阈值，如果大于开始扩容为原数组的二倍。
@@ -2688,14 +2698,17 @@ static final int tableSizeFor(int cap) {
 }
 ```
 
->  补充说明：下图是详细过程，算法就是让初始二进制右移1，2，4，8，16位，分别与自己异或，把高位第一个为1的数通过不断右移，把高位为1的后面全变为1，111111 + 1 = 1000000  = ![[公式]](/Users/Shadowalker/Documents/interview-Java/Java.assets/equation) （符合大于50并且是2的整数次幂 ）
->  
+
+
+补充说明：下图是详细过程，算法就是让初始二进制右移1，2，4，8，16位，分别与自己异或，把高位第一个为1的数通过不断右移，把高位为1的后面全变为1，111111 + 1 = 1000000  = ![[公式]](/Java.assets/equation) 
+
+（符合大于50并且是2的整数次幂 ）
 
 ![img](/Users/Shadowalker/Documents/interview-Java/Java.assets/v2-b8323226a85b95e3374aec1d359e661d_b.jpg)
 
-**面试官**:  你提到hash函数，你知道HashMap的哈希函数怎么设计的吗？
+**面试官**:  你提到 hash 函数，你知道 HashMap 的哈希函数怎么设计的吗？
 
-**安琪拉**:  [问的还挺细] hash函数是先拿到通过key 的hashcode，是32位的int值，然后让hashcode的高16位和低16位进行异或操作。
+**安琪拉**:  [问的还挺细] hash 函数是先拿到通过 key 的 hashCode，是 32 位的 int 值，然后让 hashCode 的高 16 位和低 16 位进行异或操作。
 
 ![img](/Users/Shadowalker/Documents/interview-Java/Java.assets/v2-e9333311913a0c2f02d39fde9f4d8c90_b.jpg)
 
@@ -2703,14 +2716,22 @@ static final int tableSizeFor(int cap) {
 
 **安琪拉**:  [这也要问]，这个也叫扰动函数，这么设计有二点原因：
 
-1. 一定要尽可能降低hash碰撞，越分散越好；
+1. 一定要尽可能降低 hash 碰撞，越分散越好；
 2. 算法一定要尽可能高效，因为这是高频操作, 因此采用位运算；
 
-**面试官**:  为什么采用hashcode的高16位和低16位异或能降低hash碰撞？hash函数能不能直接用key的hashcode？
+**面试官**:  为什么采用 hashCode 的高16位和低16位异或能降低 hash 碰撞？hash 函数能不能直接用 key 的 hashCode？
 
-[这问题有点刁钻], 安琪拉差点原地 了，恨不得出biubiubiu 二一三连招。
+[这问题有点刁钻], 安琪拉差点原地 了，恨不得出 biubiubiu 二一三连招。
 
-**安琪拉**:  因为key.hashCode()函数调用的是key键值类型自带的哈希函数，返回int型散列值。int值范围为**-2147483648~2147483647**，前后加起来大概40亿的映射空间。只要哈希函数映射得比较均匀松散，一般应用是很难出现碰撞的。但问题是一个40亿长度的数组，内存是放不下的。你想，如果HashMap数组的初始大小才16，用之前需要对数组的长度取模运算，得到的余数才能用来访问数组下标。(来自知乎-[胖君]( JDK 源码中 HashMap 的 hash 方法原理是什么？))
+**安琪拉**:  因为 key.hashCode() 函数调用的是 key 键值类型自带的哈希函数，返回 int 型散列值。
+
+int 值范围为**-2147483648~2147483647**，前后加起来大概40亿的映射空间。
+
+只要哈希函数映射得比较均匀松散，一般应用是很难出现碰撞的。
+
+但问题是一个40亿长度的数组，内存是放不下的。
+
+你想，如果HashMap数组的初始大小才16，用之前需要对数组的长度取模运算，得到的余数才能用来访问数组下标。(来自知乎-[胖君]( JDK 源码中 HashMap 的 hash 方法原理是什么？))
 
 源码中模运算就是把散列值和数组长度-1做一个"与"操作，位运算比%运算要快。
 
@@ -2733,7 +2754,7 @@ static int indexFor(int h, int length) {
 
 但这时候问题就来了，这样就算我的散列值分布再松散，要是只取最后几位的话，碰撞也会很严重。更要命的是如果散列本身做得不好，分布上成等差数列的漏洞，如果正好让最后几个低位呈现规律性重复，就无比蛋疼。
 
-时候“扰动函数”的价值就体现出来了，说到这里大家应该猜出来了。看下面这个图，
+这时候“扰动函数”的价值就体现出来了，说到这里大家应该猜出来了。看下面这个图，
 
 ![img](/Users/Shadowalker/Documents/interview-Java/Java.assets/v2-9ed3c37dc3422af45978db0d0fb8749e_b.jpg)
 
@@ -2743,9 +2764,9 @@ static int indexFor(int h, int length) {
 
 ![img](/Users/Shadowalker/Documents/interview-Java/Java.assets/v2-521c3c17c4d2b402ebeb1742384d6026_b.jpg)
 
-结果显示，当HashMap数组长度为512的时候（![[公式]](/Users/Shadowalker/Documents/interview-Java/Java.assets/equation-20200811171905998)），也就是用掩码取低9位的时候，在没有扰动函数的情况下，发生了103次碰撞，接近30%。而在使用了扰动函数之后只有92次碰撞。碰撞减少了将近10%。看来扰动函数确实还是有功效的。
+结果显示，当HashMap数组长度为512的时候（![[公式]](/Users/Shadowalker/Documents/interview-Java/Java.assets/equation-20200811171905998)），也就是用掩码取低9位的时候，在没有扰动函数的情况下，发生了 103 次碰撞，接近 30%。而在使用了扰动函数之后只有 92 次碰撞。碰撞减少了将近 10%。看来扰动函数确实还是有功效的。
 
-另外Java1.8相比1.7做了调整，1.7做了四次移位和四次异或，但明显Java 8觉得扰动做一次就够了，做4次的话，多了可能边际效用也不大，所谓为了效率考虑就改成一次了。
+另外 Java1.8 相比 1.7 做了调整，1.7 做了四次移位和四次异或，但明显 Java 8 觉得扰动做一次就够了，做4次的话，多了可能边际效用也不大，所谓为了效率考虑就改成一次了。
 
 下面是1.7的hash代码：
 
@@ -2756,29 +2777,28 @@ static int hash(int h) {
 }
 ```
 
-**面试官**:  看来做过功课，有点料啊！是不是偷偷看了**[安琪拉的博客](https://zhuanlan.zhihu.com/p/125628540/验证)**, 你刚刚说到1.8对hash函数做了优化，1.8还有别的优化吗？
+**面试官**:  看来做过功课，有点料啊！是不是偷偷看了**[安琪拉的博客](https://zhuanlan.zhihu.com/p/125628540/验证)**，你刚刚说到 1.8 对 hash 函数做了优化，1.8 还有别的优化吗？
 
-**安琪拉**: 1.8还有三点主要的优化：
+**安琪拉**: 1.8 还有三点主要的优化：
 
-1. 数组+链表改成了数组+链表或红黑树；
+1. 数组 + 链表改成了数组 + 链表或红黑树；
 2. 链表的插入方式从头插法改成了尾插法，简单说就是插入时，如果数组位置上已经有元素，1.7将新元素放到数组中，原始节点作为新节点的后继节点，1.8遍历链表，将元素放置到链表的最后；
-3. 扩容的时候1.7需要对原数组中的元素进行重新hash定位在新数组的位置，1.8采用更简单的判断逻辑，位置不变或索引+旧容量大小；
-4. 在插入时，1.7先判断是否需要扩容，再插入，1.8先进行插入，插入完成再判断是否需要扩容；
+3. 扩容的时候 1.7 需要对原数组中的元素进行重新 hash 定位在新数组的位置，1.8 采用更简单的判断逻辑，位置不变或索引 + 旧容量大小；
+4. 在插入时，1.7 先判断是否需要扩容，再插入，1.8 先进行插入，插入完成再判断是否需要扩容；
 
 **面试官**:  你分别跟我讲讲为什么要做这几点优化；
 
 **安琪拉**:  【咳咳，果然是连环炮】
 
-1. 防止发生hash冲突，链表长度过长，将时间复杂度由`O(n)`降为`O(logn)`;
+1. 防止发生 hash 冲突，链表长度过长，将时间复杂度由`O(n)`降为`O(logn)`;
    
-2. 因为1.7头插法扩容时，头插法会使链表发生反转，多线程环境下会产生环；
-    A线程在插入节点B，B线程也在插入，遇到容量不够开始扩容，重新hash，放置元素，采用头插法，后遍历到的B节点放入了头部，这样形成了环，如下图所示：
-    
+2. 因为1.7 头插法扩容时，头插法会使链表发生反转，多线程环境下会产生环；
+    A 线程在插入节点 B，B 线程也在插入，遇到容量不够开始扩容，重新 hash，放置元素，采用头插法，后遍历到的 B 节点放入了头部，这样形成了环，如下图所示：
 
 ![img](/Users/Shadowalker/Documents/interview-Java/Java.assets/v2-eb6371872dbfb4e2464ed07f778eed90_b.jpg)
 
-```text
-//1.7的扩容调用transfer代码，如下所示：
+```java
+// 1.7 的扩容调用 transfer 代码，如下所示：
  void transfer(Entry[] newTable, boolean rehash) {
  int newCapacity = newTable.length;
  for (Entry<K,V> e : table) {
@@ -2794,25 +2814,25 @@ static int hash(int h) {
     }
   }
 }
-
-
- 
 ```
 
-1. 扩容的时候为什么1.8 不用重新hash就可以直接定位原节点在新数据的位置呢?
-    这是由于扩容是扩大为原数组大小的2倍，用于计算数组位置的掩码仅仅只是高位多了一个1，怎么理解呢？
-    扩容前长度为16，用于计算(n-1) & hash 的二进制n-1为0000 1111，扩容为32后的二进制就高位多了1，为0001 1111。
-    因为是& 运算，1和任何数 & 都是它本身，那就分二种情况，如下图：原数据hashcode高位第4位为0和高位为1的情况；
-    第四位高位为0，重新hash数值不变，第四位为1，重新hash数值比原来大16（旧数组的容量）
+1. 扩容的时候为什么 1.8 不用重新 hash 就可以直接定位原节点在新数据的位置呢?
+   
+    这是由于扩容是扩大为原数组大小的2倍，用于计算数组位置的掩码仅仅只是高位多了一个1。
     
+    怎么理解呢？
+    
+    扩容前长度为16，用于计算 (n-1) & hash 的二进制 n-1 为 0000 1111，扩容为 32 后的二进制就高位多了 1，为 0001 1111。
+    因为是 & 运算，1 和任何数 & 都是它本身，那就分二种情况，如下图：原数据 hashCode 高位第 4 位为 0 和高位为 1 的情况；
+    第四位高位为 0，重新 hash 数值不变，第四位为 1，重新 hash 数值比原来大 16（旧数组的容量）
 
 ![img](/Users/Shadowalker/Documents/interview-Java/Java.assets/v2-98507f7913e924ac03add3eac2084898_b.jpg)
 
-**面试官**:  那HashMap是线程安全的吗？
+**面试官**:  那 HashMap 是线程安全的吗？
 
-**安琪拉**:  不是，在多线程环境下，1.7 会产生死循环、数据丢失、数据覆盖的问题，1.8 中会有数据覆盖的问题，以1.8为例，当A线程判断index位置为空后正好挂起，B线程开始往index位置的写入节点数据，这时A线程恢复现场，执行赋值操作，就把A线程的数据给覆盖了；还有++size这个地方也会造成多线程同时扩容等问题。
+**安琪拉**:  不是，在多线程环境下，1.7 会产生死循环、数据丢失、数据覆盖的问题，1.8 中会有数据覆盖的问题，以1.8为例，当A线程判断index位置为空后正好挂起，B 线程开始往 index 位置的写入节点数据，这时 A 线程恢复现场，执行赋值操作，就把 A 线程的数据给覆盖了；还有 ++size 这个地方也会造成多线程同时扩容等问题。
 
-```text
+```java
 final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
                boolean evict) {
   Node<K,V>[] tab; Node<K,V> p; int n, i;
@@ -2861,35 +2881,35 @@ final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
 
 **安琪拉**:  Java中有HashTable、Collections.synchronizedMap、以及ConcurrentHashMap可以实现线程安全的Map。
 
-HashTable是直接在操作方法上加synchronized关键字，锁住整个数组，粒度比较大，Collections.synchronizedMap是使用Collections集合工具的内部类，通过传入Map封装出一个SynchronizedMap对象，内部定义了一个对象锁，方法内通过对象锁实现；ConcurrentHashMap使用分段锁，降低了锁粒度，让并发度大大提高。
+HashTable 是直接在操作方法上加 synchronized 关键字，锁住整个数组，粒度比较大，Collections.synchronizedMap 是使用 Collections 集合工具的内部类，通过传入 Map 封装出一个 SynchronizedMap 对象，内部定义了一个对象锁，方法内通过对象锁实现；ConcurrentHashMap 使用分段锁，降低了锁粒度，让并发度大大提高。
 
-**面试官**:  那你知道ConcurrentHashMap的分段锁的实现原理吗？
+**面试官**:  那你知道 ConcurrentHashMap 的分段锁的实现原理吗？
 
-**安琪拉**:  【天啦撸! 俄罗斯套娃，一个套一个】ConcurrentHashMap成员变量使用volatile 修饰，免除了指令重排序，同时保证内存可见性，另外使用CAS操作和synchronized结合实现赋值操作，多线程操作只会锁住当前操作索引的节点。
+**安琪拉**:  【天啦撸! 俄罗斯套娃，一个套一个】ConcurrentHashMap 成员变量使用 volatile 修饰，免除了指令重排序，同时保证内存可见性，另外使用 CAS 操作和 synchronized 结合实现赋值操作，多线程操作只会锁住当前操作索引的节点。
 
-如下图，线程A锁住A节点所在链表，线程B锁住B节点所在链表，操作互不干涉。
+如下图，线程 A 锁住 A 节点所在链表，线程 B 锁住 B 节点所在链表，操作互不干涉。
 
 ![img](/Users/Shadowalker/Documents/interview-Java/Java.assets/v2-b0690d70c29b6a57c84cdd9afc08def8_b.jpg)
 
 **面试官**:  你前面提到链表转红黑树是链表长度达到阈值，这个阈值是多少？
 
-**安琪拉**:  阈值是8，红黑树转链表阈值为6
+**安琪拉**:  阈值是 8，红黑树转链表阈值为 6
 
-**面试官**:  为什么是8，不是16，32甚至是7 ？又为什么红黑树转链表的阈值是6，不是8了呢？
+**面试官**:  为什么是 8，不是 16，32 甚至是 7 ？又为什么红黑树转链表的阈值是 6，不是 8 了呢？
 
-**安琪拉**: 【你去问作者啊！天啦撸，biubiubiu 真想213连招】因为作者就这么设计的，哦，不对，因为经过计算，在hash函数设计合理的情况下，发生hash碰撞8次的几率为百万分之6，概率说话。。因为8够用了，至于为什么转回来是6，因为如果hash碰撞次数在8附近徘徊，会一直发生链表和红黑树的转化，为了预防这种情况的发生。
+**安琪拉**: 【你去问作者啊！天啦撸，biubiubiu 真想213连招】因为作者就这么设计的，哦，不对，因为经过计算，在 hash 函数设计合理的情况下，发生 hash 碰撞 8 次的几率为百万分之 6 ，概率说话。。因为 8 够用了，至于为什么转回来是 6，因为如果 hash 碰撞次数在 8 附近徘徊，会一直发生链表和红黑树的转化，为了预防这种情况的发生。
 
-**面试官**:  HashMap内部节点是有序的吗？
+**面试官**:  HashMap 内部节点是有序的吗？
 
-**安琪拉**:  是无序的，根据hash值随机插入
+**安琪拉**:  是无序的，根据 hash 值随机插入
 
-**面试官**:  那有没有有序的Map？
+**面试官**:  那有没有有序的 Map？
 
 **安琪拉**:  LinkedHashMap 和 TreeMap
 
-**面试官**:  跟我讲讲LinkedHashMap怎么实现有序的？
+**面试官**:  跟我讲讲 LinkedHashMap 怎么实现有序的？
 
-**安琪拉**:  LinkedHashMap内部维护了一个单链表，有头尾节点，同时LinkedHashMap节点Entry内部除了继承HashMap的Node属性，还有before 和 after用于标识前置节点和后置节点。可以实现按插入的顺序或访问顺序排序。
+**安琪拉**:  LinkedHashMap 内部维护了一个单链表，有头尾节点，同时 LinkedHashMap 节点 Entry 内部除了继承 HashMap 的 Node 属性，还有 before 和 after 用于标识前置节点和后置节点。可以实现按插入的顺序或访问顺序排序。
 
 ```text
 /**
@@ -2942,29 +2962,13 @@ public static void main(String[] args) {
 
 **面试官**:  跟我讲讲TreeMap怎么实现有序的？
 
-**安琪拉**：TreeMap是按照Key的自然顺序或者Comprator的顺序进行排序，内部是通过红黑树来实现。所以要么key所属的类实现Comparable接口，或者自定义一个实现了Comparator接口的比较器，传给TreeMap用户key的比较。
+**安琪拉**：TreeMap是按照Key的自然顺序或者Comprator的顺序进行排序，内部是通过红黑树来实现。所以要么key所属的类实现 Comparable 接口，或者自定义一个实现了 Comparator 接口的比较器，传给 TreeMap 用户 key 的比较。
 
-**面试官**:  前面提到通过CAS 和 synchronized结合实现锁粒度的降低，你能给我讲讲CAS 的实现以及synchronized的实现原理吗？
+**面试官**:  前面提到通过 CAS 和 synchronized 结合实现锁粒度的降低，你能给我讲讲 CAS 的实现以及synchronized的实现原理吗？
 
 **安琪拉**:  下一期咋们再约时间，OK？
 
 **面试官**:  好吧，回去等通知吧！
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -3150,7 +3154,7 @@ public int hashCode() {
 
 > HashMap 底层数组的长度总是 2 的 n 次方，当 length 总是 2 的 n 次方式，(length - 1) & hash 运算等价于对数组的长度取模，也就是 hash%length，但是 & 比 % 具有更高的效率。
 
-### **03、HashMap 的 put() 方法 HashMap流程图**
+### **03、HashMap 的 put() 方法 HashMap 流程图**
 
 ![HashMap 的 put()方法](./Java.assets/SouthEast.png)
 

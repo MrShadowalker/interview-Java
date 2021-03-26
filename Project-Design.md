@@ -522,21 +522,21 @@ https://zhuanlan.zhihu.com/p/145180618
 
 我们先用ps命令找到对应进程的pid(如果你有好几个目标进程，可以先用top看一下哪个占用比较高)。接着用`top -H -p pid`来找到cpu使用率比较高的一些线程
 
-![v2-1e434ef8c759e54eb0348c31ab7781e7_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-1e434ef8c759e54eb0348c31ab7781e7_b.jpg)
+![v2-1e434ef8c759e54eb0348c31ab7781e7_b](./Project-Design.assets/v2-1e434ef8c759e54eb0348c31ab7781e7_b.jpg)
 
 然后将占用最高的pid转换为16进制`printf '%x\n' pid`得到nid
 
-![v2-3a641aca3a766bab3e67a9c1177704fa_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-3a641aca3a766bab3e67a9c1177704fa_b.png)
+![v2-3a641aca3a766bab3e67a9c1177704fa_b](./Project-Design.assets/v2-3a641aca3a766bab3e67a9c1177704fa_b.png)
 
 接着直接在jstack中找到相应的堆栈信息`jstack pid |grep 'nid' -C5 –color`
 
-![v2-c0a851e537295e314dde5b019bbcef33_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-c0a851e537295e314dde5b019bbcef33_b.jpg)
+![v2-c0a851e537295e314dde5b019bbcef33_b](./Project-Design.assets/v2-c0a851e537295e314dde5b019bbcef33_b.jpg)
 
 可以看到我们已经找到了nid为0x42的堆栈信息，接着只要仔细分析一番即可。
 
 当然更常见的是我们对整个jstack文件进行分析，通常我们会比较关注WAITING和TIMED_WAITING的部分，BLOCKED就不用说了。我们可以使用命令`cat jstack.log | grep "java.lang.Thread.State" | sort -nr | uniq -c`来对jstack的状态有一个整体的把握，如果WAITING之类的特别多，那么多半是有问题啦。
 
-![v2-af12bc41c0a41f414ff92e6b2202a20b_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-af12bc41c0a41f414ff92e6b2202a20b_b.jpg)
+![v2-af12bc41c0a41f414ff92e6b2202a20b_b](./Project-Design.assets/v2-af12bc41c0a41f414ff92e6b2202a20b_b.jpg)
 
 
 
@@ -544,7 +544,7 @@ https://zhuanlan.zhihu.com/p/145180618
 
 当然我们还是会使用jstack来分析问题，但有时候我们可以先确定下gc是不是太频繁，使用`jstat -gc pid 1000`命令来对gc分代变化情况进行观察，1000表示采样间隔(ms)，S0C/S1C、S0U/S1U、EC/EU、OC/OU、MC/MU分别代表两个Survivor区、Eden区、老年代、元数据区的容量和使用量。YGC/YGT、FGC/FGCT、GCT则代表YoungGc、FullGc的耗时和次数以及总耗时。如果看到gc比较频繁，再针对gc方面做进一步分析，具体可以参考一下gc章节的描述。
 
-![v2-2e0a8cd1bc4ee377ca3cf259e358a25f_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-2e0a8cd1bc4ee377ca3cf259e358a25f_b.png)
+![v2-2e0a8cd1bc4ee377ca3cf259e358a25f_b](./Project-Design.assets/v2-2e0a8cd1bc4ee377ca3cf259e358a25f_b.png)
 
 
 
@@ -552,11 +552,11 @@ https://zhuanlan.zhihu.com/p/145180618
 
 针对频繁上下文问题，我们可以使用`vmstat`命令来进行查看
 
-![v2-f0d2f4a39c2a06b0feeb50de7bb9e232_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-f0d2f4a39c2a06b0feeb50de7bb9e232_b.jpg)
+![v2-f0d2f4a39c2a06b0feeb50de7bb9e232_b](./Project-Design.assets/v2-f0d2f4a39c2a06b0feeb50de7bb9e232_b.jpg)
 
 cs(context switch)一列则代表了上下文切换的次数。如果我们希望对特定的pid进行监控那么可以使用 `pidstat -w pid`命令，cswch和nvcswch表示自愿及非自愿切换。
 
-![v2-46015bbb283a8f341a2ffecf4d80bd2b_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-46015bbb283a8f341a2ffecf4d80bd2b_b.jpg)
+![v2-46015bbb283a8f341a2ffecf4d80bd2b_b](./Project-Design.assets/v2-46015bbb283a8f341a2ffecf4d80bd2b_b.jpg)
 
 
 
@@ -564,31 +564,31 @@ cs(context switch)一列则代表了上下文切换的次数。如果我们希�
 
 磁盘问题和cpu一样是属于比较基础的。首先是磁盘空间方面，我们直接使用`df -hl`来查看文件系统状态
 
-![v2-668be37b94dd44420a51c4fbb064403b_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-668be37b94dd44420a51c4fbb064403b_b.png)
+![v2-668be37b94dd44420a51c4fbb064403b_b](./Project-Design.assets/v2-668be37b94dd44420a51c4fbb064403b_b.png)
 
 
 
 更多时候，磁盘问题还是性能上的问题。我们可以通过iostat`iostat -d -k -x`来进行分析
 
-![v2-2aab0a2598ab24fd0d079e537e6c2b40_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-2aab0a2598ab24fd0d079e537e6c2b40_b.jpg)
+![v2-2aab0a2598ab24fd0d079e537e6c2b40_b](./Project-Design.assets/v2-2aab0a2598ab24fd0d079e537e6c2b40_b.jpg)
 
 最后一列`%util`可以看到每块磁盘写入的程度，而`rrqpm/s`以及`wrqm/s`分别表示读写速度，一般就能帮助定位到具体哪块磁盘出现问题了。
 
 另外我们还需要知道是哪个进程在进行读写，一般来说开发自己心里有数，或者用iotop命令来进行定位文件读写的来源。
 
-![v2-1c7debf2a381f9f4b3bc99289a0cc6df_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-1c7debf2a381f9f4b3bc99289a0cc6df_b.jpg)
+![v2-1c7debf2a381f9f4b3bc99289a0cc6df_b](./Project-Design.assets/v2-1c7debf2a381f9f4b3bc99289a0cc6df_b.jpg)
 
 不过这边拿到的是tid，我们要转换成pid，可以通过readlink来找到pid`readlink -f /proc/*/task/tid/../..`。
 
-![v2-2813a13dbd01d5dc09694f472934b655_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-2813a13dbd01d5dc09694f472934b655_b.png)
+![v2-2813a13dbd01d5dc09694f472934b655_b](./Project-Design.assets/v2-2813a13dbd01d5dc09694f472934b655_b.png)
 
 找到pid之后就可以看这个进程具体的读写情况`cat /proc/pid/io`
 
-![v2-744c6d31475cb2182ac3c069c187290a_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-744c6d31475cb2182ac3c069c187290a_b.jpg)
+![v2-744c6d31475cb2182ac3c069c187290a_b](./Project-Design.assets/v2-744c6d31475cb2182ac3c069c187290a_b.jpg)
 
 我们还可以通过lsof命令来确定具体的文件读写情况`lsof -p pid`
 
-![v2-df9d21f65b5c93a32c27243507ef2a70_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-df9d21f65b5c93a32c27243507ef2a70_b.jpg)
+![v2-df9d21f65b5c93a32c27243507ef2a70_b](./Project-Design.assets/v2-df9d21f65b5c93a32c27243507ef2a70_b.jpg)
 
 
 
@@ -596,7 +596,7 @@ cs(context switch)一列则代表了上下文切换的次数。如果我们希�
 
 内存问题排查起来相对比CPU麻烦一些，场景也比较多。主要包括OOM、GC问题和堆外内存。一般来讲，我们会先用`free`命令先来检查一发内存的各种情况。
 
-![v2-21c492cbeb14f09922abd1ff743f8681_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-21c492cbeb14f09922abd1ff743f8681_b.png)
+![v2-21c492cbeb14f09922abd1ff743f8681_b](./Project-Design.assets/v2-21c492cbeb14f09922abd1ff743f8681_b.png)
 
 
 
@@ -610,7 +610,7 @@ JMV中的内存不足，OOM大致可以分为以下几种：
 
 **Exception in thread "main" java.lang.OutOfMemoryError: unable to create new native thread**这个意思是没有足够的内存空间给线程分配java栈，基本上还是线程池代码写的有问题，比如说忘记shutdown，所以说应该首先从代码层面来寻找问题，使用jstack或者jmap。如果一切都正常，JVM方面可以通过指定`Xss`来减少单个thread stack的大小。另外也可以在系统层面，可以通过修改`/etc/security/limits.conf`nofile和nproc来增大os对线程的限制
 
-![v2-f73d457069b1e61a3ec84d91a2647527_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-f73d457069b1e61a3ec84d91a2647527_b.jpg)
+![v2-f73d457069b1e61a3ec84d91a2647527_b](./Project-Design.assets/v2-f73d457069b1e61a3ec84d91a2647527_b.jpg)
 
 
 
@@ -626,11 +626,11 @@ JMV中的内存不足，OOM大致可以分为以下几种：
 
 上述关于OOM和StackOverflow的代码排查方面，我们一般使用JMAP`jmap -dump:format=b,file=filename pid`来导出dump文件
 
-![v2-22c2fc87c5da5b919ffa0998f4373eaa_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-22c2fc87c5da5b919ffa0998f4373eaa_b.png)
+![v2-22c2fc87c5da5b919ffa0998f4373eaa_b](./Project-Design.assets/v2-22c2fc87c5da5b919ffa0998f4373eaa_b.png)
 
 通过mat(Eclipse Memory Analysis Tools)导入dump文件进行分析，内存泄漏问题一般我们直接选Leak Suspects即可，mat给出了内存泄漏的建议。另外也可以选择Top Consumers来查看最大对象报告。和线程相关的问题可以选择thread overview进行分析。除此之外就是选择Histogram类概览来自己慢慢分析，大家可以搜搜mat的相关教程。
 
-![v2-14f818993218e47ad7c6a2e160601ad7_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-14f818993218e47ad7c6a2e160601ad7_b.jpg)
+![v2-14f818993218e47ad7c6a2e160601ad7_b](./Project-Design.assets/v2-14f818993218e47ad7c6a2e160601ad7_b.jpg)
 
 
 
@@ -642,11 +642,11 @@ JMV中的内存不足，OOM大致可以分为以下几种：
 
 gc问题除了影响cpu也会影响内存，排查思路也是一致的。一般先使用jstat来查看分代变化情况，比如youngGC或者fullGC次数是不是太多呀；EU、OU等指标增长是不是异常呀等。线程的话太多而且不被及时gc也会引发oom，大部分就是之前说的`unable to create new native thread`。除了jstack细细分析dump文件外，我们一般先会看下总体线程，通过`pstreee -p pid |wc -l`。
 
-![v2-614b248b4f02ac9defc753deee1d4ec1_1440w](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-614b248b4f02ac9defc753deee1d4ec1_1440w.jpg)
+![v2-614b248b4f02ac9defc753deee1d4ec1_1440w](./Project-Design.assets/v2-614b248b4f02ac9defc753deee1d4ec1_1440w.jpg)
 
 或者直接通过查看`/proc/pid/task`的数量即为线程数量。
 
-![v2-d4442496ed211d2a4cf755efe91bc9eb_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-d4442496ed211d2a4cf755efe91bc9eb_b.png)
+![v2-d4442496ed211d2a4cf755efe91bc9eb_b](./Project-Design.assets/v2-d4442496ed211d2a4cf755efe91bc9eb_b.png)
 
 
 
@@ -656,11 +656,11 @@ gc问题除了影响cpu也会影响内存，排查思路也是一致的。一般
 
 堆外内存溢出往往是和NIO的使用相关，一般我们先通过pmap来查看下进程占用的内存情况`pmap -x pid | sort -rn -k3 | head -30`，这段意思是查看对应pid倒序前30大的内存段。这边可以再一段时间后再跑一次命令看看内存增长情况，或者和正常机器比较可疑的内存段在哪里。
 
-![v2-d9f25ca8e7ecc5a946c03eeda5945602_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-d9f25ca8e7ecc5a946c03eeda5945602_b.jpg)
+![v2-d9f25ca8e7ecc5a946c03eeda5945602_b](./Project-Design.assets/v2-d9f25ca8e7ecc5a946c03eeda5945602_b.jpg)
 
 我们如果确定有可疑的内存端，需要通过gdb来分析`gdb --batch --pid {pid} -ex "dump memory filename.dump {内存起始地址} {内存起始地址+内存块大小}"`
 
-![v2-ff024bbd1c2426f1b3bb2b26f913e346_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-ff024bbd1c2426f1b3bb2b26f913e346_b.png)
+![v2-ff024bbd1c2426f1b3bb2b26f913e346_b](./Project-Design.assets/v2-ff024bbd1c2426f1b3bb2b26f913e346_b.png)
 
 获取dump文件后可用heaxdump进行查看`hexdump -C filename | less`，不过大多数看到的都是二进制乱码。
 
@@ -668,27 +668,27 @@ NMT是Java7U40引入的HotSpot新特性，配合jcmd命令我们就可以看到�
 
 一般对于堆外内存缓慢增长直到爆炸的情况来说，可以先设一个基线`jcmd pid VM.native_memory baseline`。
 
-![v2-f016ed78f373f1c87c458297d22a0afa_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-f016ed78f373f1c87c458297d22a0afa_b.png)
+![v2-f016ed78f373f1c87c458297d22a0afa_b](./Project-Design.assets/v2-f016ed78f373f1c87c458297d22a0afa_b.png)
 
 然后等放一段时间后再去看看内存增长的情况，通过`jcmd pid VM.native_memory detail.diff(summary.diff)`做一下summary或者detail级别的diff。
 
-![v2-c6d139d3ccf88f6fd1da6650b5409be9_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-c6d139d3ccf88f6fd1da6650b5409be9_b.png)
+![v2-c6d139d3ccf88f6fd1da6650b5409be9_b](./Project-Design.assets/v2-c6d139d3ccf88f6fd1da6650b5409be9_b.png)
 
 
 
-![v2-08c855d052d666eca42c543d83624d21_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-08c855d052d666eca42c543d83624d21_b.jpg)
+![v2-08c855d052d666eca42c543d83624d21_b](./Project-Design.assets/v2-08c855d052d666eca42c543d83624d21_b.jpg)
 
 可以看到jcmd分析出来的内存十分详细，包括堆内、线程以及gc(所以上述其他内存异常其实都可以用nmt来分析)，这边堆外内存我们重点关注Internal的内存增长，如果增长十分明显的话那就是有问题了。detail级别的话还会有具体内存段的增长情况，如下图。
 
 
 
-![v2-4b290d6c0480fb6a17bffb92ed82c7b1_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-4b290d6c0480fb6a17bffb92ed82c7b1_b.png)
+![v2-4b290d6c0480fb6a17bffb92ed82c7b1_b](./Project-Design.assets/v2-4b290d6c0480fb6a17bffb92ed82c7b1_b.png)
 
 此外在系统层面，我们还可以使用strace命令来监控内存分配 `strace -f -e "brk,mmap,munmap" -p pid`这边内存分配信息主要包括了pid和内存地址。
 
 
 
-![v2-0790244683164613452271e642865eb8_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-0790244683164613452271e642865eb8_b.jpg)
+![v2-0790244683164613452271e642865eb8_b](./Project-Design.assets/v2-0790244683164613452271e642865eb8_b.jpg)
 
 不过其实上面那些操作也很难定位到具体的问题点，关键还是要看错误日志栈，找到可疑的对象，搞清楚它的回收机制，然后去分析对应的对象。比如DirectByteBuffer分配内存的话，是需要full GC或者手动system.gc来进行回收的(所以最好不要使用`-XX:+DisableExplicitGC`)。那么其实我们可以跟踪一下DirectByteBuffer对象的内存情况，通过`jmap -histo:live pid`手动触发fullGC来看看堆外内存有没有被回收。如果被回收了，那么大概率是堆外内存本身分配的太小了，通过`-XX:MaxDirectMemorySize`进行调整。如果没有什么变化，那就要使用jmap去分析那些不能被gc的对象，以及和DirectByteBuffer之间的引用关系了。
 
@@ -706,7 +706,7 @@ NMT是Java7U40引入的HotSpot新特性，配合jcmd命令我们就可以看到�
 
 
 
-![v2-ecdbf25b737c2c5e6eb5b0fce71a5df6_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-ecdbf25b737c2c5e6eb5b0fce71a5df6_b.jpg)
+![v2-ecdbf25b737c2c5e6eb5b0fce71a5df6_b](./Project-Design.assets/v2-ecdbf25b737c2c5e6eb5b0fce71a5df6_b.jpg)
 
 **触发fullGC**G1中更多的还是mixedGC，但mixedGC可以和youngGC思路一样去排查。触发fullGC了一般都会有问题，G1会退化使用Serial收集器来完成垃圾的清理工作，暂停时长达到秒级别，可以说是半跪了。fullGC的原因可能包括以下这些，以及参数调整方面的一些思路：
 
@@ -750,7 +750,7 @@ tcp队列溢出是个相对底层的错误，它可能会造成超时、rst等�
 
 
 
-![v2-266725989fb22d07137776353611bcd8_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-266725989fb22d07137776353611bcd8_b.jpg)
+![v2-266725989fb22d07137776353611bcd8_b](./Project-Design.assets/v2-266725989fb22d07137776353611bcd8_b.jpg)
 
 如上图所示，这里有两个队列：syns queue(半连接队列）、accept queue（全连接队列）。三次握手，在server收到client的syn后，把消息放到syns queue，回复syn+ack给client，server收到client的ack，如果这时accept queue没满，那就从syns queue拿出暂存的信息放入accept queue中，否则按tcp_abort_on_overflow指示的执行。
 
@@ -762,7 +762,7 @@ tcp_abort_on_overflow 0表示如果三次握手第三步的时候accept queue满
 
 
 
-![v2-73d364b909443ca2f9b7f2f0726644ce_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-73d364b909443ca2f9b7f2f0726644ce_b.jpg)
+![v2-73d364b909443ca2f9b7f2f0726644ce_b](./Project-Design.assets/v2-73d364b909443ca2f9b7f2f0726644ce_b.jpg)
 
 如上图所示，overflowed表示全连接队列溢出的次数，sockets dropped表示半连接队列溢出的次数。
 
@@ -770,7 +770,7 @@ tcp_abort_on_overflow 0表示如果三次握手第三步的时候accept queue满
 
 
 
-![v2-71c2442e1aad628ffce897ab29d3f691_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-71c2442e1aad628ffce897ab29d3f691_b.jpg)
+![v2-71c2442e1aad628ffce897ab29d3f691_b](./Project-Design.assets/v2-71c2442e1aad628ffce897ab29d3f691_b.jpg)
 
 上面看到Send-Q 表示第三列的listen端口上的全连接队列最大为5，第一列Recv-Q为全连接队列当前使用了多少。
 
@@ -812,13 +812,13 @@ RST包表示连接重置，用于关闭一些无用的连接，通常表示异�
 
 
 
-![v2-bbcfe576cd6f5d829f0955404e33c8f4_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-bbcfe576cd6f5d829f0955404e33c8f4_b-8953376.jpg)
+![v2-bbcfe576cd6f5d829f0955404e33c8f4_b](./Project-Design.assets/v2-bbcfe576cd6f5d829f0955404e33c8f4_b-8953376.jpg)
 
 接下来我们通过wireshark打开抓到的包，可能就能看到如下图所示，红色的就表示RST包了。
 
 
 
-![v2-e294dded989ba8ab8b04191186dd93c9_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-e294dded989ba8ab8b04191186dd93c9_b.jpg)
+![v2-e294dded989ba8ab8b04191186dd93c9_b](./Project-Design.assets/v2-e294dded989ba8ab8b04191186dd93c9_b.jpg)
 
 #### **TIME_WAIT和CLOSE_WAIT**
 
@@ -828,7 +828,7 @@ TIME_WAIT和CLOSE_WAIT是啥意思相信大家都知道。在线上时，我们�
 
 
 
-![v2-66f36b6bf391ce93764fe4af133950af_b](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/v2-66f36b6bf391ce93764fe4af133950af_b-8953410.png)
+![v2-66f36b6bf391ce93764fe4af133950af_b](./Project-Design.assets/v2-66f36b6bf391ce93764fe4af133950af_b-8953410.png)
 
 ##### **TIME_WAIT**
 
@@ -1019,15 +1019,15 @@ String[] domain = { referer可接受的信任域名 };　　
 
 　　　　输入正常的程序指定的referer地址正常:
 
-![正常](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/1090320-20180522222956791-520140430.png)
+![正常](./Project-Design.assets/1090320-20180522222956791-520140430.png)
 
  　　　
 
-　　　![正常](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/1090320-20180522223017207-1827249476.png)
+　　　![正常](./Project-Design.assets/1090320-20180522223017207-1827249476.png)
 
 　　　
 
- ![1090320-20180522223041455-69175324](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/1090320-20180522223041455-69175324.png)
+ ![1090320-20180522223041455-69175324](./Project-Design.assets/1090320-20180522223041455-69175324.png)
 
 　　尝试绕过Referer进行攻击　　
 
@@ -1035,19 +1035,19 @@ String[] domain = { referer可接受的信任域名 };　　
 
 
 
- ![1090320-20180522223119552-1160784469](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/1090320-20180522223119552-1160784469.png)
+ ![1090320-20180522223119552-1160784469](./Project-Design.assets/1090320-20180522223119552-1160784469.png)
 
 使用绕过方案2发现无法绕过
 
 
 
- ![1090320-20180522223152634-586394176](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/1090320-20180522223152634-586394176.png)
+ ![1090320-20180522223152634-586394176](./Project-Design.assets/1090320-20180522223152634-586394176.png)
 
 使用绕过方案3发现无法绕过
 
 
 
- ![1090320-20180522223217832-1711247242](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/1090320-20180522223217832-1711247242.png)
+ ![1090320-20180522223217832-1711247242](./Project-Design.assets/1090320-20180522223217832-1711247242.png)
 
 那么此次CSRF的修复还是比较完整的用这种方式!
 
@@ -1080,7 +1080,7 @@ Drools 规则是在 Java 应用程序上运行的，其要执行的步骤顺序�
 
 
 
-![watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70.png)
+![watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70](./Project-Design.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70.png)
 
 ### 使用方式：
 
@@ -1135,7 +1135,7 @@ end
 
 
 
-![watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70-20200827113447491](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70-20200827113447491.png)
+![watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70-20200827113447491](./Project-Design.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70-20200827113447491.png)
 
 ### 测试用例：
 
@@ -1200,7 +1200,7 @@ Aviator的设计目标是轻量级和高性能 ，相比于Groovy、JRuby的笨�
 
 
 
-![watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70-20200827113447210](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70-20200827113447210.png)
+![watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70-20200827113447210](./Project-Design.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70-20200827113447210.png)
 
 ### maven依赖：
 
@@ -1251,7 +1251,7 @@ Aviator可以使用两种函数：内置函数、自定义函数
 
 
 
-![watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70-20200827113447365](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70-20200827113447365.png)
+![watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70-20200827113447365](./Project-Design.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70-20200827113447365.png)
 
 ```java
 package cn.caijiajia.decision.service;
@@ -1325,11 +1325,11 @@ class MultiplyFunction extends AbstractFunction{
 
 （1）操作符列表
 
-![watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70-20200827113447204](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70-20200827113447204.png)
+![watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70-20200827113447204](./Project-Design.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70-20200827113447204.png)
 
 （2）常量和变量
 
-![watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70-20200827113447238](/Users/Shadowalker/Documents/%E5%AD%97%E8%8A%82%E8%B7%B3%E5%8A%A8%E9%9D%A2%E8%AF%95/Project-Design.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70-20200827113447238.png)
+![watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70-20200827113447238](./Project-Design.assets/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lqY2xzeA==,size_16,color_FFFFFF,t_70-20200827113447238.png)
 
 （3）编译表达式
 
