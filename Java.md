@@ -281,7 +281,7 @@ private Node enq(final Node node) {
 
 ### **锁释放-等待线程唤起**
 
-我们来看看当 Thread1 这个时候终于做完了事情，调用了unlock准备释放锁，这个时候发生了什么。
+我们来看看当 Thread1 这个时候终于做完了事情，调用了 unlock 准备释放锁，这个时候发生了什么。
 
 代码：
 
@@ -311,9 +311,11 @@ public final boolean release(int arg) {
 
  
 
-### **羊群效应**
+### **羊群效应/惊群效应**
 
-这里说一下羊群效应，当有多个线程去竞争同一个锁的时候，假设锁被某个线程占用，那么如果有成千上万个线程在等待锁，有一种做法是同时唤醒这成千上万个线程去去竞争锁，这个时候就发生了羊群效应，海量的竞争必然造成资源的剧增和浪费，因此终究只能有一个线程竞争成功，其他线程还是要老老实实的回去等待。**AQS 的 FIFO 的等待队列给解决在锁竞争方面的羊群效应问题提供了一个思路：保持一个 FIFO 队列，队列每个节点只关心其前一个节点的状态，线程唤醒也只唤醒队头等待线程。**其实这个思路已经被应用到了分布式锁的实践中，见：Zookeeper 分布式锁的改进实现方案。
+这里说一下羊群效应，当有多个线程去竞争同一个锁的时候，假设锁被某个线程占用，那么如果有成千上万个线程在等待锁，有一种做法是同时唤醒这成千上万个线程去去竞争锁，这个时候就发生了羊群效应，海量的竞争必然造成资源的剧增和浪费，因此终究只能有一个线程竞争成功，其他线程还是要老老实实的回去等待。**AQS 的 FIFO 的等待队列给解决在锁竞争方面的羊群效应问题提供了一个思路：保持一个 FIFO 队列，队列每个节点只关心其前一个节点的状态，线程唤醒也只唤醒队头等待线程。**
+
+其实这个思路已经被应用到了分布式锁的实践中，见：Zookeeper 分布式锁的改进实现方案。
 
  
 
@@ -502,7 +504,12 @@ i = temp;
 JDK 1.5 之后，在 java.util.concurrent 包中提供了多种并发容器类来改进同步容器类的性能。其中最主要的就是 ConcurrentHashMap。
 
 **1、ConcurrentHashMap：**
- ConcurrentHashMap 就是一个线程安全的 hash 表。我们知道 HashMap 是线程不安全的，HashTable 加了锁，是线程安全的，因此它效率低。HashTable 加锁就是将整个 hash 表锁起来，当有多个线程访问时，同一时间只能有一个线程访问，并行变成串行，因此效率低。所以JDK1.5 后提供了 ConcurrentHashMap，它采用了锁分段机制。
+
+ConcurrentHashMap 就是一个线程安全的 hash 表。我们知道 HashMap 是线程不安全的，HashTable 加了锁，是线程安全的，因此它效率低。
+
+HashTable 加锁就是将整个 hash 表锁起来，当有多个线程访问时，同一时间只能有一个线程访问，并行变成串行，因此效率低。
+
+所以JDK1.5 后提供了 ConcurrentHashMap，它采用了锁分段机制。
 
 ![ConcurrentHashMap锁分段](https:////upload-images.jianshu.io/upload_images/11531502-046e702837bca8cd.png)
 
@@ -514,7 +521,8 @@ JDK 1.5 之后，在 java.util.concurrent 包中提供了多种并发容器类�
 
 
 **2、用法:**
- java.util.concurrent 包还提供了设计用于多线程上下文中的 Collection 实现： ConcurrentHashMap、ConcurrentSkipListMap、ConcurrentSkipListSet、CopyOnWriteArrayList 和 CopyOnWriteArraySet。当期望许多线程访问一个给 定 collection 时，ConcurrentHashMap 通常优于同步的 HashMap， ConcurrentSkipListMap 通常优于同步的 TreeMap。当期望的读数和遍历远远 大于列表的更新数时，CopyOnWriteArrayList 优于同步的 ArrayList。下面看看部分用法：
+
+java.util.concurrent 包还提供了设计用于多线程上下文中的 Collection 实现： ConcurrentHashMap、ConcurrentSkipListMap、ConcurrentSkipListSet、CopyOnWriteArrayList 和 CopyOnWriteArraySet。当期望许多线程访问一个给 定 collection 时，ConcurrentHashMap 通常优于同步的 HashMap， ConcurrentSkipListMap 通常优于同步的 TreeMap。当期望的读数和遍历远远 大于列表的更新数时，CopyOnWriteArrayList 优于同步的 ArrayList。下面看看部分用法：
 
 ```java
 public class TestConcurrent {
@@ -1220,7 +1228,7 @@ public class ReadWriteLock {
 
 
 
-### ***\*ReentrantReadWriteLock的结构\****
+### ReentrantReadWriteLock的结构
 
 `ReentrantReadWriteLock`的核心是由一个基于AQS的同步器`Sync`构成，然后由其扩展出`ReadLock`（共享锁），`WriteLock`（排它锁）所组成。
 
@@ -1240,11 +1248,11 @@ public ReentrantReadWriteLock(boolean fair) {
 
 
 
-### **Sync的实现\**
+### Sync的实现
 
 `sync`是读写锁实现的核心，`sync`是基于AQS实现的，在AQS中核心是state字段和双端队列，那么一个一个问题来分析。
 
-#### **Sync如何同时表示读锁与写锁？\**
+#### Sync如何同时表示读锁与写锁？
 
 **清单2：读写锁状态获取**
 
@@ -1415,7 +1423,7 @@ final int fullTryAcquireShared(Thread current) {
 
 
 
-### ***\*读锁的释放\****
+### 读锁的释放
 
 **清单6：读锁释放入口**
 
@@ -1483,7 +1491,7 @@ protected final boolean tryReleaseShared(int unused) {
 
 
 
-### ***\*写锁的获取\****
+### 写锁的获取
 
 **清单8：写锁的获取入口**
 
@@ -1541,7 +1549,7 @@ protected final boolean tryAcquire(int acquires) {
 
 
 
-### ***\*写锁的释放\****
+### 写锁的释放
 
 #### **清单10：写锁的释放入口**
 
@@ -1586,9 +1594,9 @@ protected final boolean tryRelease(int releases) {
 
 
 
-### ***\*一些其他问题：\****
+### 一些其他问题：
 
-#### ***\*锁降级操作哪里体现？\****
+#### 锁降级操作哪里体现？
 
 锁降级操作指的是一个线程获取写锁之后再获取读锁，然后读锁释放掉写锁的过程。在`tryAcquireShared(arg)`获取读锁的代码中有如下代码。
 

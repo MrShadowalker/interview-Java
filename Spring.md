@@ -1242,7 +1242,7 @@ public class MyTest {
 
 [![复制代码](Spring.assets/copycode-9725481.gif)](javascript:void(0);)
 
-```
+```java
 String name = "shaqiang";
 
 if(name.equals("saobin")){
@@ -1264,7 +1264,7 @@ if(name.equals("saobin")){
 
 [![复制代码](Spring.assets/copycode-9725481.gif)](javascript:void(0);)
 
-```
+```java
 import org.Springframework.beans.factory.InitializingBean;
 
 /**
@@ -1287,7 +1287,7 @@ public interface NameHandler extends InitializingBean {
 
 [![复制代码](Spring.assets/copycode-9725481.gif)](javascript:void(0);)
 
-```
+```java
 import org.Springframework.util.StringUtils;
 
 import java.util.HashMap;
@@ -1319,10 +1319,8 @@ public class NameSetFactory {
         }
         strategyMap.put(name,handler);
     }
-}
+}[![复制代码](Spring.assets/copycode-9725481.gif)](javascript:void(0);)
 ```
-
-[![复制代码](Spring.assets/copycode-9725481.gif)](javascript:void(0);)
 
 ### 1.3 为各成员实现各自的具体策略实现类
 
@@ -1330,7 +1328,7 @@ public class NameSetFactory {
 
 [![复制代码](Spring.assets/copycode-9725481.gif)](javascript:void(0);)
 
-```
+```java
 import org.Springframework.stereotype.Component;
 
 /**
@@ -1358,7 +1356,7 @@ public class SaoBinHandler implements NameHandler {
 
 [![复制代码](Spring.assets/copycode-9725481.gif)](javascript:void(0);)
 
-```
+```java
 import org.Springframework.stereotype.Component;
 
 /**
@@ -1386,7 +1384,7 @@ public class ShaQiangHandler implements NameHandler {
 
 [![复制代码](Spring.assets/copycode-9725481.gif)](javascript:void(0);)
 
-```
+```java
 import org.Springframework.stereotype.Component;
 
 /**
