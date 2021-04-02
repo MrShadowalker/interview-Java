@@ -1363,14 +1363,14 @@ protected final int tryAcquireShared(int unused) {
 
 ```java
 final int fullTryAcquireShared(Thread current) {
-           HoldCounter rh = null;
-           // 最外层嵌套循环
-           for (;;) {
-               int c = getState();
-               // 操作5：存在写锁，且写锁并非当前线程则直接返回失败
-               if (exclusiveCount(c) != 0) {
-                   if (getExclusiveOwnerThread() != current)
-                       return -1;
+    HoldCounter rh = null;
+    // 最外层嵌套循环
+    for (;;) {
+        int c = getState();
+        // 操作5：存在写锁，且写锁并非当前线程则直接返回失败
+        if (exclusiveCount(c) != 0) {
+            if (getExclusiveOwnerThread() != current)
+                return -1;
                    // else we hold the exclusive lock; blocking here
                    // would cause deadlock.
                // 操作6：如果当前线程是重入读锁则放行
