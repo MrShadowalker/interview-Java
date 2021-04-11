@@ -45,9 +45,9 @@ Java 程序在运行时，会为JVM单独划出一块内存区域，而这块内
 
 ![img](./JVM.assets/1527989-20181120213515733-877630399.png)
 
-在上图中可以看到，如果时选用引用计数算法，object5, object6, object7之间互相引用，所以无法被回收。但是如果选用了可达性分析算法，虽然他们之间时相互引用，但是他们没有任何引用链和GC Roots连接，所以是可回收对象。
+在上图中可以看到，如果选用引用计数算法，object5, object6, object7 之间互相引用，所以无法被回收。但是如果选用了可达性分析算法，虽然他们之间时相互引用，但是他们没有任何引用链和 GC Roots 连接，所以是可回收对象。
 
-GC Roots对象一般包括有：
+GC Roots 对象一般包括有：
 
 1. 虚拟机栈（栈帧中本地变量表）中引用的对象；
 
@@ -124,13 +124,13 @@ Concurrent Mark Sweep，在进行垃圾回收的时候，应用程序也可以�
 
 
 
-## GC时间长如何发现，如何处理
+## GC 时间长如何发现，如何处理
 
 ### 1.对象创建的速度过高
 
-如果应用创建对象的速度非常高，随之而来的就是GC频率也会变快，然后会导致GC的停顿时间变长。所以说，优化代码以降低对象的创建速率是降低GC停顿时间最有效的方法。这可能是一件非常耗时的事情，但是却非常值得去做。可以使用JProfiler, YourKit, JVisualVM这样的性能监控工具来帮助优化对象的创建速度，这些工具会分析出：应用到底创建了哪些对象？对象创建的速度是多少？这些对象占用了多少内存空间？是谁创建的这些对象？所谓擒贼先擒王，因此首先要考虑优化那些占用内存最多的对象。
+如果应用创建对象的速度非常高，随之而来的就是 GC 频率也会变快，然后会导致 GC 的停顿时间变长。所以说，优化代码以降低对象的创建速率是降低GC停顿时间最有效的方法。这可能是一件非常耗时的事情，但是却非常值得去做。可以使用 JProfiler，YourKit， JVisualVM 这样的性能监控工具来帮助优化对象的创建速度，这些工具会分析出：应用到底创建了哪些对象？对象创建的速度是多少？这些对象占用了多少内存空间？是谁创建的这些对象？所谓擒贼先擒王，因此首先要考虑优化那些占用内存最多的对象。
 
-tip1：如何知道对象的创建速度？[把GC日志上传到gceasy.io](http://xn--gcgceasy-m39lv3gosmhw6bulhx9l.io/)，这个工具会告诉你对象的创建速度，下图中‘Object Stats’里面的 ‘Avg creation rate’ 就是对象的平均创建速度。要让这个值尽可能的小。
+tip1：如何知道对象的创建速度？[把GC日志上传到gceasy.io](http://xn--gcgceasy-m39lv3gosmhw6bulhx9l.io/)，这个工具会告诉你对象的创建速度，下图中`Object Stats`里面的`Avg creation rate` 就是对象的平均创建速度。要让这个值尽可能的小。
 
 ![在这里插入图片描述](JVM.assets/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy83NTI1NDE5LTU2YmQyMmIxYmJhZTQwZTA.png)
 
@@ -187,7 +187,7 @@ b：减少机器上运行的进程数，以释放更多的内存
 
 c：减少应用分配的内存（不推荐，可能会引起其他问题）
 
-### 5. GC线程数过少
+### 5. GC 线程数过少
 
 GC 日志中的每一个 GC 事件都会打印 user、sys、real time，比如：
 
@@ -203,9 +203,9 @@ GC 日志中的每一个 GC 事件都会打印 user、sys、real time，比如�
 
 如果系统的 IO 负载很重（大量的文件读写）也会导致 GC 停顿时间过长。这些 IO 读写不一定是你的应用引起的，可能是机器上其他的进程导致的，但是这仍然会导致你的应用的停顿时间变长。
 
-这里有个文章详细的说明了这种情况：https://engineering.linkedin.com/blog/2016/02/eliminating-large-jvm-gc-pauses-caused-by-background-io-traffic。
+这里有个文章详细的说明了这种情况：https://engineering.linkedin.com/blog/2016/02/eliminating-large-JVM-gc-pauses-caused-by-background-io-traffic。
 
-当IO负载很重的时候，real time 会明显比 user time 长，比如：
+当 IO 负载很重的时候，real time 会明显比 user time 长，比如：
 
 ```java
 [Times: user=0.20 sys=0.01, real=18.45 secs]
@@ -217,15 +217,15 @@ a：如果是你的应用导致的，优化你的代码
 
 b：如果是别的进程导致的，把它杀掉或者迁走
 
-c：把你的应用迁到一个IO负载小的机器上
+c：把你的应用迁到一个 IO 负载小的机器上
 
-tip：如何来监控IO负载？
+tip：如何来监控 IO 负载？
 
-在linux上可以用sar命令来监控IO的负载：sar -d -p 1，这个命令每隔一秒会打印一次每秒的读写数量。
+在 linux 上可以用 sar 命令来监控IO的负载：sar -d -p 1，这个命令每隔一秒会打印一次每秒的读写数量。
 
 这里有sar的详细的用法：https://www.linuxtechi.com/generate-cpu-memory-io-report-sar-command/
 
-### 7.显式调用了System.gc()
+### 7.显式调用了 System.gc()
 
 当调用了 System.gc() 或者是 Runtime.getRuntime().gc() 以后，就会导致 FullGC。FullGC 的过程当中，整个 JVM 是暂停的（所有的应用都被暂停掉）。System.gc() 可能是以下几种情况产生的：
 
@@ -242,28 +242,32 @@ d：如果你的应用使用了RMI，RMI会每隔一段时间调用一次System.
 – Dsun.rmi.dgc.client.gcInterval=n
 ```
 
-要评估一下，是否真的有必要明确调用System.gc()。如果没有必要，就不要调用。同时，你也可以通过给JVM传递‘-XX:+DisableExplicitGC‘参数来禁用掉System.gc()。
+要评估一下，是否真的有必要明确调用 System.gc()。如果没有必要，就不要调用。
 
-关于System.gc()的问题和解决方案可以参考：https://blog.gceasy.io/2016/11/22/system-gc/
+同时，你也可以通过给JVM传递‘-XX:+DisableExplicitGC‘参数来禁用掉System.gc()。
 
-tip：如何知道是否手动调用了System.gc()？可以把GC日志上传到gceasy，如果有手动调用System.gc()，在‘GC Causes’中就会展示出来，如图：
+关于 System.gc() 的问题和解决方案可以参考：https://blog.gceasy.io/2016/11/22/system-gc/
+
+tip：如何知道是否手动调用了 System.gc()？可以把 GC 日志上传到 gceasy，如果有手动调用 System.gc()，在 `GC Causes` 中就会展示出来，如图：
 
 ![在这里插入图片描述](JVM.assets/aHR0cHM6Ly91cGxvYWQtaW1hZ2VzLmppYW5zaHUuaW8vdXBsb2FkX2ltYWdlcy83NTI1NDE5LTY4OWRkYmUzMjRiOWYxNjU.png)
 
-上图说明发生了4次System.gc()调用。
+上图说明发生了 4 次 System.gc() 调用。
 
 ### 8. 堆内存过大
 
-堆内存过大也会导致GC停顿时间过长，如果堆内存过大，那么堆中就会累计过多的垃圾，当发生 FullGC 要回收所有的垃圾的时候，就会花费更多的时间。如果你的 JVM 的堆内存有18G，可以考虑分成3个6G的 JVM 实例，堆内存小会降低GC的停顿时间。
+堆内存过大也会导致 GC 停顿时间过长，如果堆内存过大，那么堆中就会累计过多的垃圾，当发生 FullGC 要回收所有的垃圾的时候，就会花费更多的时间。如果你的 JVM 的堆内存有 18G，可以考虑分成 3 个 6G 的 JVM 实例，堆内存小会降低 GC 的停顿时间。
 注意：在应用以上任何一种策略之前，都需要做好测试，这些策略对你可能都不适用，如果使用不当可能带来负面效果。
 
-### 9.GC任务分配不均
+### 9. GC 任务分配不均
 
-就算有多个GC线程，线程之间的任务分配可能也不是均衡的，这个可能有很多种原因：
+就算有多个 GC 线程，线程之间的任务分配可能也不是均衡的，这个可能有很多种原因：
 
 a：扫描大的线性的数据结构目前是无法并行的。
 
-b：有些GC事件只发生在单个线程上，比如CMS中的‘concurrent mode failure’。如果你碰巧使用的CMS，可以使用-XX:+CMSScavengeBeforeRemark 这个参数，它可以让多个GC线程之间任务分配的更平均。
+b：有些 GC 事件只发生在单个线程上，比如 CMS 中的 `concurrent mode failure`。
+
+如果你碰巧使用的 CMS，可以使用-XX:+CMSScavengeBeforeRemark 这个参数，它可以让多个GC线程之间任务分配的更平均。
 
 
 
@@ -285,19 +289,19 @@ b：有些GC事件只发生在单个线程上，比如CMS中的‘concurrent mod
 
 **1）什么是OOM？** 
 
-OOM，全称“Out Of Memory”，翻译成中文就是“内存用完了”，来源于java.lang.OutOfMemoryError。
+OOM，全称“Out Of Memory”，翻译成中文就是“内存用完了”，来源于 Java.lang.OutOfMemoryError。
 
 看下关于的官方说明： Thrown when the Java Virtual Machine cannot allocate an object because it is out of memory, and no more memory could be made available by the garbage collector. 意思就是说，当JVM因为没有足够的内存来为对象分配空间并且垃圾回收器也已经没有空间可回收时，就会抛出这个error（注：非exception，因为这个问题已经严重到不足以被应用处理）。
 
  
 
-**2）为什么会OOM？**
+**2）为什么会 OOM？**
 
 为什么会没有内存了呢？原因不外乎有两点：
 
 1）分配的少了：比如虚拟机本身可使用的内存（一般通过启动时的VM参数指定）太少。
 
-2）应用用的太多，并且用完没释放，浪费了。此时就会造成内存泄露或者内存溢出。
+2）应用用得太多，并且用完没释放，浪费了。此时就会造成内存泄露或者内存溢出。
 
  
 
@@ -307,36 +311,35 @@ OOM，全称“Out Of Memory”，翻译成中文就是“内存用完了”，�
 
  
 
-在之前没有垃圾自动回收的日子里，比如C语言和C++语言，我们必须亲自负责内存的申请与释放操作，如果申请了内存，用完后又忘记了释放，比如C++中的new了但是没有delete，那么就可能造成内存泄露。偶尔的内存泄露可能不会造成问题，而大量的内存泄露可能会导致内存溢出。
+在之前没有垃圾自动回收的日子里，比如 C 语言和 C++ 语言，我们必须亲自负责内存的申请与释放操作，如果申请了内存，用完后又忘记了释放，比如 C++ 中的 new 了但是没有 delete，那么就可能造成内存泄露。偶尔的内存泄露可能不会造成问题，而大量的内存泄露可能会导致内存溢出。
 
-而在 Java 语言中，由于存在了垃圾自动回收机制，所以，我们一般不用去主动释放不用的对象所占的内存，也就是理论上来说，是不会存在“内存泄露”的。但是，如果编码不当，比如，将某个对象的引用放到了全局的Map中，虽然方法结束了，但是由于垃圾回收器会根据对象的引用情况来回收内存，导致该对象不能被及时的回收。如果该种情况出现次数多了，就会导致内存溢出，比如系统中经常使用的缓存机制。Java中的内存泄露，不同于C++中的忘了delete，往往是逻辑上的原因泄露。
+而在 Java 语言中，由于存在了垃圾自动回收机制，所以，我们一般不用去主动释放不用的对象所占的内存，也就是理论上来说，是不会存在“内存泄露”的。但是，如果编码不当，比如，将某个对象的引用放到了全局的 Map 中，虽然方法结束了，但是由于垃圾回收器会根据对象的引用情况来回收内存，导致该对象不能被及时的回收。如果该种情况出现次数多了，就会导致内存溢出，比如系统中经常使用的缓存机制。Java 中的内存泄露，不同于 C++ 中的忘了 delete，往往是逻辑上的原因泄露。
 
  
 
-**3）OOM的类型**
+**3）OOM 的类型**
 
-JVM内存模型：
+JVM 内存模型：
 
-按照JVM规范，JAVA虚拟机在运行时会管理以下的内存区域：
+按照 JVM 规范，Java 虚拟机在运行时会管理以下的内存区域：
 
 - **程序计数器**：当前线程执行的字节码的行号指示器，线程私有
-- **JAVA 虚拟机栈**：Java 方法执行的内存模型，每个 Java 方法的执行对应着一个栈帧的进栈和出栈的操作。
-- **本地方法栈**：类似“ JAVA虚拟机栈 ”，但是为 native 方法的运行提供内存环境。
-- **JAVA 堆**：对象内存分配的地方，内存垃圾回收的主要区域，所有线程共享。可分为新生代，老生代。
+- **Java 虚拟机栈**：Java 方法执行的内存模型，每个 Java 方法的执行对应着一个栈帧的进栈和出栈的操作。
+- **本地方法栈**：类似“ Java 虚拟机栈 ”，但是为 native 方法的运行提供内存环境。
+- **Java 堆**：对象内存分配的地方，内存垃圾回收的主要区域，所有线程共享。可分为新生代，老生代。
 - **方法区**：用于存储已经被JVM加载的类信息、常量、静态变量、即时编译器编译后的代码等数据。Hotspot中的“永久代”。
 - **运行时常量池**：方法区的一部分，存储常量信息，如各种字面量、符号引用等。
-- **直接内存**：并不是 JVM 运行时数据区的一部分， 可直接访问的内存， 比如NIO会用到这部分。
+- **直接内存**：并不是 JVM 运行时数据区的一部分， 可直接访问的内存， 比如 NIO 会用到这部分。
 
-按照JVM规范，除了程序计数器不会抛出OOM外，其他各个内存区域都可能会抛出OOM。
+按照 JVM 规范，除了程序计数器不会抛出 OOM 外，其他各个内存区域都可能会抛出 OOM。
 
  
 
 最常见的OOM情况有以下三种：
 
-- java.lang.OutOfMemoryError: Java heap space ———>Java 堆内存溢出，此种情况最常见，一般由于内存泄露或者堆的大小设置不当引起。对于内存泄露，需要通过内存监控软件查找程序中的泄露代码，而堆大小可以通过虚拟机参数-Xms,-Xmx等修改。
-- java.lang.OutOfMemoryError: PermGen space ———>Java 永久代溢出，即方法区溢出了，一般出现于大量 Class 或者 jsp 页面，或者采用 cglib 等反射机制的情况，因为上述情况会产生大量的 Class 信息存储于方法区。此种情况可以通过更改方法区的大小来解决，使用类似-XX:PermSize=64m -XX:MaxPermSize=256m的形式修改。另外，过多的常量尤其是字符串也会导致方法区溢出。
-- java.lang.StackOverflowError ------> 不会抛OOM error，但也是比较常见的 Java 内存溢出。JAVA虚拟机栈溢出，一般是由于程序中存在死循环或者深度递归调用造成的，栈大小设置太小也会出现此种溢出。可以通过虚拟机参数-Xss来设置栈的大小。
-
+- Java.lang.OutOfMemoryError: Java heap space ———>Java 堆内存溢出，此种情况最常见，一般由于内存泄露或者堆的大小设置不当引起。对于内存泄露，需要通过内存监控软件查找程序中的泄露代码，而堆大小可以通过虚拟机参数-Xms,-Xmx等修改。
+- Java.lang.OutOfMemoryError: PermGen space ———>Java 永久代溢出，即方法区溢出了，一般出现于大量 Class 或者 jsp 页面，或者采用 cglib 等反射机制的情况，因为上述情况会产生大量的 Class 信息存储于方法区。此种情况可以通过更改方法区的大小来解决，使用类似-XX:PermSize=64m -XX:MaxPermSize=256m的形式修改。另外，过多的常量尤其是字符串也会导致方法区溢出。
+- Java.lang.StackOverflowError ------> 不会抛OOM error，但也是比较常见的 Java 内存溢出。Java虚拟机栈溢出，一般是由于程序中存在死循环或者深度递归调用造成的，栈大小设置太小也会出现此种溢出。可以通过虚拟机参数-Xss来设置栈的大小。
 
 **4）OOM分析--heapdump**
 
@@ -350,7 +353,7 @@ dump堆内存信息后，需要对dump出的文件进行分析，从而找到OOM
 
 **mat**: eclipse memory analyzer, 基于eclipse RCP的内存分析工具。详细信息参见：http://www.eclipse.org/mat/，推荐使用。
 
-**jhat**：JDK自带的java heap analyze tool，可以将堆中的对象以html的形式显示出来，包括对象的数量，大小等等，并支持对象查询语言OQL，分析相关的应用后，可以通过http://localhost:7000来访问分析结果。不推荐使用，因为在实际的排查过程中，一般是先在生产环境 dump出文件来，然后拉到自己的开发机器上分析，所以，不如采用高级的分析工具比如前面的mat来的高效。
+**jhat**：JDK自带的Java heap analyze tool，可以将堆中的对象以html的形式显示出来，包括对象的数量，大小等等，并支持对象查询语言OQL，分析相关的应用后，可以通过http://localhost:7000来访问分析结果。不推荐使用，因为在实际的排查过程中，一般是先在生产环境 dump出文件来，然后拉到自己的开发机器上分析，所以，不如采用高级的分析工具比如前面的mat来的高效。
 这个链接：http://www.ibm.com/developerworks/cn/opensource/os-cn-ecl-ma/index.html中提供了一个采用mat分析的例子 。
 
 注意：因为JVM规范没有对dump出的文件的格式进行定义，所以不同的虚拟机产生的dump文件并不是一样的。在分析时，需要针对不同的虚拟机的输出采用不同的分析工具（当然，有的工具可以兼容多个虚拟机的格式）。IBM HeapAnalyzer也是分析heap的一个常用的工具。
@@ -366,9 +369,9 @@ Eclipse 的 Debug 页面中设置虚拟机参数
 代码：
 -verbose:gc -Xms20M -Xmx20M Xmn10M -XX:+PrintGCDaetails -XX：SurvivorRatio=8
 
-JAVA堆的大小设置最小值 -Xms 
+Java堆的大小设置最小值 -Xms 
 
-JAVA堆的大小设置最大值 -Xmx
+Java堆的大小设置最大值 -Xmx
 
  
 
@@ -404,7 +407,7 @@ HotSpot 虚拟机不区分 虚拟机栈 和 本地方法栈，因此Xoss（设�
 
 当前主流 AOP 框架 (Spring Hibernate 等) 都会使用到 CFLib 这类字节码技术对类进行加强，增强的类越多，就越需要越大的方法区来保证动态生成的Class 可以载入内存。在动态生成大量 Class 的应用中，需要特别注意类的回收状况。
 
-注：除了使用GCLib字节码增强以外，常见的还有 JSP 或者动态产生 JSP 的应用文件（JSP在第一次运行时要编译为JAVA类）或是基于 OSGi（注：  OSGi(Open Service Gateway Initiative)技术，是Java动态化模块化系统的一系列规范。OSGi一方面指维护OSGi规范的OSGI官方联盟，另一方面指的是该组织维护的基于Java语言的服务(业务)规范。简单来说，OSGi可以认为是Java平台的模块层。） 的应用即使是同一个类呗不同的加载器加载也会视为不同的类。
+注：除了使用GCLib字节码增强以外，常见的还有 JSP 或者动态产生 JSP 的应用文件（JSP在第一次运行时要编译为Java类）或是基于 OSGi（注：  OSGi(Open Service Gateway Initiative)技术，是Java动态化模块化系统的一系列规范。OSGi一方面指维护OSGi规范的OSGI官方联盟，另一方面指的是该组织维护的基于Java语言的服务(业务)规范。简单来说，OSGi可以认为是Java平台的模块层。） 的应用即使是同一个类呗不同的加载器加载也会视为不同的类。
 
  
 
@@ -437,11 +440,9 @@ DirectMemory 可通过-XX：MaxDirectMemorySize 指定。
  }
 ```
 
-
-
   
 
-       这段代码很简单，从功能的角度来看，就是实际执行了一个fork()，生成一个新的进程，从逻辑的角度看，就是判断了如果fork()返回的是0则打印相关语句，然后函数最后再打印一句表示执行完整个testfork()函数。代码的执行逻辑和功能上看就是如此简单，一共四行代码，从上到下一句一句执行而已，完全看不出来哪里有体现出用户态和进程态的概念。
+    这段代码很简单，从功能的角度来看，就是实际执行了一个fork()，生成一个新的进程，从逻辑的角度看，就是判断了如果fork()返回的是0则打印相关语句，然后函数最后再打印一句表示执行完整个testfork()函数。代码的执行逻辑和功能上看就是如此简单，一共四行代码，从上到下一句一句执行而已，完全看不出来哪里有体现出用户态和进程态的概念。
 
 如果说前面两种是静态观察的角度看的话，我们还可以从动态的角度来看这段代码，即它被转换成CPU执行的指令后加载执行的过程，这时这段程序就是一个动态执行的指令序列。而究竟加载了哪些代码，如何加载就是和操作系统密切相关了。
 
@@ -457,7 +458,9 @@ DirectMemory 可通过-XX：MaxDirectMemorySize 指定。
 
 3）用户态和内核态
 
-        现在我们从特权级的调度来理解用户态和内核态就比较好理解了，当程序运行在3级特权级上时，就可以称之为运行在用户态，因为这是最低特权级，是普通的用户进程运行的特权级，大部分用户直接面对的程序都是运行在用户态；反之，当程序运行在0级特权级上时，就可以称之为运行在内核态。
+```txt
+现在我们从特权级的调度来理解用户态和内核态就比较好理解了，当程序运行在3级特权级上时，就可以称之为运行在用户态，因为这是最低特权级，是普通的用户进程运行的特权级，大部分用户直接面对的程序都是运行在用户态；反之，当程序运行在0级特权级上时，就可以称之为运行在内核态。
+```
 
 虽然用户态下和内核态下工作的程序有很多差别，但最重要的差别就在于特权级的不同，即权力的不同。运行在用户态下的程序不能直接访问操作系统内核数据结构和程序，比如上面例子中的testfork()就不能直接调用sys_fork()，因为前者是工作在用户态，属于用户态程序，而sys_fork()是工作在内核态，属于内核态程序。
 
@@ -482,6 +485,7 @@ c. 外围设备的中断
         当外围设备完成用户请求的操作后，会向CPU发出相应的中断信号，这时CPU会暂停执行下一条即将要执行的指令转而去执行与中断信号对应的处理程序，如果先前执行的指令是用户态下的程序，那么这个转换的过程自然也就发生了由用户态到内核态的切换。比如硬盘读写操作完成，系统会切换到硬盘读写的中断处理程序中执行后续操作等。
 
  
+
 
 
 这3种方式是系统在运行时由用户态转到内核态的最主要方式，其中系统调用可以认为是用户进程主动发起的，异常和外围设备中断则是被动的。
@@ -547,23 +551,23 @@ int 0x80即所谓的系统调用执行的软中断，此条指令执行完之后
 
 
 
-## 有没有JVM调优的经验、如何JVM 调优，Dump 日志如何分析
+## 有没有 JVM 调优的经验、如何 JVM 调优，Dump 日志如何分析
 
 
 
 ## 强引用 软引用 弱引用 虚引用
 
-### 在Java中提供了四个级别的引用：强引用，软引用，弱引用和虚引用。
+### 在 Java 中提供了四个级别的引用：强引用，软引用，弱引用和虚引用。
 
-在这四个引用类型中，只有强引用FinalReference类是包内可见，其他三种引用类型均为public，可以在应用程序中直接使用。
+在这四个引用类型中，只有强引用 FinalReference 类是包内可见，其他三种引用类型均为 public，可以在应用程序中直接使用。
 
-#### 1.强引用Java中的引用，类似C语言中最难的指针。
+#### 1. 强引用 Java 中的引用，类似 C 语言中最难的指针。
 
 通过引用，可以对堆中的对象进行操作。
 
 如：StringBuffer stringBuffer = new StringBuffer("Helloword");
 
-变量str指向StringBuffer实例所在的堆空间，通过str可以操作该对象。
+变量 str 指向 StringBuffer 实例所在的堆空间，通过 str 可以操作该对象。
 
 **强引用的特点：**
 
@@ -571,15 +575,15 @@ int 0x80即所谓的系统调用执行的软中断，此条指令执行完之后
 
 - 引用所指向的对象在任何时候都不会被系统回收。
 
-- JVM宁愿抛出OOM异常，也不会回收强引用所指向的对象。
+- JVM 宁愿抛出 OOM 异常，也不会回收强引用所指向的对象。
 
 - 强引用可能导致内存泄漏。
 
-#### 2.软引用软引用是除了强引用外，最强的引用类型。
+#### 2. 软引用软引用是除了强引用外，最强的引用类型。
 
-可以通过java.lang.ref.SoftReference使用软引用。一个持有软引用的对象，不会被JVM很快回收，JVM会根据当前堆的使用情况来判断何时回收。当堆使用率临近阈值时，才会去回收软引用的对象。
+可以通过 Java.lang.ref.SoftReference 使用软引用。一个持有软引用的对象，不会被 JVM 很快回收，JVM 会根据当前堆的使用情况来判断何时回收。当堆使用率临近阈值时，才会去回收软引用的对象。
 
-因此，软引用可以用于实现对内存敏感的高速缓存。SoftReference的特点是它的一个实例保存对一个Java对象的软引用， 该软引用的存在不妨碍垃圾收集线程对该Java对象的回收。也就是说，一旦SoftReference保存了对一个Java对象的软引用后，在垃圾线程对 这个Java对象回收前，SoftReference类所提供的get()方法返回Java对象的强引用。一旦垃圾线程回收该Java对象之后，get()方法将返回null。下面举一个例子说明软引用的使用方法。在你的IDE设置参数 -Xmx2m -Xms2m规定堆内存大小为2m。
+因此，软引用可以用于实现对内存敏感的高速缓存。SoftReference 的特点是它的一个实例保存对一个 Java 对象的软引用， 该软引用的存在不妨碍垃圾收集线程对该 Java 对象的回收。也就是说，一旦 SoftReference 保存了对一个 Java 对象的软引用后，在垃圾线程对这个 Java 对象回收前，SoftReference 类所提供的get() 方法返回 Java 对象的强引用。一旦垃圾线程回收该 Java 对象之后，get() 方法将返回 null。下面举一个例子说明软引用的使用方法。在你的 IDE 设置参数 -Xmx2m -Xms2m 规定堆内存大小为 2m。
 
 ```java
 @Test    
@@ -597,9 +601,9 @@ public void test3(){
 
 运行结果：是否被回收cn.zyzpp.MyObject@42110406打开被注释掉的new byte[1024*100]语句，这条语句请求一块大的堆空间，使堆内存使用紧张。并显式的再调用一次GC，结果如下：是否被回收null说明在系统内存紧张的情况下，软引用被回收。
 
-#### 3.弱引用弱引用是一种比软引用较弱的引用类型。
+#### 3. 弱引用弱引用是一种比软引用较弱的引用类型。
 
-在系统GC时，只要发现弱引用，不管系统堆空间是否足够，都会将对象进行回收。在java中，可以用java.lang.ref.WeakReference实例来保存对一个Java对象的弱引用。
+在系统 GC 时，只要发现弱引用，不管系统堆空间是否足够，都会将对象进行回收。在 Java 中，可以用 Java.lang.ref.WeakReference 实例来保存对一个 Java 对象的弱引用。
 
 ```java
 public void test3() {
@@ -611,11 +615,17 @@ public void test3() {
 }
 ```
 
-运行结果：是否被回收cn.zyzpp.MyObject@42110406是否被回收null软引用，弱引用都非常适合来保存那些可有可无的缓存数据，如果这么做，当系统内存不足时，这些缓存数据会被回收，不会导致内存溢出。而当内存资源充足时，这些缓存数据又可以存在相当长的时间，从而起到加速系统的作用。
+运行结果：
 
-#### 4.虚引用虚引用是所有类型中最弱的一个。
+是否被回收 cn.zyzpp.MyObject@42110406
 
-一个持有虚引用的对象，和没有引用几乎是一样的，随时可能被垃圾回收器回收。当试图通过虚引用的get()方法取得强引用时，总是会失败。并且，虚引用必须和引用队列一起使用，它的作用在于跟踪垃圾回收过程。当垃圾回收器准备回收一个对象时，如果发现它还有虚引用，就会在垃圾回收后，销毁这个对象，将这个虚引用加入引用队列。程序可以通过判断引用队列中是否已经加入了虚引用，来了解被引用的对象是否将要被垃圾回收。如果程序发现某个虚引用已经被加入到引用队列，那么就可以在所引用的对象的内存被回收之前采取必要的行动。
+是否被回收 null 
+
+软引用，弱引用都非常适合来保存那些可有可无的缓存数据，如果这么做，当系统内存不足时，这些缓存数据会被回收，不会导致内存溢出。而当内存资源充足时，这些缓存数据又可以存在相当长的时间，从而起到加速系统的作用。
+
+#### 4. 虚引用虚引用是所有类型中最弱的一个。
+
+一个持有虚引用的对象，和没有引用几乎是一样的，随时可能被垃圾回收器回收。当试图通过虚引用的 get() 方法取得强引用时，总是会失败。并且，虚引用必须和引用队列一起使用，它的作用在于跟踪垃圾回收过程。当垃圾回收器准备回收一个对象时，如果发现它还有虚引用，就会在垃圾回收后，销毁这个对象，将这个虚引用加入引用队列。程序可以通过判断引用队列中是否已经加入了虚引用，来了解被引用的对象是否将要被垃圾回收。如果程序发现某个虚引用已经被加入到引用队列，那么就可以在所引用的对象的内存被回收之前采取必要的行动。
 
 ```java
 public void test3() {
@@ -631,9 +641,9 @@ public void test3() {
 
 运行结果：是否被回收null是否被回收null对虚引用的get()操作，总是返回null，因为sf.get()方法的实现如下：    public T get() {        return null;    }
 
-#### 5.WeakHashMap类及其实现WeakHashMap类在java.util包内，它实现了Map接口，是HashMap的一种实现，它使用弱引用作为内部数据的存储方案。
+#### 5. WeakHashMap 类及其实现 WeakHashMap 类在 Java.util 包内，它实现了 Map 接口，是 HashMap 的一种实现，它使用弱引用作为内部数据的存储方案。
 
-> WeakHashMap是弱引用的一种典型应用，它可以作为简单的缓存表解决方案。一下两段代码分别使用WeakHashMap和HashMap保存大量的数据：
+> WeakHashMap 是弱引用的一种典型应用，它可以作为简单的缓存表解决方案。一下两段代码分别使用 WeakHashMap 和 HashMap 保存大量的数据：
 
 
 
@@ -650,9 +660,9 @@ public void test(){
 }
 ```
 
-使用-Xmx2M限定堆内存，使用WeakHashMap的代码正常运行结束，而使用HashMap的代码段抛出异常java.lang.OutOfMemoryError: Java heap space
+使用-Xmx2M限定堆内存，使用WeakHashMap的代码正常运行结束，而使用HashMap的代码段抛出异常Java.lang.OutOfMemoryError: Java heap space
 
-**由此可见，WeakHashMap会在系统内存紧张时使用弱引用，自动释放掉持有弱引用的内存数据。但如果WeakHashMap的key都在系统内持有强引用，那么WeakHashMap就退化为普通的HashMap，因为所有的表项都无法被自动清理。**
+**由此可见，WeakHashMap 会在系统内存紧张时使用弱引用，自动释放掉持有弱引用的内存数据。但如果 WeakHashMap 的 key 都在系统内持有强引用，那么 WeakHashMap 就退化为普通的 HashMap，因为所有的表项都无法被自动清理。**
 
 
 
@@ -662,7 +672,7 @@ public void test(){
 
 - 一个能够运行字节码的虚拟机。
 - 屏蔽了具体的操作系统的信息。
-- 正是以上两点，使得Java程序具有**一次编译，到处执行**的特性。
+- 正是以上两点，使得 Java 程序具有**一次编译，到处执行**的特性。
 
 关于JVM是什么的介绍就到这里，还是老样子，先来看看这篇文章的结构：
 
@@ -711,7 +721,7 @@ Java 内存模型（不仅仅是JVM内存分区）：调用栈和本地变量存
 
 ### 硬件内存架构
 
-现代硬件内存模型与Java内存模型有一些不同，理解内存模型架构以及Java内存模型如何与它协同工作也是非常重要的。
+现代硬件内存模型与 Java 内存模型有一些不同，理解内存模型架构以及 Java 内存模型如何与它协同工作也是非常重要的。
 
 现代计算机硬件架构的简单图示：
 
@@ -754,11 +764,11 @@ Java 内存模型与硬件内存架构之间存在差异。硬件内存架构没
 
 线程间通信必须要经过主内存。
 
-如下，如果线程A与线程B之间要通信的话，必须要经历下面2个步骤：
+如下，如果线程 A 与线程 B 之间要通信的话，必须要经历下面 2 个步骤：
 
-1）线程A把本地内存A中更新过的共享变量刷新到主内存中去。
+1）线程 A 把本地内存 A 中更新过的共享变量刷新到主内存中去。
 
-2）线程B到主内存中去读取线程A之前已更新过的共享变量。
+2）线程 B 到主内存中去读取线程 A 之前已更新过的共享变量。
 
 ![img](./JVM.assets/v2-8750cb14ecaa93509e3f1981563513e1_1440w.jpg)
 
@@ -766,12 +776,12 @@ Java 内存模型与硬件内存架构之间存在差异。硬件内存架构没
 
 - **lock（锁定）**：作用于主内存的变量，把一个变量标识为一条线程独占状态。
 - **unlock（解锁）**：作用于主内存变量，把一个处于锁定状态的变量释放出来，释放后的变量才可以被其他线程锁定。
-- **read（读取）**：作用于主内存变量，把一个变量值从主内存传输到线程的工作内存中，以便随后的load动作使用
-- **load（载入）**：作用于工作内存的变量，它把read操作从主内存中得到的变量值放入工作内存的变量副本中。
+- **read（读取）**：作用于主内存变量，把一个变量值从主内存传输到线程的工作内存中，以便随后的 load 动作使用
+- **load（载入）**：作用于工作内存的变量，它把 read 操作从主内存中得到的变量值放入工作内存的变量副本中。
 - **use（使用）**：作用于工作内存的变量，把工作内存中的一个变量值传递给执行引擎，每当虚拟机遇到一个需要使用变量的值的字节码指令时将会执行这个操作。
 - **assign（赋值）**：作用于工作内存的变量，它把一个从执行引擎接收到的值赋值给工作内存的变量，每当虚拟机遇到一个给变量赋值的字节码指令时执行这个操作。
-- **store（存储）**：作用于工作内存的变量，把工作内存中的一个变量的值传送到主内存中，以便随后的write的操作。
-- **write（写入）**：作用于主内存的变量，它把store操作从工作内存中一个变量的值传送到主内存的变量中。
+- **store（存储）**：作用于工作内存的变量，把工作内存中的一个变量的值传送到主内存中，以便随后的 write 的操作。
+- **write（写入）**：作用于主内存的变量，它把 store 操作从工作内存中一个变量的值传送到主内存的变量中。
 
 Java 内存模型还规定了在执行上述八种基本操作时，必须满足如下规则：
 
@@ -801,17 +811,17 @@ Java 内存模型建立所围绕的问题：在多线程并发过程中，如何
 
 **线程缓存导致的可见性问题：**
 
-如果两个或者更多的线程在没有正确的使用 volatile 声明或者同步的情况下共享一个对象，一个线程更新这个共享对象可能对其它线程来说是不可见的：共享对象被初始化在主存中。跑在 CPU 上的一个线程将这个共享对象读到CPU缓存中，然后修改了这个对象。只要 CPU 缓存没有被刷新会主存，对象修改后的版本对跑在其它 CPU 上的线程都是不可见的。这种方式可能导致每个线程拥有这个共享对象的私有拷贝，每个拷贝停留在不同的 CPU 缓存中。
+如果两个或者更多的线程在没有正确的使用 volatile 声明或者同步的情况下共享一个对象，一个线程更新这个共享对象可能对其它线程来说是不可见的：共享对象被初始化在主存中。跑在 CPU 上的一个线程将这个共享对象读到 CPU 缓存中，然后修改了这个对象。只要 CPU 缓存没有被刷新会主存，对象修改后的版本对跑在其它 CPU 上的线程都是不可见的。这种方式可能导致每个线程拥有这个共享对象的私有拷贝，每个拷贝停留在不同的 CPU 缓存中。
 
-下图示意了这种情形。跑在左边 CPU 的线程拷贝这个共享对象到它的 CPU 缓存中，然后将 count 变量的值修改为2。这个修改对跑在右边CPU上的其它线程是不可见的，因为修改后的count的值还没有被刷新回主存中去。
+下图示意了这种情形。跑在左边 CPU 的线程拷贝这个共享对象到它的 CPU 缓存中，然后将 count 变量的值修改为 2。这个修改对跑在右边 CPU 上的其它线程是不可见的，因为修改后的 count 的值还没有被刷新回主存中去。
 
 ![img](./JVM.assets/v2-7abd7500588012315f4f0e068e20e341_1440w.jpg)
 
-解决这个内存可见性问题你可以使用：
+解决这个内存可见性问题可以使用：
 
-- Java中的 volatile 关键字：volatile 关键字可以保证直接从主存中读取一个变量，如果这个变量被修改后，总是会被写回到主存中去。Java 内存模型是通过在变量修改后将新值同步回主内存，在变量读取前从主内存刷新变量值这种依赖主内存作为传递媒介的方式来实现可见性的，无论是普通变量还是 volatile 变量都是如此，普通变量与 volatile 变量的区别是：volatile 的特殊规则保证了新值能立即同步到主内存，以及每个线程在每次使用 volatile 变量前都立即从主内存刷新。因此我们可以说 volatile 保证了多线程操作时变量的可见性，而普通变量则不能保证这一点。
+- Java 中的 volatile 关键字：volatile 关键字可以保证直接从主存中读取一个变量，如果这个变量被修改后，总是会被写回到主存中去。Java 内存模型是通过在变量修改后将新值同步回主内存，在变量读取前从主内存刷新变量值这种依赖主内存作为传递媒介的方式来实现可见性的，无论是普通变量还是 volatile 变量都是如此，普通变量与 volatile 变量的区别是：volatile 的特殊规则保证了新值能立即同步到主内存，以及每个线程在每次使用 volatile 变量前都立即从主内存刷新。因此我们可以说 volatile 保证了多线程操作时变量的可见性，而普通变量则不能保证这一点。
 - Java 中的 synchronized 关键字：同步块的可见性是由"如果对一个变量执行 lock 操作，将会清空工作内存中此变量的值，在执行引擎使用这个变量前需要重新执行 load 或 assign 操作初始化变量的值"、"对一个变量执行 unlock 操作之前，必须先把此变量同步回主内存中（执行 store 和 write 操作）"这两条规则获得的。
-- Java中的 final 关键字：final 关键字的可见性是指，被 final 修饰的字段在构造器中一旦被初始化完成，并且构造器没有把“this”的引用传递出去（this引用逃逸是一件很危险的事情，其他线程有可能通过这个引用访问到“初始化了一半”的对象），那么在其他线程就能看见 final 字段的值（无须同步）
+- Java中的 final 关键字：final 关键字的可见性是指，被 final 修饰的字段在构造器中一旦被初始化完成，并且构造器没有把“this”的引用传递出去（this 引用逃逸是一件很危险的事情，其他线程有可能通过这个引用访问到“初始化了一半”的对象），那么在其他线程就能看见 final 字段的值（无须同步）
 
 **重排序导致的可见性问题：**
 
@@ -846,32 +856,32 @@ Java 语言提供了 volatile 和 synchronized 两个关键字来保证线程之
 
 ![img](./JVM.assets/v2-8ef063a1b514d9cfbdf059984f83ed2f_1440w.jpg)
 
-当1和2之间没有数据依赖关系时，1和2之间就可能被重排序（3和4类似）。这样的结果就是：读线程B执行4时，不一定能看到写线程A在执行1时对共享变量的修改。
+当 1 和 2 之间没有数据依赖关系时，1 和 2 之间就可能被重排序（3 和 4 类似）。这样的结果就是：读线程 B 执行 4 时，不一定能看到写线程 A 在执行 1 时对共享变量的修改。
 
 **指令重排序改变多线程程序的执行结果例子：**
 
 ![img](./JVM.assets/v2-111bfd93bcd92fd2ee495a12cb34f9aa_1440w.jpg)
 
-flag变量是个标记，用来标识变量a是否已被写入。这里假设有两个线程A和B，A首先执行writer()方法，随后B线程接着执行reader()方法。线程B在执行操作4时，能否看到线程A在操作1对共享变量a的写入呢？
+flag 变量是个标记，用来标识变量 a 是否已被写入。这里假设有两个线程 A 和 B，A 首先执行 writer() 方法，随后 B 线程接着执行 reader() 方法。线程 B 在执行操作 4 时，能否看到线程 A 在操作 1 对共享变量 a 的写入呢？
 
 答案是：不一定能看到。
 
-由于操作1和操作2没有数据依赖关系，编译器和处理器可以对这两个操作重排序；同样，操作3和操作4没有数据依赖关系，编译器和处理器也可以对这两个操作重排序。
+由于操作 1 和操作 2 没有数据依赖关系，编译器和处理器可以对这两个操作重排序；同样，操作 3 和操作 4 没有数据依赖关系，编译器和处理器也可以对这两个操作重排序。
 
-**as-if-serial语义：**
+**as-if-serial 语义：**
 
-不管怎么重排序（编译器和处理器为了提高并行度），（单线程）程序的执行结果不能被改变。（编译器、runtime和处理器都必须遵守as-if-serial语义）
+不管怎么重排序（编译器和处理器为了提高并行度），（单线程）程序的执行结果不能被改变。（编译器、runtime 和处理器都必须遵守 as-if-serial 语义）
 
 **happens before：**
 
-从JDK 5开始，Java使用新的JSR-133内存模型，JSR-133使用happens-before的概念来阐述操作之间的内存可见性：在JMM中，如果一个操作执行的结果需要对另一个操作可见（两个操作既可以是在一个线程之内，也可以是在不同线程之间），那么这两个操作之间必须要存在happens-before关系：
+从 JDK 5 开始，Java 使用新的 JSR-133 内存模型，JSR-133 使用 happens-before 的概念来阐述操作之间的内存可见性：在 JMM 中，如果一个操作执行的结果需要对另一个操作可见（两个操作既可以是在一个线程之内，也可以是在不同线程之间），那么这两个操作之间必须要存在 happens-before 关系：
 
-- 程序顺序规则：一个线程中的每个操作，happens-before于该线程中的任意后续操作。
-- 监视器锁规则：对一个锁的解锁，happens-before于随后对这个锁的加锁。
-- volatile变量规则：对一个volatile域的写，happens-before于任意后续对这个volatile域的读。
-- 传递性：如果A happens-before B，且B happens-before C，那么A happens-before C。
+- 程序顺序规则：一个线程中的每个操作，happens-before 于该线程中的任意后续操作。
+- 监视器锁规则：对一个锁的解锁，happens-before 于随后对这个锁的加锁。
+- volatile变量规则：对一个 volatile 域的写，happens-before 于任意后续对这个 volatile 域的读。
+- 传递性：如果 A happens-before B，且 B happens-before C，那么 A happens-before C。
 
-一个happens-before规则对应于一个或多个编译器和处理器重排序规则
+一个 happens-before 规则对应于一个或多个编译器和处理器重排序规则
 
 **内存屏障禁止特定类型的处理器重排序：**
 
@@ -885,11 +895,11 @@ StoreLoad Barriers是一个“全能型”的屏障，它同时具有其他3个�
 
 #### 2. 多线程写同步与原子性
 
-**多线程竞争（Race Conditions）问题**：当读，写和检查共享变量时出现race conditions。
+**多线程竞争（Race Conditions）问题**：当读，写和检查共享变量时出现 race conditions。
 
-如果两个或者更多的线程共享一个对象，多个线程在这个共享对象上更新变量，就有可能发生race conditions。
+如果两个或者更多的线程共享一个对象，多个线程在这个共享对象上更新变量，就有可能发生 race conditions。
 
-想象一下，如果线程A读一个共享对象的变量count到它的CPU缓存中。再想象一下，线程B也做了同样的事情，但是往一个不同的CPU缓存中。现在线程A将count加1，线程B也做了同样的事情。现在count已经被增加了两次，每个CPU缓存中一次。如果这些增加操作被顺序的执行，变量count应该被增加两次，然后原值+2被写回到主存中去。然而，两次增加都是在没有适当的同步下并发执行的。无论是线程A还是线程B将count修改后的版本写回到主存中取，修改后的值仅会被原值大1，尽管增加了两次：
+想象一下，如果线程 A 读一个共享对象的变量count到它的CPU缓存中。再想象一下，线程 B 也做了同样的事情，但是往一个不同的CPU缓存中。现在线程 A 将count加1，线程 B 也做了同样的事情。现在count已经被增加了两次，每个CPU缓存中一次。如果这些增加操作被顺序的执行，变量count应该被增加两次，然后原值+2被写回到主存中去。然而，两次增加都是在没有适当的同步下并发执行的。无论是线程 A 还是线程 B 将count修改后的版本写回到主存中取，修改后的值仅会被原值大1，尽管增加了两次：
 
 ![img](./JVM.assets/v2-02ae4be429d4b48a18442efe91131155_1440w.jpg)
 
@@ -902,7 +912,7 @@ StoreLoad Barriers是一个“全能型”的屏障，它同时具有其他3个�
 - Reads and writes are atomic for reference variables and for most primitive variables (all types except long and double).
 - Reads and writes are atomic for all variables declared **volatile** (including long and double variables).
 
-（[https://docs.oracle.com/javase/tutorial/essential/concurrency/atomic.html](https://link.zhihu.com/?target=https%3A//docs.oracle.com/javase/tutorial/essential/concurrency/atomic.html)）
+（[https://docs.oracle.com/Javase/tutorial/essential/concurrency/atomic.html](https://link.zhihu.com/?target=https%3A//docs.oracle.com/Javase/tutorial/essential/concurrency/atomic.html)）
 
 **实现原子性：**
 
@@ -997,7 +1007,7 @@ Java虚拟机栈也是一块被开发者重点关注的地方，同样，先把�
 
 **进程是资源分配的最小单位，线程是 CPU 调度的最小单位，一个进程可以包含多个线程，** **Java 线程通过抢占的方法获得 CPU 的执行权**。现在可以思考下面这个场景。
 
-某一次，线程A获得CPU的执行权，开始执行内部程序。但是线程A的程序还没有执行完，在某一时刻CPU的执行权被另一个线程B抢走了。后来经过线程A的不懈努力，又抢回了CPU的执行权，**那么线程A的程序又要从头开始执行？**
+某一次，线程 A 获得CPU的执行权，开始执行内部程序。但是线程 A 的程序还没有执行完，在某一时刻CPU的执行权被另一个线程 B 抢走了。后来经过线程 A 的不懈努力，又抢回了CPU的执行权，**那么线程 A 的程序又要从头开始执行？**
 
 这个时候程序计数器就粉墨登场了，**它的作用就是记录当前线程所执行的位置。** 这样，当线程重新获得CPU的执行权的时候，就直接从记录的位置开始执行，分支、循环、跳转、异常处理也都依赖这个程序计数器来完成。此外，程序计数器还具有以下特点：
 
@@ -1192,7 +1202,7 @@ JDK1.6：
 
 - 存取控制器（access controller）：存取控制器可以控制核心 API 对操作系统的存取权限，而这个控制的策略设定，可以由用户指定。
 - 安全管理器（security manager）：是核心 API 和操作系统之间的主要接口。实现全线控制，比存取控制器优先级高。
-- 安全软件包（secur package）：java.security 下的类和扩展包下的类，允许用户为自己的应用增加新的安全特性，包括：
+- 安全软件包（secur package）：Java.security 下的类和扩展包下的类，允许用户为自己的应用增加新的安全特性，包括：
 
 1.  安全提供者
 2. 消息摘要
@@ -1225,7 +1235,7 @@ Java 在诞生的时候喊出了一个非常牛逼的口号：“Write Once, Run
 源码如下：
 
 ```java
-package com.cmower.java_demo;
+package com.cmower.Java_demo;
 public class Test {
     public static void main(String[] args) {
         System.out.println("沉默王二");
@@ -1238,7 +1248,7 @@ public class Test {
 ```
 xxd Test.class
 00000000: cafe babe 0000 0034 0022 0700 0201 0019  .......4."......
-00000010: 636f 6d2f 636d 6f77 6572 2f6a 6176 615f  com/cmower/java_
+00000010: 636f 6d2f 636d 6f77 6572 2f6a 6176 615f  com/cmower/Java_
 00000020: 6465 6d6f 2f54 6573 7407 0004 0100 106a  demo/Test......j
 00000030: 6176 612f 6c61 6e67 2f4f 626a 6563 7401  ava/lang/Object.
 00000040: 0006 3c69 6e69 743e 0100 0328 2956 0100  ..<init>...()V..
@@ -1262,7 +1272,7 @@ Java 的类加载过程可以分为 5 个阶段：**载入、验证、准备、�
 
 #### 1）Loading（载入）
 
-JVM 在该阶段的主要目的是将字节码从不同的数据源（可能是 class 文件、也可能是 jar 包，甚至网络）转化为二进制字节流加载到内存中，并生成一个代表该类的 `java.lang.Class` 对象。
+JVM 在该阶段的主要目的是将字节码从不同的数据源（可能是 class 文件、也可能是 jar 包，甚至网络）转化为二进制字节流加载到内存中，并生成一个代表该类的 `Java.lang.Class` 对象。
 
 #### 2）Verification（验证）
 
@@ -1360,7 +1370,7 @@ sun.misc.Launcher$ExtClassLoader@15db9742
 
 ### **4. 双亲委派模型**
 
-如果以上三种类加载器不能满足要求的话，程序员还可以自定义类加载器（继承 `java.lang.ClassLoader` 类），它们之间的层级关系如下图所示。
+如果以上三种类加载器不能满足要求的话，程序员还可以自定义类加载器（继承 `Java.lang.ClassLoader` 类），它们之间的层级关系如下图所示。
 
 
 
@@ -1437,15 +1447,15 @@ public static void main(String[] args) throws ClassNotFoundException {
 ```java
 package dragon.classloader;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
+import Java.io.File;
+import Java.io.IOException;
+import Java.nio.charset.Charset;
 
-import javax.tools.JavaCompiler;
-import javax.tools.JavaFileObject;
-import javax.tools.StandardJavaFileManager;
-import javax.tools.ToolProvider;
-import javax.tools.JavaCompiler.CompilationTask;
+import Javax.tools.JavaCompiler;
+import Javax.tools.JavaFileObject;
+import Javax.tools.StandardJavaFileManager;
+import Javax.tools.ToolProvider;
+import Javax.tools.JavaCompiler.CompilationTask;
 
 public class Monitor implements Runnable {
 	// flag 为 true 表示需要重新加载（源文件已经编译了），false 表示不需要重新加载
@@ -1522,7 +1532,7 @@ public class Monitor implements Runnable {
 1. 这里主要的思路都在 run 方法中了，我加了注释，读者应该可以理解它的作用，如果发现了问题，可以在评论中指出来。
 2. 关于下面这个 compileJavaFile 方法，它的作用是编译指定的Java源文件。关于这部分的代码，我以前见过，当时今天是第一次使用，我也是参考了别人的思路。
    大家可以去参考这个人的博客：
-   [java_基础——用代码编译.java文件+加载class文件](https://www.cnblogs.com/xiaoMzjm/p/3889832.html)
+   [Java_基础——用代码编译.Java文件+加载class文件](https://www.cnblogs.com/xiaoMzjm/p/3889832.html)
    或者如果你感觉这个方法有点难以理解（实际上我也是的，哈哈！）。那你可以去使用调用 Javac 程序来编译代码，那个会比较简单一些。
 
 ### 重新加载字节码文件
@@ -1532,8 +1542,8 @@ public class Monitor implements Runnable {
 ```java
 package dragon.classloader;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
+import Java.lang.reflect.Constructor;
+import Java.lang.reflect.Method;
 
 import dragon.obj.DragonClassLoader;
 
@@ -1624,7 +1634,7 @@ package dragon.classloader;
 
 public class TestHotDeploy {
 	public static void main(String[] args) {
-		String filepath = "D:\\DragonFile\\testCode\\dragon\\Animal.java";
+		String filepath = "D:\\DragonFile\\testCode\\dragon\\Animal.Java";
 		Monitor monitor = new Monitor(filepath);
 		Thread t1 = new Thread(monitor);
 		t1.start();   //启动线程开始监视文件的修改
@@ -1907,7 +1917,7 @@ JDK1.8 默认垃圾回收器是**Parallel Scavenge 收集器** + **Parallel Old 
 
 ## JVM 调优
 
-JVM命令行参数参考：https://docs.oracle.com/javase/8/docs/technotes/tools/unix/java
+JVM命令行参数参考：https://docs.oracle.com/Javase/8/docs/technotes/tools/unix/Java
 
 JVM 参数分类
 
@@ -1916,17 +1926,19 @@ JVM 参数分类
 - 不稳定： -XX 开头，下个版本可能取消
 
 ```bash
-java -XX:+PrintCommandLineFlags
-java -XX:+PrintFlagsFinal #最终参数值
-java -XX:+PrintFlagsInitial #默认参数值
-java -X:UseG1GC
+Java -XX:+PrintCommandLineFlags
+Java -XX:+PrintFlagsFinal #最终参数值
+Java -XX:+PrintFlagsInitial #默认参数值
+Java -X:UseG1GC
 ```
 
 
 
 # JVM 相关问题
 
-以下是美团追魂七连问
+以下是美团追魂九连问
+
+马士兵讲解：https://www.bilibili.com/video/BV1UK4y1271Y?p=8&spm_id_from=pageDriver
 
 ```java
 Object object = new Obbject();
@@ -2254,9 +2266,13 @@ public class Test01 {
 
 
 
-## 对象在内存中的存储布局——对象与数组的存储不同
+## 对象在内存中的存储布局
+
+对象与数组的存储不同
 
 ## 对象头具体包括什么
+
+markword klasspointer
 
 synchronized 锁信息
 
@@ -2270,7 +2286,15 @@ synchronized 锁信息
 
 ## Object o = new Object()  在内存中占用多少字节
 
-32 字节
+压缩不压缩都是 16 个字节
+
+## 为什么 Hotspot 不使用 C++对象来代替 Java 对象
+
+太大，虚拟表
+
+## Class 对象在堆还是在方法区
+
+Java 对象在堆，C++ 对象在方法区
 
 
 
@@ -2286,11 +2310,11 @@ Java 中的所有类，都需要由类加载器装载到 JVM 中才能运行。�
 
 类装载方式，有两种
 
-（1）隐式装载，程序在运行过程中当碰到通过 new 等方式生成对象时，隐式调用类装载器加载对应的类到jvm中。
+（1）隐式装载，程序在运行过程中当碰到通过 new 等方式生成对象时，隐式调用类装载器加载对应的类到JVM中。
 
 （2）显式装载，通过class.forname()等方法，显式加载需要的类 ,隐式加载与显式加载的区别：两者本质是一样的。
 
-Java类的加载是动态的，它并不会一次性将所有类全部加载后再运行，而是保证程序运行的基础类(像是基类)完全加载到jvm中，至于其他类，则在需要的时候才加载。这当然就是为了节省内存开销。
+Java类的加载是动态的，它并不会一次性将所有类全部加载后再运行，而是保证程序运行的基础类(像是基类)完全加载到JVM中，至于其他类，则在需要的时候才加载。这当然就是为了节省内存开销。
 
 ## ● 什么是 Java 虚拟机？为什么 Java 被称作是“平台无关的编程语言”？
 
@@ -2298,8 +2322,8 @@ Java类的加载是动态的，它并不会一次性将所有类全部加载后�
 
 ### 参考回答：
 
-Java虚拟机是一个可以执行Java字节码的虚拟机进程。Java源文件被编译成能被Java虚拟机执行的字节码文件。
-Java被设计成允许应用程序可以运行在任意的平台，而不需要程序员为每一个平台单独重写或者是重新编译。Java虚拟机让这个变为可能，因为它知道底层硬件平台的指令长度和其他特性。
+Java 虚拟机是一个可以执行 Java 字节码的虚拟机进程。Java 源文件被编译成能被 Java 虚拟机执行的字节码文件。
+Java 被设计成允许应用程序可以运行在任意的平台，而不需要程序员为每一个平台单独重写或者是重新编译。Java 虚拟机让这个变为可能，因为它知道底层硬件平台的指令长度和其他特性。
 
 ## ● JVM最大内存限制多少？
 
@@ -2331,7 +2355,7 @@ JVM使用-XX:PermSize设置非堆内存初始值，默认是物理内存的1/64�
 
 线程是比进程更轻量级的调度执行单位。线程可以把一个进程的资源分配和执行调度分开。一个进程里可以启动多条线程，各个线程可共享该进程的资源(内存地址，文件IO等)，又可以独立调度。线程是 CPU 调度的基本单位。
 
-主流 OS 都提供线程实现。Java 语言提供对线程操作的同一 API，每个已经执行 start()，且还未结束的 java.lang.Thread 类的实例，代表了一个线程。
+主流 OS 都提供线程实现。Java 语言提供对线程操作的同一 API，每个已经执行 start()，且还未结束的 Java.lang.Thread 类的实例，代表了一个线程。
 
 Thread 类的关键方法，都声明为 Native。这意味着这个方法无法或没有使用平台无关的手段来实现，也可能是为了执行效率。
 
@@ -2371,9 +2395,9 @@ Java内存模型(简称JMM)，JMM决定一个线程对共享变量的写入何�
 
 ![img](https://uploadfiles.nowcoder.com/images/20180926/308572_1537966532773_1E1B1BEE9AB8D94DACF75BD5E1703DBD)
 
-## ● 请列举一下，在 JAVA 虚拟机中，哪些对象可作为 ROOT 对象？
+## ● 请列举一下，在 Java 虚拟机中，哪些对象可作为 ROOT 对象？
 
-考察点：JAVA虚拟机
+考察点：Java虚拟机
 
 ### 参考回答：
 
@@ -2387,7 +2411,7 @@ Java内存模型(简称JMM)，JMM决定一个线程对共享变量的写入何�
 
 ## ● GC 中如何判断对象是否需要被回收？
 
-考察点：JAVA虚拟机
+考察点：Java 虚拟机
 
 ### 参考回答：
 
@@ -2397,27 +2421,27 @@ Java内存模型(简称JMM)，JMM决定一个线程对共享变量的写入何�
 
 finalize()方法是对象逃脱回收的最后一次机会,稍后GC将对F-Queue中的对象进行第二次小规模的标记,如果对象要在finalize()中跳出回收——只要重新与引用链上的任何一个对象建立关联即可,譬如把自己(this关键字)赋值给某个类变量或者对象的成员变量,那在第二次标记时它将被移除出“即将回收”的集合;如果对象这时候还没有逃脱,那基本上它就真的被回收了。
 
-## ● 请说明一下 JAVA 虚拟机的作用是什么?
+## ● 请说明一下 Java 虚拟机的作用是什么?
 
-考察点：java虚拟机
+考察点：Java 虚拟机
 
 ### 参考回答：
 
 解释运行字节码程序消除平台相关性。
 
-jvm将java字节码解释为具体平台的具体指令。一般的高级语言如要在不同的平台上运行，至少需要编译成不同的目标代码。而引入JVM后，Java语言在不同平台上运行时不需要重新编译。Java语言使用模式Java虚拟机屏蔽了与具体平台相关的信息，使得Java语言编译程序只需生成在Java虚拟机上运行的目标代码（字节码），就可以在多种平台上不加修改地运行。Java虚拟机在执行字节码时，把字节码解释成具体平台上的机器指令执行。
+JVM 将 Java 字节码解释为具体平台的具体指令。一般的高级语言如要在不同的平台上运行，至少需要编译成不同的目标代码。而引入 JVM 后，Java 语言在不同平台上运行时不需要重新编译。Java 语言使用模式 Java 虚拟机屏蔽了与具体平台相关的信息，使得 Java 语言编译程序只需生成在 Java 虚拟机上运行的目标代码（字节码），就可以在多种平台上不加修改地运行。Java 虚拟机在执行字节码时，把字节码解释成具体平台上的机器指令执行。
 
 
 
-假设一个场景，要求stop the world时间非常短，你会怎么设计垃圾回收机制？
+假设一个场景，要求 stop the world 时间非常短，你会怎么设计垃圾回收机制？
 
-绝大多数新创建的对象分配在Eden区。
+绝大多数新创建的对象分配在 Eden 区。
 
-在Eden区发生一次GC后，存活的对象移到其中一个Survivor区。
+在 Eden 区发生一次 GC 后，存活的对象移到其中一个 Survivor 区。
 
-在Eden区发生一次GC后，对象是存放到Survivor区，这个Survivor区已经存在其他存活的对象。
+在 Eden 区发生一次 GC 后，对象是存放到 Survivor 区，这个 Survivor 区已经存在其他存活的对象。
 
-一旦一个Survivor区已满，存活的对象移动到另外一个Survivor区。然后之前那个空间已满Survivor区将置为空，没有任何数据。
+一旦一个 Survivor 区已满，存活的对象移动到另外一个 Survivor 区。然后之前那个空间已满 Survivor 区将置为空，没有任何数据。
 
 经过重复多次这样的步骤后依旧存活的对象将被移到老年代。
 
@@ -2427,9 +2451,9 @@ jvm将java字节码解释为具体平台的具体指令。一般的高级语言�
 
 ### 参考回答：
 
-目前主流的虚拟机实现都采用了分代收集的思想，把整个堆区划分为新生代和老年代；新生代又被划分成Eden 空间、 From Survivor 和 To Survivor 三块区域。
+目前主流的虚拟机实现都采用了分代收集的思想，把整个堆区划分为新生代和老年代；新生代又被划分成 Eden 空间、 From Survivor 和 To Survivor 三块区域。
 
-我们把Eden : From Survivor : To Survivor 空间大小设成 8 : 1 : 1 ，对象总是在 Eden 区出生， From Survivor 保存当前的幸存对象， To Survivor 为空。一次 gc 发生后： 1）Eden 区活着的对象 ＋ From Survivor 存储的对象被复制到 To Survivor ；
+我们把 Eden : From Survivor : To Survivor 空间大小设成 8 : 1 : 1 ，对象总是在 Eden 区出生， From Survivor 保存当前的幸存对象， To Survivor 为空。一次 gc 发生后： 1）Eden 区活着的对象 ＋ From Survivor 存储的对象被复制到 To Survivor ；
 2) 清空 Eden 和 From Survivor ； 3) 颠倒 From Survivor 和 To Survivor 的逻辑关系： From 变 To ， To 变 From 。可以看出，只有在 Eden 空间快满的时候才会触发 Minor GC 。而 Eden 空间占新生代的绝大部分，所以 Minor GC 的频率得以降低。当然，使用两个 Survivor 这种方式我们也付出了一定的代价，如 10% 的空间浪费、复制对象的开销等。
 
 ## ● 请简单描述一下 JVM 分区都有哪些？
@@ -2440,7 +2464,7 @@ jvm将java字节码解释为具体平台的具体指令。一般的高级语言�
 
 ![img](https://uploadfiles.nowcoder.com/images/20180926/308572_1537962738034_560D4514BC25F890A38519E8A401BBF0)
 
-java内存通常被划分为5个区域：程序计数器（Program Count Register）、本地方法栈（Native Stack）、方法区（Methon Area）、栈（Stack）、堆（Heap）。
+Java内存通常被划分为5个区域：程序计数器（Program Count Register）、本地方法栈（Native Stack）、方法区（Methon Area）、栈（Stack）、堆（Heap）。
 
 ## ● 请简单描述一下类的加载过程
 
@@ -2448,17 +2472,17 @@ java内存通常被划分为5个区域：程序计数器（Program Count Registe
 
 ### 参考回答：
 
-如下图所示，JVM类加载机制分为五个部分：加载，验证，准备，解析，初始化，下面我们就分别来看一下这五个过程。
+如下图所示，JVM 类加载机制分为五个部分：加载，验证，准备，解析，初始化，下面我们就分别来看一下这五个过程。
 
 ![img](https://uploadfiles.nowcoder.com/images/20180926/308572_1537962641528_95106A90F455887E4A4B298735A4641B)
 
 加载
 
-加载是类加载过程中的一个阶段，这个阶段会在内存中生成一个代表这个类的java.lang.Class对象，作为方法区这个类的各种数据的入口。注意这里不一定非得要从一个Class文件获取，这里既可以从ZIP包中读取（比如从jar包和war包中读取），也可以在运行时计算生成（动态代理），也可以由其它文件生成（比如将JSP文件转换成对应的Class类）。
+加载是类加载过程中的一个阶段，这个阶段会在内存中生成一个代表这个类的 Java.lang.Class 对象，作为方法区这个类的各种数据的入口。注意这里不一定非得要从一个 Class 文件获取，这里既可以从 ZIP 包中读取（比如从 jar 包和 war 包中读取），也可以在运行时计算生成（动态代理），也可以由其它文件生成（比如将 JSP 文件转换成对应的 Class 类）。
 
 验证
 
-这一阶段的主要目的是为了确保Class文件的字节流中包含的信息是否符合当前虚拟机的要求，并且不会危害虚拟机自身的安全。
+这一阶段的主要目的是为了确保 Class 文件的字节流中包含的信息是否符合当前虚拟机的要求，并且不会危害虚拟机自身的安全。
 
 准备
 
@@ -2516,17 +2540,17 @@ CONSTANT_Method_info
 
 虚拟机设计团队把加载动作放到JVM外部实现，以便让应用程序决定如何获取所需的类，JVM提供了3种类加载器：
 
-启动类加载器(Bootstrap ClassLoader)：负责加载 JAVA_HOME\lib 目录中的，或通过-Xbootclasspath参数指定路径中的，且被虚拟机认可（按文件名识别，如rt.jar）的类。
+启动类加载器(Bootstrap ClassLoader)：负责加载 Java_HOME\lib 目录中的，或通过-Xbootclasspath参数指定路径中的，且被虚拟机认可（按文件名识别，如rt.jar）的类。
 
-扩展类加载器(Extension ClassLoader)：负责加载 JAVA_HOME\lib\ext 目录中的，或通过java.ext.dirs系统变量指定路径中的类库。
+扩展类加载器(Extension ClassLoader)：负责加载 Java_HOME\lib\ext 目录中的，或通过Java.ext.dirs系统变量指定路径中的类库。
 
 应用程序类加载器(Application ClassLoader)：负责加载用户路径（classpath）上的类库。
 
-JVM通过双亲委派模型进行类的加载，当然我们也可以通过继承java.lang.ClassLoader实现自定义的类加载器。
+JVM通过双亲委派模型进行类的加载，当然我们也可以通过继承Java.lang.ClassLoader实现自定义的类加载器。
 
 ![img](https://uploadfiles.nowcoder.com/images/20180926/308572_1537962385800_7142B8354CA8A352B2B805F997C71549)
 
-当一个类加载器收到类加载任务，会先交给其父类加载器去完成，因此最终加载任务都会传递到顶层的启动类加载器，只有当父类加载器无法完成加载任务时，才会尝试执行加载任务。采用双亲委派的一个好处是比如加载位于rt.jar包中的类java.lang.Object，不管是哪个加载器加载这个类，最终都是委托给顶层的启动类加载器进行加载，这样就保证了使用不同的类加载器最终得到的都是同样一个Object对象。
+当一个类加载器收到类加载任务，会先交给其父类加载器去完成，因此最终加载任务都会传递到顶层的启动类加载器，只有当父类加载器无法完成加载任务时，才会尝试执行加载任务。采用双亲委派的一个好处是比如加载位于rt.jar包中的类Java.lang.Object，不管是哪个加载器加载这个类，最终都是委托给顶层的启动类加载器进行加载，这样就保证了使用不同的类加载器最终得到的都是同样一个Object对象。
 
 ## ● 请简单说明一下 JVM 的回收算法以及它的回收器是什么？还有 CMS 采用哪种回收算法？使用 CMS 怎样解决内存碎片的问题呢？
 
@@ -2604,25 +2628,25 @@ CMS(Concurrent Mark Swep)收集器是一个比较重要的回收器，现在应�
 
 
 
-G1收集器
+G1 收集器
 
-G1收集器是一款面向服务端应用的垃圾收集器。HotSpot团队赋予它的使命是在未来替换掉JDK1.5中发布的CMS收集器。与其他GC收集器相比，G1具备如下特点：
+G1 收集器是一款面向服务端应用的垃圾收集器。HotSpot 团队赋予它的使命是在未来替换掉 JDK1.5 中发布的 CMS 收集器。与其他 GC 收集器相比，G1 具备如下特点：
 
-并行与并发：G1能更充分的利用CPU，多核环境下的硬件优势来缩短stop the world的停顿时间。
+并行与并发：G1 能更充分的利用 CPU，多核环境下的硬件优势来缩短 stop the world 的停顿时间。
 
-分代收集：和其他收集器一样，分代的概念在G1中依然存在，不过G1不需要其他的垃圾回收器的配合就可以独自管理整个GC堆。
+分代收集：和其他收集器一样，分代的概念在 G1 中依然存在，不过 G1 不需要其他的垃圾回收器的配合就可以独自管理整个GC堆。
 
-空间整合：G1收集器有利于程序长时间运行，分配大对象时不会无法得到连续的空间而提前触发一次GC。
+空间整合：G1 收集器有利于程序长时间运行，分配大对象时不会无法得到连续的空间而提前触发一次 GC。
 
-可预测的非停顿：这是G1相对于CMS的另一大优势，降低停顿时间是G1和CMS共同的关注点，能让使用者明确指定在一个长度为M毫秒的时间片段内，消耗在垃圾收集上的时间不得超过N毫秒。
+可预测的非停顿：这是 G1 相对于 CMS 的另一大优势，降低停顿时间是 G1 和 CMS 共同的关注点，能让使用者明确指定在一个长度为 M 毫秒的时间片段内，消耗在垃圾收集上的时间不得超过 N 毫秒。
 
 CMS：采用标记清除算法
 
-解决这个问题的办法就是可以让CMS在进行一定次数的Full GC（标记清除）的时候进行一次标记整理算法，CMS提供了以下参数来控制：
+解决这个问题的办法就是可以让 CMS 在进行一定次数的 Full GC（标记清除）的时候进行一次标记整理算法，CMS 提供了以下参数来控制：
 
 -XX:UseCMSCompactAtFullCollection -XX:CMSFullGCBeforeCompaction=5
 
-也就是CMS在进行5次Full GC（标记清除）之后进行一次标记整理算法，从而可以控制老年带的碎片在一定的数量以内，甚至可以配置CMS在每次Full GC的时候都进行内存的整理。
+也就是 CMS 在进行 5 次 Full GC（标记清除）之后进行一次标记整理算法，从而可以控制老年带的碎片在一定的数量以内，甚至可以配置 CMS 在每次 Full GC 的时候都进行内存的整理。
 
 
 
@@ -2711,7 +2735,7 @@ Java 中，GC Roots 是指：
 
 ### 3. Java 中的引用
 
-Java对引用的概念进行了扩充，将引用分为强引用（Strong Reference）、软引用（Soft Reference）、弱引用（Weak Reference）、虚引用（Phantom Reference）4种，这4种引用强度依次逐渐减弱。
+Java 对引用的概念进行了扩充，将引用分为强引用（Strong Reference）、软引用（Soft Reference）、弱引用（Weak Reference）、虚引用（Phantom Reference）4种，这4种引用强度依次逐渐减弱。
 
 这样子设计的原因主要是为了描述这样一类对象：当内存空间还足够时，则能保留在内存之中；如果内存空间在进行垃圾收集后还是非常紧张，则可以抛弃这些对象。很多系统的缓存功能都符合这样的应用场景。
 
@@ -2824,9 +2848,11 @@ PhantomReference<MyClass> phantomReference = new PhantomReference<>(new MyClass(
 
 推荐阅读：[46张PPT弄懂JVM、GC算法和性能调优！](https://link.zhihu.com/?target=http%3A//mp.weixin.qq.com/s%3F__biz%3DMzI3ODcxMzQzMw%3D%3D%26mid%3D2247489332%26idx%3D2%26sn%3D65de5886e13b98116c8432d7d10ae4bc%26chksm%3Deb539202dc241b14010f70edf89dc37c7629b5e2b7add50fd3f58070ecf2c14260196bf147d8%26scene%3D21%23wechat_redirect)
 
-关注微信公众号：Java技术栈，在后台回复：JVM，可以获取我整理的 N 篇最新JVM 教程，都是干货。
+
 
 ![img](./JVM.assets/v2-46af95e6b105941f3c8fbb387afd43ea_1440w.jpg)
+
+
 
 ## 四、GC 术语
 
@@ -2834,13 +2860,13 @@ PhantomReference<MyClass> phantomReference = new PhantomReference<>(new MyClass(
 
 - 部分收集（Partial GC）：指目标不是完整收集整个Java堆的垃圾收集，其中又分为：
 - 新生代收集（Minor GC/Young GC）：指目标只是新生代的垃圾收集。
-- 老年代收集（Major GC/Old GC）：指目标只是老年代的垃圾收集。目前只有CMS收集器会有单独收集老年代的行为。另外请注意“Major GC”这个说法现在有点混淆，在不同资料上常有不同所指，读者需按上下文区分到底是指老年代的收集还是整堆收集。
-- 混合收集（Mixed GC）：指目标是收集整个新生代以及部分老年代的垃圾收集。目前只有G1收集器会有这种行为。
-- 整堆收集（Full GC）：收集整个Java堆和方法区的垃圾收集。
-- 并行（Parallel） ：在JVM运行时，同时存在应用程序线程和垃圾收集器线程。并行阶段是由多个GC 线程执行，即GC 工作在它们之间分配。串行（Serial）：串行阶段仅在单个GC 线程上执行。
-  STW ：Stop The World 阶段，应用程序线程被暂停，以便GC线程 执行其工作。当应用程序因为GC 暂停时，这通常是由于Stop The World 阶段。
-  并发（Concurrent）：用户线程与垃圾收集器线程同时执行，不一定是并行执行，可能是交替执行（竞争）
-  增量：如果一个阶段是增量的，那么它可以运行一段时间之后由于某些条件提前终止，例如需要执行更高优先级的GC 阶段，同时仍然完成生产性工作。增量阶段与需要完全完成的阶段形成鲜明对比。
+- 老年代收集（Major GC/Old GC）：指目标只是老年代的垃圾收集。目前只有 CMS 收集器会有单独收集老年代的行为。另外请注意 `Major GC` 这个说法现在有点混淆，在不同资料上常有不同所指，读者需按上下文区分到底是指老年代的收集还是整堆收集。
+- 混合收集（Mixed GC）：指目标是收集整个新生代以及部分老年代的垃圾收集。目前只有 G1 收集器会有这种行为。
+- 整堆收集（Full GC）：收集整个 Java 堆和方法区的垃圾收集。
+- 并行（Parallel） ：在 JVM 运行时，同时存在应用程序线程和垃圾收集器线程。并行阶段是由多个GC 线程执行，即GC 工作在它们之间分配。串行（Serial）：串行阶段仅在单个GC 线程上执行。
+- STW ：Stop The World 阶段，应用程序线程被暂停，以便GC线程 执行其工作。当应用程序因为GC 暂停时，这通常是由于Stop The World 阶段。
+- 并发（Concurrent）：用户线程与垃圾收集器线程同时执行，不一定是并行执行，可能是交替执行（竞争）
+- 增量：如果一个阶段是增量的，那么它可以运行一段时间之后由于某些条件提前终止，例如需要执行更高优先级的GC 阶段，同时仍然完成生产性工作。增量阶段与需要完全完成的阶段形成鲜明对比。
 
 ## 五、垃圾收集器
 
@@ -2959,21 +2985,21 @@ CMS(Concurrent Mark Sweep，并发标记清除) 收集器是以获取最短回�
 
 ### 4.4 G1 - Garbage First
 
-#### JDK 9发布之日，G1宣告取代Parallel Scavenge加Parallel Old组合，成为服务端模式下的默认垃圾收集器。
+#### JDK 9 发布之日，G1 宣告取代 Parallel Scavenge 加 Parallel Old 组合，成为服务端模式下的默认垃圾收集器。
 
 鉴于 CMS 的一些不足之外，比如: 老年代内存碎片化，STW 时间虽然已经改善了很多，但是仍然有提升空间。G1 就横空出世了，它对于堆区的内存划思路很新颖，有点算法中分治法“分而治之”的味道。具体什么意思呢，让我们继续看下去。
 
-G1 将连续的Java堆划分为多个大小相等的独立区域（Region），每一个Region都可以根据需要，扮演新生代的Eden空间、Survivor空间，或者老年代空间。每个Region的大小可以通过参数`-XX：G1HeapRegionSize`设定，取值范围为1MB～32MB，且应为2的N次幂。
+G1 将连续的 Java 堆划分为多个大小相等的独立区域（Region），每一个 Region 都可以根据需要，扮演新生代的 Eden 空间、Survivor 空间，或者老年代空间。每个 Region 的大小可以通过参数`-XX：G1HeapRegionSize`设定，取值范围为 1MB～32MB，且应为 2 的 N 次幂。
 
-Region中还有一类特殊的Humongous区域，专门用来存储大对象。G1认为只要大小超过了一个Region容量一半的对象即可判定为大对象。对于那些超过了整个Region容量的超级大对象，将会被存放在N个连续的Humongous Region之中。
+Region 中还有一类特殊的 Humongous 区域，专门用来存储大对象。G1 认为只要大小超过了一个 Region 容量一半的对象即可判定为大对象。对于那些超过了整个 Region 容量的超级大对象，将会被存放在 N 个连续的 Humongous Region 之中。
 
-Humongous，简称 H 区，是专用于存放超大对象的区域，通常 >= 1/2 Region Size，G1的大多数行为都把Humongous Region作为老年代的一部分来进行看待。
+Humongous，简称 H 区，是专用于存放超大对象的区域，通常 >= 1/2 Region Size，G1 的大多数行为都把 Humongous Region 作为老年代的一部分来进行看待。
 
 ![img](./JVM.assets/v2-3f48b74c41fceebe751156e05cd78fff_1440w.jpg)
 
-认识了G1中的内存规划之后，我们就可以理解为什么它叫做"Garbage First"。所有的垃圾回收，都是基于 region 的。G1根据各个Region回收所获得的空间大小以及回收所需时间等指标在后台维护一个优先列表，每次根据允许的收集时间，优先回收价值最大（垃圾）的Region，从而可以有计划地避免在整个Java堆中进行全区域的垃圾收集。这也是 "Garbage First" 得名的由来。
+认识了 G1 中的内存规划之后，我们就可以理解为什么它叫做"Garbage First"。所有的垃圾回收，都是基于 region 的。G1 根据各个 Region 回收所获得的空间大小以及回收所需时间等指标在后台维护一个优先列表，每次根据允许的收集时间，优先回收价值最大（垃圾）的 Region，从而可以有计划地避免在整个 Java 堆中进行全区域的垃圾收集。这也是 "Garbage First" 得名的由来。
 
-G1从整体来看是基于“标记-整理”算法实现的收集器，但从局部（两个Region之间）上看又是基于“标记-复制”算法实现，无论如何，这两种算法都意味着G1运作期间不会产生内存空间碎片，垃圾收集完成之后能提供规整的可用内存。这种特性有利于程序长时间运行，在程序为大对象分配内存时不容易因无法找到连续内存空间而提前触发下一次GC。
+G1从整体来看是基于“标记-整理”算法实现的收集器，但从局部（两个Region之间）上看又是基于“标记-复制”算法实现，无论如何，这两种算法都意味着 G1 运作期间不会产生内存空间碎片，垃圾收集完成之后能提供规整的可用内存。这种特性有利于程序长时间运行，在程序为大对象分配内存时不容易因无法找到连续内存空间而提前触发下一次 GC。
 
 提问环节：
 
@@ -3020,23 +3046,23 @@ Mixed GC的整个子任务和YGC完全一样，只是回收的范围不一样。
 
 ![img](./JVM.assets/v2-28b11ca576157c88baac75b5bc99d9eb_1440w.jpg)
 
-注：G1 一般来说是没有FGC的概念的。因为它本身不提供FGC的功能。
+注：G1 一般来说是没有 FGC 的概念的。因为它本身不提供 FGC 的功能。
 
-如果 Mixed GC 仍然效果不理想，跟不上新对象分配内存的需求，会使用 Serial Old GC 进行 Full GC强制收集整个 Heap。
+如果 Mixed GC 仍然效果不理想，跟不上新对象分配内存的需求，会使用 Serial Old GC 进行 Full GC 强制收集整个 Heap。
 
-相比CMS，G1总结有以下优点：
+相比 CMS，G1 总结有以下优点：
 
-G1运作期间不会产生内存空间碎片，垃圾收集完成之后能提供规整的可用内存。这种特性有利于程序长时间运行。
+G1 运作期间不会产生内存空间碎片，垃圾收集完成之后能提供规整的可用内存。这种特性有利于程序长时间运行。
 
 G1 能预测 GC 停顿时间， STW 时间可控（G1 uses a pause prediction model to meet a user-defined pause time target and selects the number of regions to collect based on the specified pause time target.）
 
-关于G1实际上还有很多的细节可以讲，这里希望读者去阅读《深入理解Java虚拟机》或者其他资料来延伸学习，查漏补缺。
+关于 G1 实际上还有很多的细节可以讲，这里希望读者去阅读《深入理解 Java 虚拟机》或者其他资料来延伸学习，查漏补缺。
 
 相关参数：
 
 ![img](./JVM.assets/v2-e5e4828ef68af89d6e5c3b7bf0392d68_1440w.jpg)
 
-本系列关于JVM 垃圾回收的知识就到这里了。
+本系列关于 JVM 垃圾回收的知识就到这里了。
 
 ### CMS 和 G1
 
@@ -3044,11 +3070,11 @@ CMS：以获取最短回收停顿时间为目标的收集器，基于并发“�
 
 过程：
 
-1、初始标记：独占PUC，仅标记GCroots能直接关联的对象
+1、初始标记：独占 CPU，仅标记 GCroots 能直接关联的对象
 
 2、并发标记：可以和用户线程并行执行，标记所有可达对象
 
-3、重新标记：独占CPU(STW)，对并发标记阶段用户线程运行产生的垃圾对象进行标记修正
+3、重新标记：独占 CPU(STW)，对并发标记阶段用户线程运行产生的垃圾对象进行标记修正
 
 4、并发清理：可以和用户线程并行执行，清理垃圾
 
@@ -3058,17 +3084,17 @@ CMS：以获取最短回收停顿时间为目标的收集器，基于并发“�
 
 缺点：
 
-1、对CPU非常敏感：在并发阶段虽然不会导致用户线程停顿，但是会因为占用了一部分线程使应用程序变慢
+1、对 CPU 非常敏感：在并发阶段虽然不会导致用户线程停顿，但是会因为占用了一部分线程使应用程序变慢
 
-2、无法处理浮动垃圾：在最后一步并发清理过程中，用户县城执行也会产生垃圾，但是这部分垃圾是在标记之后，所以只有等到下一次gc的时候清理掉，这部分垃圾叫浮动垃圾
+2、无法处理浮动垃圾：在最后一步并发清理过程中，用户线程执行也会产生垃圾，但是这部分垃圾是在标记之后，所以只有等到下一次 GC 的时候清理掉，这部分垃圾叫浮动垃圾
 
-3、CMS使用“标记-清理”法会产生大量的空间碎片，当碎片过多，将会给大对象空间的分配带来很大的麻烦，往往会出现老年代还有很大的空间但无法找到足够大的连续空间来分配当前对象，不得不提前触发一次FullGC，为了解决这个问题CMS提供了一个开关参数，用于在CMS顶不住，要进行FullGC时开启内存碎片的合并整理过程，但是内存整理的过程是无法并发的，空间碎片没有了但是停顿时间变长了
+3、CMS 使用“标记-清理”法会产生大量的空间碎片，当碎片过多，将会给大对象空间的分配带来很大的麻烦，往往会出现老年代还有很大的空间但无法找到足够大的连续空间来分配当前对象，不得不提前触发一次 FullGC，为了解决这个问题 CMS 提供了一个开关参数，用于在 CMS 顶不住，要进行 FullGC 时开启内存碎片的合并整理过程，但是内存整理的过程是无法并发的，空间碎片没有了但是停顿时间变长了
 
-CMS 出现FullGC的原因：
+CMS 出现 FullGC 的原因：
 
-1、年轻带晋升到老年带没有足够的连续空间，很有可能是内存碎片导致的
+1、年轻代晋升到老年带没有足够的连续空间，很有可能是内存碎片导致的
 
-2、在并发过程中JVM觉得在并发过程结束之前堆就会满，需要提前触发FullGC
+2、在并发过程中 JVM 觉得在并发过程结束之前堆就会满，需要提前触发 FullGC
 
  
 
@@ -3076,23 +3102,23 @@ G1：是一款面向服务端应用的垃圾收集器
 
 特点：
 
-1、并行于并发：G1能充分利用CPU、多核环境下的硬件优势，使用多个CPU（CPU或者CPU核心）来缩短stop-The-World停顿时间。部分其他收集器原本需要停顿Java线程执行的GC动作，G1收集器仍然可以通过并发的方式让java程序继续执行。
+1、并行于并发：G1能充分利用CPU、多核环境下的硬件优势，使用多个CPU（CPU或者CPU核心）来缩短stop-The-World停顿时间。部分其他收集器原本需要停顿 Java 线程执行的GC动作，G1 收集器仍然可以通过并发的方式让 Java 程序继续执行。
 
-2、分代收集：分代概念在G1中依然得以保留。虽然G1可以不需要其它收集器配合就能独立管理整个GC堆，但它能够采用不同的方式去处理新创建的对象和已经存活了一段时间、熬过多次GC的旧对象以获取更好的收集效果。也就是说G1可以自己管理新生代和老年代了。
+2、分代收集：分代概念在 G1 中依然得以保留。虽然 G1 可以不需要其它收集器配合就能独立管理整个 GC 堆，但它能够采用不同的方式去处理新创建的对象和已经存活了一段时间、熬过多次 GC 的旧对象以获取更好的收集效果。也就是说 G1 可以自己管理新生代和老年代了。
 
-3、空间整合：由于G1使用了独立区域（Region）概念，G1从整体来看是基于“标记-整理”算法实现收集，从局部（两个Region）上来看是基于“复制”算法实现的，但无论如何，这两种算法都意味着G1运作期间不会产生内存空间碎片。
+3、空间整合：由于 G1 使用了独立区域（Region）概念，G1 从整体来看是基于“标记-整理”算法实现收集，从局部（两个Region）上来看是基于“复制”算法实现的，但无论如何，这两种算法都意味着 G1 运作期间不会产生内存空间碎片。
 
-4、可预测的停顿：这是G1相对于CMS的另一大优势，降低停顿时间是G1和CMS共同的关注点，但G1除了追求低停顿外，还能建立可预测的停顿时间模型，能让使用这明确指定一个长度为M毫秒的时间片段内，消耗在垃圾收集上的时间不得超过N毫秒。
-
- 
+4、可预测的停顿：这是 G1 相对于 CMS 的另一大优势，降低停顿时间是 G1 和 CMS 共同的关注点，但 G1 除了追求低停顿外，还能建立可预测的停顿时间模型，能让使用这明确指定一个长度为 M 毫秒的时间片段内，消耗在垃圾收集上的时间不得超过 N 毫秒。
 
  
 
-与其它收集器相比，G1变化较大的是它将整个Java堆划分为多个大小相等的独立区域（Region），虽然还保留了新生代和来年代的概念，但新生代和老年代不再是物理隔离的了它们都是一部分Region（不需要连续）的集合。同时，为了避免全堆扫描，G1使用了Remembered Set来管理相关的对象引用信息。当进行内存回收时，在GC根节点的枚举范围中加入Remembered Set即可保证不对全堆扫描也不会有遗漏了。
+ 
+
+与其它收集器相比，G1 变化较大的是它将整个 Java 堆划分为多个大小相等的独立区域（Region），虽然还保留了新生代和来年代的概念，但新生代和老年代不再是物理隔离的了它们都是一部分 Region（不需要连续）的集合。同时，为了避免全堆扫描，G1 使用了 Remembered Set 来管理相关的对象引用信息。当进行内存回收时，在 GC 根节点的枚举范围中加入 Remembered Set 即可保证不对全堆扫描也不会有遗漏了。
 
  
 
-如果不计算维护Remembered Set的操作，G1收集器的运作大致可划分为以下几个步骤：
+如果不计算维护 Remembered Set 的操作，G1收集器的运作大致可划分为以下几个步骤：
 
 1、初始标记（Initial Making）
 
@@ -3102,7 +3128,7 @@ G1：是一款面向服务端应用的垃圾收集器
 
 4、筛选回收（Live Data Counting and Evacuation）
 
-看上去跟CMS收集器的运作过程有几分相似，不过确实也这样。初始阶段仅仅只是标记一下GC Roots能直接关联到的对象，并且修改TAMS（Next Top Mark Start）的值，让下一阶段用户程序并发运行时，能在正确可以用的Region中创建新对象，这个阶段需要停顿线程，但耗时很短。并发标记阶段是从GC Roots开始对堆中对象进行可达性分析，找出存活对象，这一阶段耗时较长但能与用户线程并发运行。而最终标记阶段需要吧Remembered Set Logs的数据合并到Remembered Set中，这阶段需要停顿线程，但可并行执行。最后筛选回收阶段首先对各个Region的回收价值和成本进行排序，根据用户所期望的GC停顿时间来制定回收计划，这一过程同样是需要停顿线程的，但Sun公司透露这个阶段其实也可以做到并发，但考虑到停顿线程将大幅度提高收集效率，所以选择停顿。下图为G1收集器运行示意图：
+看上去跟 CMS 收集器的运作过程有几分相似，不过确实也这样。初始阶段仅仅只是标记一下 GC Roots 能直接关联到的对象，并且修改 TAMS（Next Top Mark Start）的值，让下一阶段用户程序并发运行时，能在正确可以用的 Region 中创建新对象，这个阶段需要停顿线程，但耗时很短。并发标记阶段是从 GC Roots 开始对堆中对象进行可达性分析，找出存活对象，这一阶段耗时较长但能与用户线程并发运行。而最终标记阶段需要把 Remembered Set Logs 的数据合并到 Remembered Set 中，这阶段需要停顿线程，但可并行执行。最后筛选回收阶段首先对各个 Region 的回收价值和成本进行排序，根据用户所期望的 GC 停顿时间来制定回收计划，这一过程同样是需要停顿线程的，但 Sun 公司透露这个阶段其实也可以做到并发，但考虑到停顿线程将大幅度提高收集效率，所以选择停顿。下图为 G1 收集器运行示意图：
 
 ![img](./JVM.assets/1266222-20180825175006862-736908574.png)
 
@@ -3114,19 +3140,19 @@ G1：是一款面向服务端应用的垃圾收集器
 
 ## GC 整理
 
-JVM内存模型：
+JVM 内存模型：
 
-按照JVM规范，JAVA虚拟机在运行时会管理以下的内存区域：
+按照 JVM 规范，Java 虚拟机在运行时会管理以下的内存区域：
 
 - 程序计数器：当前线程执行的字节码的行号指示器，线程私有
-- JAVA虚拟机栈：Java方法执行的内存模型，每个Java方法的执行对应着一个栈帧的进栈和出栈的操作。
-- 本地方法栈：类似“ JAVA虚拟机栈 ”，但是为native方法的运行提供内存环境。
-- JAVA堆：对象内存分配的地方，内存垃圾回收的主要区域，所有线程共享。可分为新生代，老生代。
+- Java虚拟机栈：Java 方法执行的内存模型，每个 Java 方法的执行对应着一个栈帧的进栈和出栈的操作。
+- 本地方法栈：类似“ Java虚拟机栈 ”，但是为 native 方法的运行提供内存环境。
+- Java堆：对象内存分配的地方，内存垃圾回收的主要区域，所有线程共享。可分为新生代，老生代。
 - 方法区：用于存储已经被JVM加载的类信息、常量、静态变量、即时编译器编译后的代码等数据。Hotspot中的“永久代”。
 - 运行时常量池：方法区的一部分，存储常量信息，如各种字面量、符号引用等。
 - 直接内存：并不是JVM运行时数据区的一部分， 可直接访问的内存， 比如NIO会用到这部分。
 
-按照JVM规范，除了程序计数器不会抛出OOM外，其他各个内存区域都可能会抛出OOM。
+按照 JVM 规范，除了程序计数器不会抛出 OOM 外，其他各个内存区域都可能会抛出 OOM。
 
 
 
@@ -3286,9 +3312,9 @@ no, i am dead :(
 **软引用使用示例：**
 
 ```java
-package jvm;
+package JVM;
  
-import java.lang.ref.SoftReference;
+import Java.lang.ref.SoftReference;
  
 class Node {
     public String msg = "";
@@ -3333,9 +3359,9 @@ node2
 
 - 该类所有的实例都已经被回收，也就是Java堆中不存在该类的任何实例；
 - 加载该类的`ClassLoader`已经被回收；
-- 该类对应的`java.lang.Class`对象没有在任何地方被引用，**无法在任何地方通过反射访问该类的方法。**
+- 该类对应的`Java.lang.Class`对象没有在任何地方被引用，**无法在任何地方通过反射访问该类的方法。**
 
-关于类加载的原理，也是阿里面试的主角，面试官也问过我比如：能否自己定义String，答案是不行，因为jvm在加载类的时候会执行双亲委派，
+关于类加载的原理，也是阿里面试的主角，面试官也问过我比如：能否自己定义String，答案是不行，因为JVM在加载类的时候会执行双亲委派，
 
 原理请参考：[Java 类加载机制(阿里面试题)](http://www.cnblogs.com/aspirant/p/7200523.html)
 
@@ -3423,7 +3449,7 @@ class MyObject{
 
 a) 所有新生成的对象首先都是放在年轻代的。年轻代的目标就是尽可能快速的收集掉那些生命周期短的对象。
 
-b) 新生代内存按照8:1:1的比例分为一个eden区和两个survivor(survivor0,survivor1)区。一个Eden区，两个 Survivor区(一般而言)。大部分对象在Eden区中生成。回收时先将eden区存活对象复制到一个survivor0区，然后清空eden区，当这个survivor0区也存放满了时，则将eden区和survivor0区存活对象复制到另一个survivor1区，然后清空eden和这个survivor0区，此时survivor0区是空的，然后将survivor0区和survivor1区交换，**即保持survivor1区为空(美团面试，问的太细，为啥保持survivor1为空，答案：为了让eden和survivor0 交换存活对象)**， 如此往复。当Eden没有足够空间的时候就会 触发jvm发起一次Minor GC
+b) 新生代内存按照8:1:1的比例分为一个eden区和两个survivor(survivor0,survivor1)区。一个Eden区，两个 Survivor区(一般而言)。大部分对象在Eden区中生成。回收时先将eden区存活对象复制到一个survivor0区，然后清空eden区，当这个survivor0区也存放满了时，则将eden区和survivor0区存活对象复制到另一个survivor1区，然后清空eden和这个survivor0区，此时survivor0区是空的，然后将survivor0区和survivor1区交换，**即保持survivor1区为空(美团面试，问的太细，为啥保持survivor1为空，答案：为了让eden和survivor0 交换存活对象)**， 如此往复。当Eden没有足够空间的时候就会 触发JVM发起一次Minor GC
 
 c) 当survivor1区不足以存放 eden和survivor0的存活对象时，就将存活对象直接存放到老年代。若是老年代也满了就会触发一次Full GC(Major GC)，也就是新生代、老年代都进行回收。
 
@@ -3445,13 +3471,13 @@ b) 内存比新生代也大很多(大概比例是1:2)，当老年代内存满时
 
 - 该类所有的实例都已经被回收，也就是Java堆中不存在该类的任何实例；
 - 加载该类的`ClassLoader`已经被回收；
-- 该类对应的`java.lang.Class`对象没有在任何地方被引用，**无法在任何地方通过反射访问该类的方法。**
+- 该类对应的`Java.lang.Class`对象没有在任何地方被引用，**无法在任何地方通过反射访问该类的方法。**
 
  
 
  5 新生代和老年代的区别(**阿里面试官的题目**)： 
 
-所谓的新生代和老年代是针对于分代收集算法来定义的，新生代又分为Eden和Survivor两个区。加上老年代就这三个区。数据会首先分配到Eden区 当中（当然也有特殊情况，如果是大对象那么会直接放入到老年代（大对象是指需要大量连续内存空间的java对象）。），当Eden没有足够空间的时候就会 触发jvm发起一次Minor GC。如果对象经过一次Minor GC还存活，并且又能被Survivor空间接受，那么将被移动到Survivor空 间当中。并将其年龄设为1，对象在Survivor每熬过一次Minor GC，年龄就加1，当年龄达到一定的程度（默认为15）时，就会被晋升到老年代 中了，当然晋升老年代的年龄是可以设置的。如果老年代满了就执行：Full GC 因为不经常执行，因此采用了 Mark-Compact算法清理
+所谓的新生代和老年代是针对于分代收集算法来定义的，新生代又分为Eden和Survivor两个区。加上老年代就这三个区。数据会首先分配到Eden区 当中（当然也有特殊情况，如果是大对象那么会直接放入到老年代（大对象是指需要大量连续内存空间的Java对象）。），当Eden没有足够空间的时候就会 触发JVM发起一次Minor GC。如果对象经过一次Minor GC还存活，并且又能被Survivor空间接受，那么将被移动到Survivor空 间当中。并将其年龄设为1，对象在Survivor每熬过一次Minor GC，年龄就加1，当年龄达到一定的程度（默认为15）时，就会被晋升到老年代 中了，当然晋升老年代的年龄是可以设置的。如果老年代满了就执行：Full GC 因为不经常执行，因此采用了 Mark-Compact算法清理
 
 其实新生代和老年代就是针对于对象做分区存储，更便于回收等等
 
@@ -3613,7 +3639,7 @@ d) 上一次GC之后Heap的各域分配策略动态变化；
 
 对于GC来说，当程序员创建对象时，GC就开始监控这个对象的地址、大小以及使用情况。通常，GC采用有向图的方式记录和管理堆(heap)中的所有对象。通过这种方式确定哪些对象是”可达的”，哪些对象是”不可达的”。当GC确定一些对象为”不可达”时，GC就有责任回收这些内存空间。可以。程序员可以手动执行System.gc()，通知GC运行，但是Java语言规范并不保证GC一定会执行。
 
-## ● 请问，在java中会存在内存泄漏吗？请简单描述一下。
+## ● 请问，在Java中会存在内存泄漏吗？请简单描述一下。
 
 考察点：内存
 

@@ -79,29 +79,29 @@ ConcurrentHashMap 在1.8的时候有了很大的改动，当然，我这里要�
 
 ### List、Set、Map是否继承自Collection接口？
 
-List、Set 是，Map 不是。Map是键值对映射容器，与List和Set有明显的区别，而Set存储的零散的元素且不允许有重复元素（数学中的集合也是如此），List是线性结构的容器，适用于按数值索引访问元素的情形。
+List、Set 是，Map 不是。Map 是键值对映射容器，与 List 和 Set 有明显的区别，而 Set 存储的零散的元素且不允许有重复元素（数学中的集合也是如此），List是线性结构的容器，适用于按数值索引访问元素的情形。
 
-### 阐述ArrayList、Vector、LinkedList的存储性能和特性。
+### 阐述 ArrayList、Vector、LinkedList 的存储性能和特性。
 
-ArrayList 和Vector都是使用数组方式存储数据，此数组元素数大于实际存储的数据以便增加和插入元素，它们都允许直接按序号索引元素，但是插入元素要涉及数组元素移动等内存操作，所以索引数据快而插入数据慢，Vector中的方法由于添加了synchronized修饰，因此Vector是线程安全的容器，但性能上较ArrayList差，因此已经是Java中的遗留容器。
+ArrayList 和 Vector 都是使用数组方式存储数据，此数组元素数大于实际存储的数据以便增加和插入元素，它们都允许直接按序号索引元素，但是插入元素要涉及数组元素移动等内存操作，所以索引数据快而插入数据慢，Vector 中的方法由于添加了synchronized 修饰，因此 Vector 是线程安全的容器，但性能上较 ArrayList 差，因此已经是 Java 中的遗留容器。
 
-LinkedList使用双向链表实现存储（将内存中零散的内存单元通过附加的引用关联起来，形成一个可以按序号索引的线性结构，这种链式存储方式与数组的连续存储方式相比，内存的利用率更高），按序号索引数据需要进行前向或后向遍历，但是插入数据时只需要记录本项的前后项即可，所以插入速度较快。
+LinkedList 使用双向链表实现存储（将内存中零散的内存单元通过附加的引用关联起来，形成一个可以按序号索引的线性结构，这种链式存储方式与数组的连续存储方式相比，内存的利用率更高），按序号索引数据需要进行前向或后向遍历，但是插入数据时只需要记录本项的前后项即可，所以插入速度较快。
 
-Vector属于遗留容器（Java早期的版本中提供的容器，除此之外，Hashtable、Dictionary、BitSet、Stack、Properties都是遗留容器），已经不推荐使用，但是由于ArrayList和LinkedListed都是非线程安全的，如果遇到多个线程操作同一个容器的场景，则可以通过工具类Collections中的synchronizedList方法将其转换成线程安全的容器后再使用。
+Vector 属于遗留容器（Java 早期的版本中提供的容器，除此之外，HashTable、Dictionary、BitSet、Stack、Properties 都是遗留容器），已经不推荐使用，但是由于 ArrayList 和 LinkedListed 都是非线程安全的，如果遇到多个线程操作同一个容器的场景，则可以通过工具类 Collections 中的 synchronizedList 方法将其转换成线程安全的容器后再使用。
 
 ### Collection和Collections的区别？
 
-Collection是一个接口，它是Set、List等容器的父接口；
+Collection 是一个接口，它是 Set、List 等容器的父接口；
 
-Collections是个一个工具类，提供了一系列的静态方法来辅助容器操作，这些方法包括对容器的搜索、排序、线程安全化等等。
+Collections 是个一个工具类，提供了一系列的静态方法来辅助容器操作，这些方法包括对容器的搜索、排序、线程安全化等等。
 
 ### List、Map、Set三个接口存取元素时，各有什么特点？
 
-List以特定索引来存取元素，可以有重复元素。
+List 以特定索引来存取元素，可以有重复元素。
 
-Set不能存放重复元素（用对象的equals()方法来区分元素是否重复）。
+Set 不能存放重复元素（用对象的 equals() 方法来区分元素是否重复）。
 
-Map保存键值对（key-value pair）映射，映射关系可以是一对一或多对一。
+Map 保存键值对（key-value pair）映射，映射关系可以是一对一或多对一。
 
 
 
@@ -149,7 +149,7 @@ lock 需要获取锁，释放锁；synchronized 自动获取锁和释放锁。
 lock 方法多，更灵活；lock 提供公平锁（先来先获取锁）；
 
 ```java
-// 默认ReentrantLock 是非公平锁
+// 默认 ReentrantLock 是非公平锁
 public ReentrantLock {
     sync = new NonfairSync();
 }
@@ -175,7 +175,9 @@ AbstractQueuedSynchronizer
 
 ### 什么是可重入锁？
 
-ReentrantLock 是可重入锁，什么是可重入锁呢？**可重入锁就是当前持有该锁的线程能够多次获取该锁，无需等待。**可重入锁是如何实现的呢？这要从 ReentrantLock 的一个内部类 Sync 的父类说起，Sync 的父类是 AbstractQueuedSynchronizer（后面简称 AQS ）。
+ReentrantLock 是可重入锁，什么是可重入锁呢？**可重入锁就是当前持有该锁的线程能够多次获取该锁，无需等待。**
+
+可重入锁是如何实现的呢？这要从 ReentrantLock 的一个内部类 Sync 的父类说起，Sync 的父类是 AbstractQueuedSynchronizer（后面简称 AQS ）。
 
 ### 什么是AQS？
 
@@ -187,15 +189,15 @@ ReentrantLock 的架构相对简单，主要包括一个 Sync 的内部抽象类
 
 ![img](./Java.assets/224539_IegA_1759553.png)
 
-上图除了 AQS 之外，我把AQS的父类AbstractOwnableSynchronizer（简称AOS）也画了进来，AOS主要提供一个 exclusiveOwnerThread 属性，用于关联当前持有该所的线程。另外，Sync 的两个实现类分别是 NonfairSync 和 FairSync，由名字大概可以猜到，一个是用于实现公平锁、一个是用于实现非公平锁。那么 Sync 为什么要被设计成内部类呢？我们可以看看 AQS 主要提供了哪些 protect 的方法用于修改 state 的状态，我们发现 Sync 被设计成为安全的外部不可访问的内部类。ReentrantLock 中所有涉及对 AQS 的访问都要经过 Sync，其实，Sync 被设计成为内部类主要是为了安全性考虑，这也是作者在 AQS 的 comments 上强调的一点。
+上图除了 AQS 之外，我把 AQS的父类 AbstractOwnableSynchronizer（简称 AOS）也画了进来，AOS 主要提供一个 exclusiveOwnerThread 属性，用于关联当前持有该所的线程。另外，Sync 的两个实现类分别是 NonfairSync 和 FairSync，由名字大概可以猜到，一个是用于实现公平锁、一个是用于实现非公平锁。那么 Sync 为什么要被设计成内部类呢？我们可以看看 AQS 主要提供了哪些 protect 的方法用于修改 state 的状态，我们发现 Sync 被设计成为安全的外部不可访问的内部类。ReentrantLock 中所有涉及对 AQS 的访问都要经过 Sync，其实，Sync 被设计成为内部类主要是为了安全性考虑，这也是作者在 AQS 的 comments 上强调的一点。
 
 ### AQS 的等待队列
 
-作为AQS的核心实现的一部分，举个例子来描述一下这个队列长什么样子，我们假设目前有三个线程Thread1、Thread2、Thread3同时去竞争锁，如果结果是Thread1获取了锁，Thread2和Thread3进入了等待队列，那么他们的样子如下：
+作为AQS的核心实现的一部分，举个例子来描述一下这个队列长什么样子，我们假设目前有三个线程 Thread1、Thread2、Thread3 同时去竞争锁，如果结果是Thread1 获取了锁，Thread2 和 Thread3 进入了等待队列，那么他们的样子如下：
 
 ![img](./Java.assets/104016_XiVq_1759553.png)
 
-AQS 的等待队列基于一个双向链表实现的，HEAD 节点不关联线程，后面两个节点分别关联Thread2和Thread3，他们将会按照先后顺序被串联在这个队列上。这个时候如果后面再有线程进来的话将会被当做队列的TAIL。
+AQS 的等待队列基于一个双向链表实现的，HEAD 节点不关联线程，后面两个节点分别关联 Thread2 和 Thread3，他们将会按照先后顺序被串联在这个队列上。这个时候如果后面再有线程进来的话将会被当做队列的 TAIL。
 
 **1）入队列**
 
@@ -331,7 +333,7 @@ java.util.current.Locks.lock
 
 ### 前言：
 
-在 Java 中，线程部分是一个重点，本篇文章说的 JUC 也是关于线程的。JUC 就是 java.util .concurrent 工具包的简称。这是一个处理线程的工具包，JDK 1.5开始出现的。下面一起来看看它怎么使用。
+在 Java 中，线程部分是一个重点，本篇文章说的 JUC 也是关于线程的。JUC 就是 java.util .concurrent 工具包的简称。这是一个处理线程的工具包，JDK 1.5 开始出现的。下面一起来看看它怎么使用。
 
 ### 一、volatile关键字与内存可见性
 
@@ -2708,7 +2710,7 @@ static final int tableSizeFor(int cap) {
 
 
 
-补充说明：下图是详细过程，算法就是让初始二进制右移1，2，4，8，16位，分别与自己异或，把高位第一个为1的数通过不断右移，把高位为1的后面全变为1，111111 + 1 = 1000000  = ![[公式]](/Java.assets/equation) 
+补充说明：下图是详细过程，算法就是让初始二进制右移1，2，4，8，16位，分别与自己异或，把高位第一个为1的数通过不断右移，把高位为1的后面全变为1，111111 + 1 = 1000000  = ![[公式]](/Users/Shadowalker/Documents/interview-Java/Java.assets/equation) 
 
 （符合大于50并且是2的整数次幂 ）
 
